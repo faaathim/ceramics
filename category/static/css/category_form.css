@@ -1,0 +1,99 @@
+.page-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.category-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.category-form input[type="text"],
+.category-form textarea,
+.category-form input[type="file"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.image-preview img {
+    max-width: 200px;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    margin-top: 8px;
+}
+
+
+.image-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.save-btn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #e5e7eb;
+    color: #333;
+    padding: 10px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.sort-btn {
+    background-color: #3b82f6; /* Tailwind-style blue */
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.sort-btn:hover {
+    background-color: #2563eb; /* Darker blue */
+}
+
+

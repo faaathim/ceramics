@@ -1,0 +1,43 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  /* You can copy the exact CSS from your product delete template here.
+     Keeping the same look is fine — no functional differences required. */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="navbar-custom">
+  <div class="container-fluid px-4">
+    <div class="row align-items-center w-100">
+      <div class="col">
+        <h1>Confirm Delete</h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="form-container">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete "<strong>{{ category.name }}</strong>"?</p>
+
+    <!-- If you want to warn about linked products, show count here (optional). -->
+    {% if linked_products_count %}
+      <p class="text-warning">This category has {{ linked_products_count }} product(s) associated. Deleting will not remove products (they may be left without a category or be soft-deleted depending on your logic).</p>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger" aria-label="Confirm delete">Delete</button>
+      <a href="{% url 'category_list' %}" class="btn btn-secondary" aria-label="Cancel delete">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #f0f6fc;
+    }
+
+    .content {
+        padding: 2rem;
+    }
+
+    .navbar-custom {
+        background-color: #161b22;
+        color: #f0f6fc;
+        padding: 20px 0;
+        border-bottom: 1px solid #21262d;
+        margin-bottom: 30px;
+    }
+
+    .navbar-custom h1 {
+        color: #f0f6fc;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #161b22;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        border: 1px solid #21262d;
+        transition: all 0.3s ease;
+    }
+
+    .form-container:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        border-color: #30363d;
+    }
+
+    .btn-danger {
+        background: #f85149;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        background: #d73a31;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(248, 81, 73, 0.3);
+    }
+
+    .btn-secondary {
+        background: #484f58;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #6e7681;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 768px) {
+        .content {
+            padding: 1rem;
+        }
+
+        .form-container {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="navbar-custom">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center w-100">
+            <div class="col">
+                <h1>Confirm Delete</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-container">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete "{{ product.name }}"?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" aria-label="Confirm delete">Delete</button>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary" aria-label="Cancel delete">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

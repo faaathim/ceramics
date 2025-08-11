@@ -1,0 +1,656 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0d1117;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #f0f6fc;
+        }
+
+        .navbar-custom {
+            background-color: #161b22;
+            color: #f0f6fc;
+            padding: 20px 0;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .navbar-custom h1 {
+            color: #f0f6fc;
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .stat-card {
+            background: #161b22;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            border: 1px solid #21262d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border-color: #30363d;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #58a6ff, #a5a5a5);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+        }
+
+        .icon-users { background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%); }
+        .icon-orders { background: linear-gradient(135deg, #505050 0%, #303030 100%); }
+        .icon-sales { background: linear-gradient(135deg, #454545 0%, #252525 100%); }
+        .icon-pending { background: linear-gradient(135deg, #484848 0%, #282828 100%); }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f0f6fc;
+            margin: 15px 0 5px 0;
+        }
+
+        .stat-label {
+            color: #8b949e;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.positive {
+            color: #7c3aed;
+        }
+
+        .stat-change.negative {
+            color: #6b7280;
+        }
+
+        .chart-container {
+            background: #161b22;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            border: 1px solid #21262d;
+        }
+
+        .chart-container:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            border-color: #30363d;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+
+        .chart-dropdown {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            color: #8b949e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chart-dropdown:hover {
+            background: #30363d;
+            border-color: #484f58;
+            color: #f0f6fc;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 1000;
+            min-width: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #8b949e;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .dropdown-item:hover {
+            background: #30363d;
+            color: #f0f6fc;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .chart-area {
+            height: 300px;
+            background: linear-gradient(180deg, #0d1117 0%, transparent 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-line {
+            fill: none;
+            stroke: #8b949e;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .chart-area:hover .chart-line {
+            stroke: #58a6ff;
+            stroke-width: 3;
+        }
+
+        .chart-fill {
+            fill: url(#gradient);
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .chart-area:hover .chart-fill {
+            opacity: 0.5;
+        }
+
+        .chart-point {
+            fill: #8b949e;
+            stroke: #161b22;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .chart-point:hover {
+            fill: #58a6ff;
+        }
+
+        .chart-tooltip {
+            background: rgba(0,0,0,0.9);
+            color: #f0f6fc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border: 1px solid #30363d;
+        }
+
+        .axis-label {
+            font-size: 0.8rem;
+            fill: #8b949e;
+        }
+
+        .print-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .print-dropdown {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            color: #8b949e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .print-dropdown:hover {
+            background: #30363d;
+            border-color: #484f58;
+            color: #f0f6fc;
+        }
+
+        .print-btn {
+            background: #484f58;
+            color: #f0f6fc;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            background: #6e7681;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                padding: 20px;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar-custom">
+        <div class="container-fluid">
+            <h1>Dashboard</h1>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Total User</div>
+                            <div class="stat-number">40,689</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                8.5% Up from yesterday
+                            </div>
+                        </div>
+                        <div class="stat-icon icon-users">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Total Order</div>
+                            <div class="stat-number">10293</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                1.3% Up from past week
+                            </div>
+                        </div>
+                        <div class="stat-icon icon-orders">
+                            <i class="fas fa-box"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Total Sales</div>
+                            <div class="stat-number">$89,000</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                4.3% Down from yesterday
+                            </div>
+                        </div>
+                        <div class="stat-icon icon-sales">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-label">Total Pending</div>
+                            <div class="stat-number">2040</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                1.8% Up from yesterday
+                            </div>
+                        </div>
+                        <div class="stat-icon icon-pending">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">Sales Details</h2>
+                <div class="chart-dropdown" id="chartDropdown">
+                    <span id="chartSelectedMonth">October</span>
+                    <i class="fas fa-chevron-down ms-2"></i>
+                    <div class="dropdown-menu" id="chartDropdownMenu">
+                        <div class="dropdown-item" data-month="January">January</div>
+                        <div class="dropdown-item" data-month="February">February</div>
+                        <div class="dropdown-item" data-month="March">March</div>
+                        <div class="dropdown-item" data-month="April">April</div>
+                        <div class="dropdown-item" data-month="May">May</div>
+                        <div class="dropdown-item" data-month="June">June</div>
+                        <div class="dropdown-item" data-month="July">July</div>
+                        <div class="dropdown-item" data-month="August">August</div>
+                        <div class="dropdown-item" data-month="September">September</div>
+                        <div class="dropdown-item" data-month="October">October</div>
+                        <div class="dropdown-item" data-month="November">November</div>
+                        <div class="dropdown-item" data-month="December">December</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-area">
+                <svg class="chart-svg" viewBox="0 0 800 300">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b949e;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#8b949e;stop-opacity:0" />
+                        </linearGradient>
+                    </defs>
+                    
+
+                    
+                    <!-- Y-axis labels -->
+                    <text x="10" y="250" class="axis-label">20%</text>
+                    <text x="10" y="190" class="axis-label">40%</text>
+                    <text x="10" y="130" class="axis-label">60%</text>
+                    <text x="10" y="70" class="axis-label">80%</text>
+                    <text x="10" y="30" class="axis-label">100%</text>
+                    
+                    <!-- X-axis labels -->
+                    <text x="80" y="280" class="axis-label">5k</text>
+                    <text x="160" y="280" class="axis-label">10k</text>
+                    <text x="240" y="280" class="axis-label">15k</text>
+                    <text x="320" y="280" class="axis-label">20k</text>
+                    <text x="400" y="280" class="axis-label">25k</text>
+                    <text x="480" y="280" class="axis-label">30k</text>
+                    <text x="560" y="280" class="axis-label">35k</text>
+                    <text x="640" y="280" class="axis-label">40k</text>
+                    <text x="720" y="280" class="axis-label">45k</text>
+                    
+                    <!-- Chart area fill -->
+                    <polygon class="chart-fill" points="50,240 80,200 120,180 160,190 200,170 240,160 280,190 320,50 360,140 400,130 440,150 480,160 520,120 560,240 600,220 640,180 680,170 720,200 750,190 800,180 800,260 50,260"/>
+                    
+                    <!-- Chart line -->
+                    <polyline class="chart-line" points="50,240 80,200 120,180 160,190 200,170 240,160 280,190 320,50 360,140 400,130 440,150 480,160 520,120 560,240 600,220 640,180 680,170 720,200 750,190"/>
+                    
+                    <!-- Data points -->
+                    <circle class="chart-point" cx="50" cy="240"/>
+                    <circle class="chart-point" cx="80" cy="200"/>
+                    <circle class="chart-point" cx="120" cy="180"/>
+                    <circle class="chart-point" cx="160" cy="190"/>
+                    <circle class="chart-point" cx="200" cy="170"/>
+                    <circle class="chart-point" cx="240" cy="160"/>
+                    <circle class="chart-point" cx="280" cy="190"/>
+                    <circle class="chart-point" cx="320" cy="50"/>
+                    <circle class="chart-point" cx="360" cy="140"/>
+                    <circle class="chart-point" cx="400" cy="130"/>
+                    <circle class="chart-point" cx="440" cy="150"/>
+                    <circle class="chart-point" cx="480" cy="160"/>
+                    <circle class="chart-point" cx="520" cy="120"/>
+                    <circle class="chart-point" cx="560" cy="240"/>
+                    <circle class="chart-point" cx="600" cy="220"/>
+                    <circle class="chart-point" cx="640" cy="180"/>
+                    <circle class="chart-point" cx="680" cy="170"/>
+                    <circle class="chart-point" cx="720" cy="200"/>
+                    <circle class="chart-point" cx="750" cy="190"/>
+                    
+                    <!-- Tooltip for peak point -->
+                    <g class="peak-indicator">
+                        <rect x="300" y="30" width="80" height="25" rx="4" fill="rgba(0,0,0,0.9)" stroke="#30363d"/>
+                        <text x="340" y="47" fill="#f0f6fc" font-size="12" text-anchor="middle">64,364.77</text>
+                    </g>
+                </svg>
+                <div class="chart-tooltip" id="tooltip"></div>
+            </div>
+
+            <div class="print-section">
+                <span style="color: #8b949e; font-weight: 500;">Print sales report</span>
+                <div class="print-dropdown" id="printDropdown">
+                    <span id="printSelectedMonth">October</span>
+                    <i class="fas fa-chevron-down ms-2"></i>
+                    <div class="dropdown-menu" id="printDropdownMenu">
+                        <div class="dropdown-item" data-month="January">January</div>
+                        <div class="dropdown-item" data-month="February">February</div>
+                        <div class="dropdown-item" data-month="March">March</div>
+                        <div class="dropdown-item" data-month="April">April</div>
+                        <div class="dropdown-item" data-month="May">May</div>
+                        <div class="dropdown-item" data-month="June">June</div>
+                        <div class="dropdown-item" data-month="July">July</div>
+                        <div class="dropdown-item" data-month="August">August</div>
+                        <div class="dropdown-item" data-month="September">September</div>
+                        <div class="dropdown-item" data-month="October">October</div>
+                        <div class="dropdown-item" data-month="November">November</div>
+                        <div class="dropdown-item" data-month="December">December</div>
+                    </div>
+                </div>
+                <button class="print-btn">
+                    Print pdf
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+{% block scripts %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Dropdown functionality
+        function initializeDropdowns() {
+            // Chart dropdown
+            const chartDropdown = document.getElementById('chartDropdown');
+            const chartDropdownMenu = document.getElementById('chartDropdownMenu');
+            const chartSelectedMonth = document.getElementById('chartSelectedMonth');
+            
+            chartDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                chartDropdownMenu.classList.toggle('show');
+                // Close print dropdown if open
+                document.getElementById('printDropdownMenu').classList.remove('show');
+            });
+            
+            chartDropdownMenu.addEventListener('click', function(e) {
+                if (e.target.classList.contains('dropdown-item')) {
+                    const selectedMonth = e.target.getAttribute('data-month');
+                    chartSelectedMonth.textContent = selectedMonth;
+                    chartDropdownMenu.classList.remove('show');
+                    
+                    // Here you could update the chart data based on selected month
+                    console.log('Chart month changed to:', selectedMonth);
+                }
+            });
+            
+            // Print dropdown
+            const printDropdown = document.getElementById('printDropdown');
+            const printDropdownMenu = document.getElementById('printDropdownMenu');
+            const printSelectedMonth = document.getElementById('printSelectedMonth');
+            
+            printDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                printDropdownMenu.classList.toggle('show');
+                // Close chart dropdown if open
+                document.getElementById('chartDropdownMenu').classList.remove('show');
+            });
+            
+            printDropdownMenu.addEventListener('click', function(e) {
+                if (e.target.classList.contains('dropdown-item')) {
+                    const selectedMonth = e.target.getAttribute('data-month');
+                    printSelectedMonth.textContent = selectedMonth;
+                    printDropdownMenu.classList.remove('show');
+                    
+                    console.log('Print month changed to:', selectedMonth);
+                }
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                chartDropdownMenu.classList.remove('show');
+                printDropdownMenu.classList.remove('show');
+            });
+        }
+
+        // Chart interactivity
+        document.querySelectorAll('.chart-point').forEach(point => {
+            point.addEventListener('mouseenter', function(e) {
+                const tooltip = document.getElementById('tooltip');
+                const rect = e.target.getBoundingClientRect();
+                const value = Math.floor(Math.random() * 50000 + 10000);
+                
+                tooltip.textContent = value.toLocaleString();
+                tooltip.style.left = rect.left + 'px';
+                tooltip.style.top = rect.top - 40 + 'px';
+                tooltip.style.opacity = '1';
+            });
+            
+            point.addEventListener('mouseleave', function() {
+                document.getElementById('tooltip').style.opacity = '0';
+            });
+        });
+
+        // Dropdown functionality
+        document.querySelectorAll('.chart-dropdown, .print-dropdown').forEach(dropdown => {
+            dropdown.addEventListener('click', function() {
+                // Handled by initializeDropdowns function
+            });
+        });
+
+        // Print button functionality
+        document.querySelector('.print-btn').addEventListener('click', function() {
+            window.print();
+        });
+
+        // Counter animation on page load
+        function animateCounter(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (element.textContent.includes('$')) {
+                    element.textContent = '$' + Math.floor(current).toLocaleString();
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // Animate counters on page load
+        window.addEventListener('load', () => {
+            // Initialize dropdowns
+            initializeDropdowns();
+            
+            const counters = [
+                { element: document.querySelectorAll('.stat-number')[0], target: 40689 },
+                { element: document.querySelectorAll('.stat-number')[1], target: 10293 },
+                { element: document.querySelectorAll('.stat-number')[2], target: 89000 },
+                { element: document.querySelectorAll('.stat-number')[3], target: 2040 }
+            ];
+            
+            counters.forEach(counter => {
+                animateCounter(counter.element, counter.target);
+            });
+        });
+</script>
+{% endblock %}

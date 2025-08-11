@@ -1,0 +1,574 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Product Management{% endblock %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #f0f6fc;
+    }
+
+    .navbar-custom {
+        background-color: #161b22;
+        color: #f0f6fc;
+        padding: 20px 0;
+        border-bottom: 1px solid #21262d;
+        margin-bottom: 30px;
+    }
+
+    .navbar-custom h1 {
+        color: #f0f6fc;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .product-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .search-form input {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        flex: 1;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #58a6ff;
+    }
+
+    .search-form input::placeholder {
+        color: #8b949e;
+    }
+
+    .search-form button {
+        background: #58a6ff;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .search-form button:hover {
+        background: #4493f8;
+    }
+
+    .clear-btn {
+        background: #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .clear-btn:hover {
+        background: #30363d;
+        color: #f0f6fc;
+        text-decoration: none;
+    }
+
+    .add-product-btn {
+        background: #484f58;
+        color: #f0f6fc;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .add-product-btn:hover {
+        background: #6e7681;
+        color: #f0f6fc;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .table-container {
+        background: #161b22;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        overflow-x: auto;
+        border: 1px solid #21262d;
+        transition: all 0.3s ease;
+    }
+
+    .table-container:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        border-color: #30363d;
+    }
+
+    .product-table {
+        width: 100%;
+        margin: 0;
+        color: #f0f6fc;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .product-table thead th {
+        background-color: #21262d;
+        border-bottom: 2px solid #30363d;
+        font-weight: 600;
+        color: #8b949e;
+        padding: 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .product-table thead th:first-child {
+        width: 10%;
+    }
+
+    .product-table thead th:nth-child(2) {
+        width: 25%;
+        text-align: left;
+    }
+
+    .product-table thead th:nth-child(3) {
+        width: 20%;
+    }
+
+    .product-table thead th:nth-child(4) {
+        width: 15%;
+    }
+
+    .product-table thead th:nth-child(5) {
+        width: 15%;
+    }
+
+    .product-table thead th:last-child {
+        width: 15%;
+    }
+
+    .product-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #21262d;
+        background-color: #161b22;
+    }
+
+    .product-table tbody tr:hover {
+        background-color: #21262d;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .product-table td {
+        padding: 12px;
+        vertical-align: middle;
+        font-size: 14px;
+        border-color: #21262d;
+        text-align: center;
+    }
+
+    .product-table td:nth-child(2) {
+        text-align: left;
+    }
+
+    .product-table td:nth-child(6) .action-link {
+        margin: 0 5px;
+    }
+
+    .product-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: 2px solid #30363d;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .product-img:hover {
+        transform: scale(1.1);
+        border-color: #58a6ff;
+        box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+    }
+
+    .no-image {
+        width: 50px;
+        height: 50px;
+        background: #21262d;
+        border: 2px solid #30363d;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #8b949e;
+        margin: 0 auto;
+    }
+
+    .product-name {
+        font-weight: 500;
+        color: #f0f6fc;
+        word-break: break-word;
+    }
+
+    .category-badge {
+        color: #8b949e;
+        font-size: 13px;
+        background: #21262d;
+        padding: 4px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        margin: 0;
+    }
+
+    .status-badge {
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .status-true {
+        color: #3fb950;
+        background: rgba(63, 185, 80, 0.1);
+    }
+
+    .status-false {
+        color: #f85149;
+        background: rgba(248, 81, 73, 0.1);
+    }
+
+    .date-text {
+        color: #8b949e;
+        font-size: 13px;
+    }
+
+    .action-link {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        text-decoration: none;
+        font-size: 13px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .action-link:hover {
+        background: #30363d;
+        color: #58a6ff;
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+    }
+
+    .action-link.delete:hover {
+        color: #f85149;
+        border-color: #f85149;
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+        gap: 15px;
+        color: #8b949e;
+    }
+
+    .pagination-link {
+        background: #161b22;
+        border: 1px solid #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .pagination-link:hover {
+        background-color: #21262d;
+        color: #58a6ff;
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+    }
+
+    .pagination span {
+        background: #21262d;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .no-products {
+        text-align: center;
+        padding: 40px;
+        color: #8b949e;
+        font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .product-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-form {
+            margin-bottom: 15px;
+            max-width: 100%;
+        }
+
+        .search-form {
+            margin-bottom: 15px;
+            max-width: 100%;
+        }
+
+        .search-form input {
+            width: 100%;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .product-table {
+            min-width: 600px;
+        }
+
+        .product-table tbody tr:hover {
+            transform: none;
+        }
+
+        .navbar-custom h1 {
+            font-size: 1.5rem;
+        }
+
+        .action-link {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+    }
+
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #0d1117;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #484f58;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="navbar-custom">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center w-100">
+            <div class="col">
+                <h1>Products</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4">
+    <div class="product-controls">
+        <form method="get" class="search-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search products...">
+            <button type="submit" aria-label="Search products">
+                <i class="fas fa-search me-1"></i> Search
+            </button>
+            {% if query %}
+                <a href="{% url 'product_list' %}" class="clear-btn" aria-label="Clear search">
+                    <i class="fas fa-times me-1"></i> Clear
+                </a>
+            {% endif %}
+        </form>
+        <a href="{% url 'add_product' %}" class="add-product-btn" aria-label="Add new product">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                        {% else %}
+                            <div class="no-image">No Image</div>
+                        {% endif %}
+                    </td>
+                    <td class="product-name">{{ product.name }}</td>
+                    <td>
+                        <span class="category-badge">{{ product.category.name }}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge {% if product.is_listed %}status-true{% else %}status-false{% endif %}">
+                            {% if product.is_listed %}Listed{% else %}Unlisted{% endif %}
+                        </span>
+                    </td>
+                    <td class="date-text">{{ product.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'edit_product' product.pk %}" class="action-link" aria-label="Edit product {{ product.name }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{% url 'delete_product' product.pk %}" class="action-link delete" aria-label="Delete product {{ product.name }}">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="no-products">
+                        <i class="fas fa-box-open mb-3" style="font-size: 2rem; display: block;"></i>
+                        No products found.
+                        {% if query %}
+                            <br><small>Try adjusting your search terms.</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if products.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link" aria-label="Previous page">
+                <i class="fas fa-chevron-left me-2"></i> Previous
+            </a>
+        {% endif %}
+        <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link" aria-label="Next page">
+                Next <i class="fas fa-chevron-right ms-2"></i>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.product-table tbody tr');
+        rows.forEach((row, index) => {
+            if (row.cells.length > 1) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.6s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+
+        document.querySelectorAll('.product-img').forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.borderColor = '#58a6ff';
+                this.style.boxShadow = '0 4px 15px rgba(88, 166, 255, 0.3)';
+            });
+            img.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.borderColor = '#30363d';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        document.querySelectorAll('.action-link, .pagination-link, .add-product-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => { this.style.transform = ''; }, 150);
+            });
+        });
+
+        const searchInput = document.querySelector('.search-form input');
+        if (searchInput) {
+            searchInput.addEventListener('focus', function() { this.style.borderColor = '#58a6ff'; });
+            searchInput.addEventListener('blur', function() { this.style.borderColor = '#30363d'; });
+        }
+
+        document.querySelectorAll('.product-table tbody tr').forEach(row => {
+            if (row.cells.length > 1) {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#21262d';
+                    this.style.transform = 'translateX(5px)';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '#161b22';
+                    this.style.transform = 'translateX(0)';
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

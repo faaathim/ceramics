@@ -1,0 +1,80 @@
+body {
+  background-color: #111;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.navbar {
+  background-color: #1c1c1c;
+}
+
+.navbar .form-control,
+.navbar .btn {
+  background-color: #333;
+  color: white;
+  border: none;
+}
+
+.navbar .form-control::placeholder {
+  color: #ccc;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  background-color: #1c1c1c;
+  padding: 30px 20px;
+  border-radius: 10px;
+}
+
+.filter-label {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.sidebar input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.sidebar select {
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+}
+
+/* Product Card */
+.product-card {
+  background: #222;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.product-card:hover {
+  transform: scale(1.03);
+}
+
+.product-card img {
+  height: 250px;
+  object-fit: cover;
+}
+
+.card-title,
+.card-text {
+  color: #fff;
+}
+
+.add-to-cart {
+  background: white;
+  color: black;
+  font-weight: bold;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.add-to-cart:hover {
+  background: #ddd;
+  color: #000;
+}

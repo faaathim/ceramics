@@ -1,0 +1,41 @@
+body {
+    background-color: #0f0f0f;
+    color: white;
+    font-family: 'Georgia', serif;
+}
+
+.navbar {
+    background-color: #0f0f0f;
+    border-bottom: 1px solid #333;
+}
+
+.form-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #ccc;
+}
+
+.form-control {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    border-radius: 0;
+    padding-left: 0;
+    color: #fff;
+}
+
+.form-control:focus {
+    background-color: transparent;
+    box-shadow: none;
+    border-color: #fff;
+}
+
+.btn-light, .btn-outline-light {
+    border-radius: 0;
+    font-weight: 600;
+}
+
+.btn-outline-light:hover {
+    background-color: #fff;
+    color: #000;
+}

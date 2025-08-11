@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shop</title>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/shop.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<!-- Top Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-5 py-3">
+  <a class="navbar-brand fw-bold" href="#">CERAMIC</a>
+  
+  <!-- Navigation Toggle Button for Mobile -->
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <!-- Navigation Links -->
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">About</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Blog</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'shop' %}">Shop</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Workshop</a>
+      </li>
+    </ul>
+    
+    <!-- Search Form -->
+    <form class="d-flex" method="get">
+      <input class="form-control me-2" name="q" value="{{ query }}" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-light" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container-fluid px-5">
+  <div class="row mt-5">
+
+    <!-- Sidebar Filters -->
+    <div class="col-md-3">
+      <div class="sidebar">
+        <h5 class="mb-4">FILTER / SORT</h5>
+
+        <form method="get">
+          <!-- Category filter -->
+          <h6 class="filter-label">Category</h6>
+          <ul class="list-unstyled mb-3">
+            {% for category in categories %}
+              <li>
+                <input type="checkbox" name="category" value="{{ category.id }}" {% if category.id|stringformat:"s" in category_filter %}checked{% endif %}> {{ category.name }}
+              </li>
+            {% endfor %}
+          </ul>
+
+          <!-- Price filter -->
+          <h6 class="filter-label">Price Range</h6>
+          <ul class="list-unstyled mb-3">
+            <li><input type="radio" name="price" value="100-300" {% if min_price == 100 and max_price == 300 %}checked{% endif %}> 100 - 300</li>
+            <li><input type="radio" name="price" value="300-500" {% if min_price == 300 and max_price == 500 %}checked{% endif %}> 300 - 500</li>
+            <li><input type="radio" name="price" value="500-1000" {% if min_price == 500 and max_price == 1000 %}checked{% endif %}> 500 - 1000</li>
+            <li><input type="radio" name="price" value="1000-2000" {% if min_price == 1000 and max_price == 2000 %}checked{% endif %}> 1000 - 2000</li>
+            <li><input type="radio" name="price" value="2000-100000" {% if min_price == 2000 %}checked{% endif %}> Above 2000</li>
+          </ul>
+
+          <!-- Sort filter -->
+          <h6 class="filter-label">Sort By</h6>
+          <select name="sort" class="form-select bg-dark text-white border-light mb-3">
+            <option disabled selected>Sort</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price__desc" {% if sort_by == 'price__desc' %}selected{% endif %}>Price: High to Low</option>
+            <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A-Z</option>
+            <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name: Z-A</option>
+          </select>
+
+          <!-- Preserve search query -->
+          {% if query %}
+            <input type="hidden" name="q" value="{{ query }}">
+          {% endif %}
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn-light w-100">Done</button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="col-md-9">
+      <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-5">
+          <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none">
+          <div class="card product-card h-100 text-center">
+            
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            <div class="card-body">
+              <h6 class="card-title">{{ product.name }}</h6>
+              <p class="card-text">Rs. {{ product.price }}</p>
+              <button class="btn add-to-cart">ADD TO CART</button>
+            </div>
+          </div>
+          </a>
+        </div>
+        {% empty %}
+          <p>No products found.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-center">
+        <ul class="pagination">
+          {% if products.has_previous %}
+            <li class="page-item">
+              <a class="page-link bg-dark text-white" href="?{% if query %}q={{ query }}&{% endif %}{% for cat in category_filter %}category={{ cat }}&{% endfor %}{% if min_price and max_price %}price={{ min_price }}-{{ max_price }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ products.previous_page_number }}">Previous</a>
+            </li>
+          {% endif %}
+
+          <li class="page-item disabled">
+            <span class="page-link bg-dark text-white">{{ products.number }} / {{ products.paginator.num_pages }}</span>
+          </li>
+
+          {% if products.has_next %}
+            <li class="page-item">
+              <a class="page-link bg-dark text-white" href="?{% if query %}q={{ query }}&{% endif %}{% for cat in category_filter %}category={{ cat }}&{% endfor %}{% if min_price and max_price %}price={{ min_price }}-{{ max_price }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ products.next_page_number }}">Next</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

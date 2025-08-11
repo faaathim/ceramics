@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} | Ceramic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 1px solid #000;
+        }
+        .similar-product img {
+            height: 150px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-dark text-white">
+
+<!-- Breadcrumbs -->
+<div class="container py-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-dark">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-light">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'shop' %}" class="text-decoration-none text-light">Shop</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Product Section -->
+<div class="container py-4">
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-6">
+            <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            <!-- Add thumbnails below if multiple images -->
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <h2 class="fw-bold">{{ product.name }}</h2>
+            <p class="h4 text-warning">RS: {{ product.price }}</p>
+            <p>
+                <strong>Stock:</strong>
+                {% if product.is_listed %}
+                    <span class="text-success">In Stock</span>
+                {% else %}
+                    <span class="text-danger">Out of Stock</span>
+                {% endif %}
+            </p>
+
+            <!-- Color Options (static example colors) -->
+            <div class="mb-3">
+                <strong>Color:</strong>
+                <span class="color-dot bg-danger"></span>
+                <span class="color-dot bg-success"></span>
+                <span class="color-dot bg-primary"></span>
+                <span class="color-dot bg-warning"></span>
+            </div>
+
+            <!-- Quantity & Add to Cart -->
+            <form method="POST" action="#">
+                {% csrf_token %}
+                <div class="input-group mb-3" style="max-width: 140px;">
+                    <button class="btn btn-outline-light" type="button">-</button>
+                    <input type="number" name="quantity" class="form-control text-center" value="1" min="1">
+                    <button class="btn btn-outline-light" type="button">+</button>
+                </div>
+                <button class="btn btn-light btn-lg mb-3 w-100" type="submit">Add to Cart</button>
+            </form>
+
+            <!-- Share -->
+            <p><strong>Share this:</strong>
+                <a href="#" class="text-light me-2"><i class="bi bi-facebook"></i> FB</a>
+                <a href="#" class="text-light me-2"><i class="bi bi-instagram"></i> IG</a>
+                <a href="#" class="text-light"><i class="bi bi-linkedin"></i> LN</a>
+            </p>
+
+            <!-- Accordion for details -->
+            <div class="accordion" id="productDetailsAccordion">
+                <div class="accordion-item bg-dark text-white">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#details">
+                            Details
+                        </button>
+                    </h2>
+                    <div id="details" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            {{ product.description }}
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-dark text-white">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dimensions">
+                            Dimensions
+                        </button>
+                    </h2>
+                    <div id="dimensions" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            Add dimension info if available.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-dark text-white">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reviews">
+                            Reviews
+                        </button>
+                    </h2>
+                    <div id="reviews" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            Reviews not implemented yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Similar Items -->
+<div class="container mt-5">
+    <h3 class="mb-4">Similar Items</h3>
+    <div class="row">
+        {% for item in similar_items %}
+        <div class="col-6 col-md-3 mb-4 similar-product">
+            <div class="card bg-secondary text-white h-100">
+                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+                <div class="card-body">
+                    <h6 class="card-title">{{ item.name }}</h6>
+                    <p class="card-text">Rs: {{ item.price }}</p>
+                    <a href="{% url 'product_detail' item.pk %}" class="btn btn-light btn-sm w-100">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

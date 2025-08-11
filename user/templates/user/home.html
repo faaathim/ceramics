@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ceramic - Handmade Ceramic Products</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container-fluid nav-container">
+      <div class="d-flex align-items-center">
+          <div class="logo me-4">
+              <img src="{% static 'images/LOGO.png' %}" alt="Logo">
+          </div>
+      </div>
+      
+      <ul class="nav-center d-flex justify-content-center">
+          <li><a href="{% url 'home' %}" class="px-2">Home</a></li>
+          <li><a href="#about" class="px-2">About</a></li>
+          <li><a href="#blog" class="px-2">Blog</a></li>
+          <li><a href="{% url 'shop' %}" class="px-2">Shop</a></li>
+          <li><a href="#workshop" class="px-2">Workshop</a></li>
+          {% if user.is_authenticated %}
+              <li><a href="{% url 'logout' %}" class="px-2">Logout</a></li>
+          {% else %}
+              <li><a href="{% url 'login' %}" class="px-2">Login</a></li>
+          {% endif %}
+      </ul>
+      
+      <div class="nav-icons d-flex align-items-center">
+          <svg class="nav-icon me-3" viewBox="0 0 24 24" fill="white">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <svg class="nav-icon me-3" viewBox="0 0 24 24" fill="white">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="white">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+      </div>
+  </div>
+</nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <img src="{% static 'images/ceramic-bg.png' %}" alt="Ceramic Background" class="hero-bg-img" />
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Handmade Ceramic<br>Products</h1>
+      <p class="hero-description">
+        Handmade ceramic products bring a unique blend of artistry and functionality to any home or workspace.
+      </p>
+      <button class="buy-now-btn">Buy Now</button>
+    </div>
+  </section>
+
+  <!-- Latest Arrivals Section -->
+  <section class="latest-arrivals">
+    <div class="container">
+      <h2 class="section-title">Latest Arrivals</h2>
+      <p class="section-description">
+        Whether you're looking for stylish home décor, unique handmade pieces, or innovative essentials,
+        our fresh collection has something special for everyone.
+      </p>
+  
+      <div class="product-carousel">
+        {% for product in new_arrivals %}
+          <div class="product-card">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+              <img src="{% static 'images/default-product.png' %}" alt="Default product image">
+            {% endif %}
+            <h3>{{ product.name }}</h3>
+            <p class="price">Rs.{{ product.price|default:"40.00" }}</p>
+          </div>
+        {% endfor %}
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- Pottery Section -->
+  <section class="pottery-section" id="about">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <!-- Image Section -->
+        <div class="col-lg-6 col-md-12 image-container">
+          <div class="image-wrapper">
+            <div class="image-frame">
+              <img src="{% static 'images/img.png' %}" alt="Pottery" class="pottery-image">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Content Section -->
+        <div class="col-lg-6 col-md-12 content-section">
+          <div class="content-wrapper">
+            <h1 class="main-title">
+              TURNING MUD INTO<br>
+              SOMETHING AMAZING
+            </h1>
+            
+            <p class="description">
+              What starts as a simple lump of clay is transformed into stunning works of art 
+              through the hands of skilled artisans. Handmade ceramics showcase the 
+              beauty of craftsmanship, where raw earth is shaped, fired, and glazed into 
+              elegant pottery, functional dinnerware, and decorative masterpieces. Every 
+              piece tells a story of patience, creativity, and tradition, proving that even the 
+              simplest materials can become something truly extraordinary.
+            </p>
+            
+            <button class="btn learn-more-btn">
+              LEARN MORE
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.navbar');
+      navbar.style.background = window.scrollY > 50 ? 'rgba(0, 0, 0, 0.95)' : 'rgba(0, 0, 0, 0.8)';
+    });
+
+    document.querySelector('.buy-now-btn').addEventListener('click', function () {
+      this.style.transform = 'translateY(-2px) scale(0.98)';
+      setTimeout(() => this.style.transform = 'translateY(-2px) scale(1)', 150);
+    });
+
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const heroContent = document.querySelector('.hero-content');
+      if (heroContent) {
+        heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
+      }
+    });
+
+    document.querySelectorAll('.nav-icon').forEach(icon => {
+      icon.addEventListener('mouseenter', function () {
+        this.style.transform = 'scale(1.2) rotate(5deg)';
+      });
+      icon.addEventListener('mouseleave', function () {
+        this.style.transform = 'scale(1) rotate(0deg)';
+      });
+    });
+
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+      setInterval(() => {
+        heroTitle.style.textShadow = `0 0 ${Math.sin(Date.now() * 0.003) * 5 + 10}px rgba(255, 255, 255, 0.1)`;
+      }, 50);
+    }
+
+    const description = document.querySelector('.hero-description');
+    if (description) {
+      const originalText = description.textContent;
+      description.textContent = '';
+      setTimeout(() => {
+        let i = 0;
+        const typeWriter = () => {
+          if (i < originalText.length) {
+            description.textContent += originalText.charAt(i);
+            i++;
+            setTimeout(typeWriter, 30);
+          }
+        };
+        typeWriter();
+      }, 1000);
+    }
+
+    const carousel = document.querySelector('.product-carousel');
+    document.querySelector('.carousel-prev').onclick = () =>
+      carousel.scrollBy({ left: -320, behavior: 'smooth' });
+  
+    document.querySelector('.carousel-next').onclick = () =>
+      carousel.scrollBy({ left: 320, behavior: 'smooth' });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

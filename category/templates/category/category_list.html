@@ -1,0 +1,696 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Category Management{% endblock %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #f0f6fc;
+    }
+
+    .navbar-custom {
+        background-color: #161b22;
+        color: #f0f6fc;
+        padding: 20px 0;
+        border-bottom: 1px solid #21262d;
+        margin-bottom: 30px;
+    }
+
+    .navbar-custom h1 {
+        color: #f0f6fc;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .category-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .controls-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+        flex-wrap: wrap;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-form input {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        flex: 1;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #58a6ff;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+    .search-form input::placeholder {
+        color: #8b949e;
+    }
+
+    .search-form button {
+        background: #58a6ff;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .search-form button:hover {
+        background: #4493f8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(68, 147, 248, 0.3);
+    }
+
+    .clear-btn {
+        background: #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .clear-btn:hover {
+        background: #30363d;
+        color: #f0f6fc;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .sort-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sort-select {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 150px;
+    }
+
+    .sort-select:focus {
+        outline: none;
+        border-color: #58a6ff;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+    .sort-select:hover {
+        border-color: #58a6ff;
+    }
+
+    .sort-select option {
+        background: #161b22;
+        color: #f0f6fc;
+    }
+
+    .add-category-btn {
+        background: #484f58;
+        color: #f0f6fc;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .add-category-btn:hover {
+        background: #6e7681;
+        color: #f0f6fc;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .table-container {
+        background: #161b22;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        overflow-x: auto;
+        border: 1px solid #21262d;
+        transition: all 0.3s ease;
+    }
+
+    .table-container:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        border-color: #30363d;
+    }
+
+    .category-table {
+        width: 100%;
+        margin: 0;
+        color: #f0f6fc;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .category-table thead th {
+        background-color: #21262d;
+        border-bottom: 2px solid #30363d;
+        font-weight: 600;
+        color: #8b949e;
+        padding: 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .category-table thead th:first-child {
+        width: 10%;
+    }
+
+    .category-table thead th:nth-child(2) {
+        width: 20%;
+        text-align: left;
+    }
+
+    .category-table thead th:nth-child(3) {
+        width: 30%;
+        text-align: left;
+    }
+
+    .category-table thead th:nth-child(4) {
+        width: 12%;
+    }
+
+    .category-table thead th:nth-child(5) {
+        width: 13%;
+    }
+
+    .category-table thead th:last-child {
+        width: 15%;
+    }
+
+    .category-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #21262d;
+        background-color: #161b22;
+    }
+
+    .category-table tbody tr:hover {
+        background-color: #21262d;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .category-table td {
+        padding: 12px;
+        vertical-align: middle;
+        font-size: 14px;
+        border-color: #21262d;
+        text-align: center;
+    }
+
+    .category-table td:nth-child(2),
+    .category-table td:nth-child(3) {
+        text-align: left;
+    }
+
+    .category-table td:nth-child(6) .action-link {
+        margin: 0 5px;
+    }
+
+    .category-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: 2px solid #30363d;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .category-img:hover {
+        transform: scale(1.1);
+        border-color: #58a6ff;
+        box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+    }
+
+    .no-image {
+        width: 50px;
+        height: 50px;
+        background: #21262d;
+        border: 2px solid #30363d;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #8b949e;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .category-name {
+        font-weight: 500;
+        color: #f0f6fc;
+        word-break: break-word;
+    }
+
+    .category-description {
+        color: #8b949e;
+        font-size: 13px;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    .status-badge {
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .status-true {
+        color: #3fb950;
+        background: rgba(63, 185, 80, 0.1);
+    }
+
+    .status-false {
+        color: #f85149;
+        background: rgba(248, 81, 73, 0.1);
+    }
+
+    .date-text {
+        color: #8b949e;
+        font-size: 13px;
+    }
+
+    .action-link {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        text-decoration: none;
+        font-size: 13px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        margin: 0 2px;
+    }
+
+    .action-link:hover {
+        background: #30363d;
+        color: #58a6ff;
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        text-decoration: none;
+    }
+
+    .action-link.delete:hover {
+        color: #f85149;
+        border-color: #f85149;
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+        gap: 15px;
+        color: #8b949e;
+    }
+
+    .pagination-link {
+        background: #161b22;
+        border: 1px solid #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .pagination-link:hover {
+        background-color: #21262d;
+        color: #58a6ff;
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        text-decoration: none;
+    }
+
+    .pagination span {
+        background: #21262d;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .no-categories {
+        text-align: center;
+        padding: 40px;
+        color: #8b949e;
+        font-size: 16px;
+    }
+
+    @media (max-width: 992px) {
+        .category-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .controls-left {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+        }
+
+        .search-form {
+            max-width: 100%;
+        }
+
+        .add-category-btn {
+            align-self: center;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .controls-left {
+            flex-direction: column;
+        }
+
+        .search-form {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-form input {
+            width: 100%;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .category-table {
+            min-width: 700px;
+        }
+
+        .category-table tbody tr:hover {
+            transform: none;
+        }
+
+        .navbar-custom h1 {
+            font-size: 1.5rem;
+        }
+
+        .action-link {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+    }
+
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #0d1117;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #484f58;
+    }
+
+    .sort-label {
+        color: #8b949e;
+        font-size: 14px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="navbar-custom">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center w-100">
+            <div class="col">
+                <h1>Category Management</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4">
+    <div class="category-controls">
+        <div class="controls-left">
+            <!-- Search Form -->
+            <form method="get" class="search-form">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name or description...">
+                <button type="submit" aria-label="Search categories">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                {% if query %}
+                    <a href="{% url 'category_list' %}" class="clear-btn" aria-label="Clear search">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+
+            <!-- Sort Form -->
+            <form method="get" class="sort-form">
+                {% if query %}
+                    <input type="hidden" name="q" value="{{ query }}">
+                {% endif %}
+                <span class="sort-label">Sort:</span>
+                <select name="sort" onchange="this.form.submit()" class="sort-select" aria-label="Sort categories">
+                    <option value="">Default</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name A-Z</option>
+                    <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>Name Z-A</option>
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Add Category Button -->
+        <a href="{% url 'add_category' %}" class="add-category-btn" aria-label="Add new category">
+            <i class="fas fa-plus"></i> Add Category
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table class="category-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Category Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-img">
+                        {% else %}
+                            <div class="no-image">No Image</div>
+                        {% endif %}
+                    </td>
+                    <td class="category-name">{{ category.name }}</td>
+                    <td class="category-description">{{ category.description|truncatewords:10 }}</td>
+                    <td>
+                        <span class="status-badge {% if category.is_listed %}status-true{% else %}status-false{% endif %}">
+                            {% if category.is_listed %}Listed{% else %}Unlisted{% endif %}
+                        </span>
+                    </td>
+                    <td class="date-text">{{ category.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'edit_category' category.pk %}" class="action-link" aria-label="Edit category {{ category.name }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{% url 'delete_category' category.pk %}" class="action-link delete"
+                            aria-label="Delete category {{ category.name }}">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="no-categories">
+                        <i class="fas fa-folder-open mb-3" style="font-size: 2rem; display: block;"></i>
+                        No categories found.
+                        {% if query %}
+                            <br><small>Try adjusting your search terms.</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if categories.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if categories.has_previous %}
+            <a href="?page={{ categories.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="pagination-link" aria-label="Previous page">
+                <i class="fas fa-chevron-left me-2"></i> Previous
+            </a>
+        {% endif %}
+        <span>Page {{ categories.number }} of {{ categories.paginator.num_pages }}</span>
+        {% if categories.has_next %}
+            <a href="?page={{ categories.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="pagination-link" aria-label="Next page">
+                Next <i class="fas fa-chevron-right ms-2"></i>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate table rows on load
+        const rows = document.querySelectorAll('.category-table tbody tr');
+        rows.forEach((row, index) => {
+            if (row.cells.length > 1) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.6s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+
+        // Image hover effects
+        document.querySelectorAll('.category-img').forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.borderColor = '#58a6ff';
+                this.style.boxShadow = '0 4px 15px rgba(88, 166, 255, 0.3)';
+            });
+            img.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.borderColor = '#30363d';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Button click effects
+        document.querySelectorAll('.action-link, .pagination-link, .add-category-btn, .search-form button, .clear-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => { this.style.transform = ''; }, 150);
+            });
+        });
+
+        // Search input focus effects
+        const searchInput = document.querySelector('.search-form input');
+        if (searchInput) {
+            searchInput.addEventListener('focus', function() { 
+                this.style.borderColor = '#58a6ff';
+                this.style.boxShadow = '0 0 0 3px rgba(88, 166, 255, 0.1)';
+            });
+            searchInput.addEventListener('blur', function() { 
+                this.style.borderColor = '#30363d';
+                this.style.boxShadow = 'none';
+            });
+        }
+
+        // Sort select hover effects
+        const sortSelect = document.querySelector('.sort-select');
+        if (sortSelect) {
+            sortSelect.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#58a6ff';
+            });
+            sortSelect.addEventListener('mouseleave', function() {
+                if (this !== document.activeElement) {
+                    this.style.borderColor = '#30363d';
+                }
+            });
+        }
+
+        // Table row hover effects
+        document.querySelectorAll('.category-table tbody tr').forEach(row => {
+            if (row.cells.length > 1) {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#21262d';
+                    this.style.transform = 'translateX(5px)';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '#161b22';
+                    this.style.transform = 'translateX(0)';
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

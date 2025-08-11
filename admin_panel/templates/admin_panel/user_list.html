@@ -1,0 +1,856 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}User Management{% endblock %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #f0f6fc;
+    }
+
+    .navbar-custom {
+        background-color: #161b22;
+        color: #f0f6fc;
+        padding: 20px 0;
+        border-bottom: 1px solid #21262d;
+        margin-bottom: 30px;
+    }
+
+    .navbar-custom h1 {
+        color: #f0f6fc;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .user-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .search-form input {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        flex: 1;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #58a6ff;
+    }
+
+    .search-form input::placeholder {
+        color: #8b949e;
+    }
+
+    .search-form button {
+        background: #58a6ff;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .search-form button:hover {
+        background: #4493f8;
+    }
+
+    .clear-btn {
+        background: #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .clear-btn:hover {
+        background: #30363d;
+        color: #f0f6fc;
+        text-decoration: none;
+        border-color: #484f58;
+    }
+
+    .btn.btn-secondary {
+        background: #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 12px 15px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn.btn-secondary:hover {
+        background: #30363d;
+        color: #f0f6fc;
+        text-decoration: none;
+        border-color: #484f58;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .results-info {
+        margin-left: auto;
+    }
+
+    .results-text {
+        background: #21262d;
+        color: #8b949e;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-select {
+        background: #161b22;
+        border: 1px solid #30363d;
+        color: #f0f6fc;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+        min-width: 150px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #58a6ff;
+    }
+
+    .filter-select option {
+        background: #161b22;
+        color: #f0f6fc;
+    }
+
+    .profile-icon {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-icon:hover {
+        background: #30363d;
+        color: #58a6ff;
+        border-color: #58a6ff;
+    }
+
+    .table-container {
+        background: #161b22;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        overflow-x: auto;
+        border: 1px solid #21262d;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+    }
+
+    .table-container:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        border-color: #30363d;
+    }
+
+    .user-table {
+        width: 100%;
+        margin: 0;
+        color: #f0f6fc;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .user-table thead th {
+        background-color: #21262d;
+        border-bottom: 2px solid #30363d;
+        font-weight: 600;
+        color: #8b949e;
+        padding: 15px 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .user-table thead th:first-child {
+        width: 10%;
+    }
+
+    .user-table thead th:nth-child(2) {
+        width: 20%;
+        text-align: left;
+    }
+
+    .user-table thead th:nth-child(3) {
+        width: 30%;
+        text-align: left;
+    }
+
+    .user-table thead th:nth-child(4) {
+        width: 20%;
+    }
+
+    .user-table thead th:last-child {
+        width: 20%;
+    }
+
+    .user-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #21262d;
+        background-color: #161b22;
+    }
+
+    .user-table tbody tr:hover {
+        background-color: #21262d;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .user-table td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        font-size: 14px;
+        border-color: #21262d;
+        text-align: center;
+    }
+
+    .user-table td:nth-child(2),
+    .user-table td:nth-child(3) {
+        text-align: left;
+    }
+
+    .profile-icon.green {
+        color: #3fb950;
+        background: rgba(63, 185, 80, 0.1);
+        border-color: rgba(63, 185, 80, 0.3);
+    }
+
+    .profile-icon.red {
+        color: #f85149;
+        background: rgba(248, 81, 73, 0.1);
+        border-color: rgba(248, 81, 73, 0.3);
+    }
+
+    .username-text {
+        font-weight: 500;
+        color: #f0f6fc;
+        word-break: break-word;
+    }
+
+    .email-text {
+        color: #8b949e;
+        font-size: 13px;
+        word-break: break-word;
+    }
+
+    .date-text {
+        color: #8b949e;
+        font-size: 13px;
+    }
+
+    .btn {
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn.block {
+        background: rgba(248, 81, 73, 0.15);
+        color: #f85149;
+        border: 1px solid rgba(248, 81, 73, 0.4);
+    }
+
+    .btn.block:hover {
+        background: rgba(248, 81, 73, 0.25);
+        color: #ffffff;
+        border-color: #f85149;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.4);
+        text-decoration: none;
+    }
+
+    .btn.unblock {
+        background: rgba(63, 185, 80, 0.15);
+        color: #3fb950;
+        border: 1px solid rgba(63, 185, 80, 0.4);
+    }
+
+    .btn.unblock:hover {
+        background: rgba(63, 185, 80, 0.25);
+        color: #ffffff;
+        border-color: #3fb950;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(63, 185, 80, 0.4);
+        text-decoration: none;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+        gap: 15px;
+        color: #8b949e;
+        flex-wrap: wrap;
+    }
+
+    .page-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .page-info {
+        background: #21262d;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #f0f6fc;
+    }
+
+    .page-link {
+        background: #161b22;
+        border: 1px solid #21262d;
+        color: #8b949e;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .page-link:hover {
+        background-color: #21262d;
+        color: #58a6ff;
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        text-decoration: none;
+    }
+
+    .page-link.current {
+        background: #58a6ff;
+        color: #ffffff;
+        border-color: #58a6ff;
+    }
+
+    .page-link.disabled {
+        background: #0d1117;
+        color: #484f58;
+        border-color: #21262d;
+        cursor: not-allowed;
+    }
+
+    .page-link.disabled:hover {
+        background: #0d1117;
+        color: #484f58;
+        border-color: #21262d;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Custom Confirmation Popup */
+    .confirmation-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+    }
+
+    .confirmation-content {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: popupSlideIn 0.3s ease;
+    }
+
+    @keyframes popupSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .confirmation-content h3 {
+        color: #f0f6fc;
+        margin: 0 0 15px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .confirmation-content p {
+        color: #8b949e;
+        margin: 0 0 25px 0;
+        line-height: 1.5;
+    }
+
+    .confirmation-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+    }
+
+    .confirm-yes {
+        background: #f85149;
+        color: #ffffff;
+        border: 1px solid #f85149;
+    }
+
+    .confirm-yes:hover {
+        background: #ff6b6b;
+        border-color: #ff6b6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.4);
+    }
+
+    .confirm-no {
+        background: #21262d;
+        color: #8b949e;
+        border: 1px solid #30363d;
+    }
+
+    .confirm-no:hover {
+        background: #30363d;
+        color: #f0f6fc;
+        border-color: #484f58;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .no-users {
+        text-align: center;
+        padding: 40px;
+        color: #8b949e;
+        font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .user-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-form {
+            margin-bottom: 15px;
+            max-width: 100%;
+        }
+
+        .filter-bar {
+            justify-content: space-between;
+        }
+
+        .results-info {
+            margin-left: 0;
+            margin-top: 10px;
+        }
+
+        .filter-select {
+            min-width: 120px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .user-table {
+            min-width: 600px;
+        }
+
+        .user-table tbody tr:hover {
+            transform: none;
+        }
+
+        .navbar-custom h1 {
+            font-size: 1.5rem;
+        }
+
+        .pagination {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .page-controls {
+            justify-content: center;
+        }
+
+        .confirmation-content {
+            margin: 20px;
+        }
+
+        .confirmation-buttons {
+            flex-direction: column;
+        }
+    }
+
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #0d1117;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #484f58;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="navbar-custom">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center w-100">
+            <div class="col">
+                <h1>Users</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4">
+    <div class="user-controls">
+        <form method="get" class="search-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by username, email, name...">
+            <button type="submit" aria-label="Search users">
+                <i class="fas fa-search me-1"></i> Search
+            </button>
+            {% if query %}
+                <a href="{% url 'user_list' %}" class="clear-btn" aria-label="Clear search">
+                    <i class="fas fa-times me-1"></i> Clear
+                </a>
+            {% endif %}
+        </form>
+        <div class="filter-bar">
+            <select class="filter-select" id="statusFilter">
+                <option value="all">All Users</option>
+                <option value="active">Active Users</option>
+                <option value="blocked">Blocked Users</option>
+            </select>
+            <div class="results-info">
+                {% if query %}
+                    <span class="results-text">
+                        <i class="fas fa-search"></i>
+                        {{ total_users }} result{{ total_users|pluralize }} for "{{ query }}"
+                    </span>
+                {% else %}
+                    <span class="results-text">
+                        <i class="fas fa-users"></i>
+                        {{ total_users }} total user{{ total_users|pluralize }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>Profile</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                {% for user in users %}
+                <tr class="user-row">
+                    <td>
+                        {% if user.is_blocked %}
+                            <span class="profile-icon red">👤</span>
+                        {% else %}
+                            <span class="profile-icon green">👤</span>
+                        {% endif %}
+                    </td>
+                    <td class="username-text">{{ user.username }}</td>
+                    <td class="email-text">{{ user.email }}</td>
+                    <td class="date-text">{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        {% if user.is_blocked %}
+                            <a href="{% url 'unblock_user' user.id %}?{% if query %}q={{ query }}&{% endif %}page={{ users.number }}" 
+                               class="btn unblock" data-user-id="{{ user.id }}" data-action="unblock">
+                                <i class="fas fa-unlock"></i> Unblock
+                            </a>
+                        {% else %}
+                            <a href="{% url 'block_user' user.id %}?{% if query %}q={{ query }}&{% endif %}page={{ users.number }}" 
+                               class="btn block" data-user-id="{{ user.id }}" data-action="block">
+                                <i class="fas fa-lock"></i> Block
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="no-users">
+                        <i class="fas fa-users mb-3" style="font-size: 2rem; display: block;"></i>
+                        {% if query %}
+                            No users found matching "{{ query }}".
+                            <br><small>Try adjusting your search terms or <a href="{% url 'user_list' %}" class="text-info">clear the search</a>.</small>
+                        {% else %}
+                            No users found.
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if users.paginator.num_pages > 1 %}
+    <div class="pagination">
+        <div class="page-info">
+            Page {{ users.number }} of {{ users.paginator.num_pages }}
+        </div>
+        <div class="page-controls">
+            {% if users.has_previous %}
+                <a href="?page={{ users.previous_page_number }}" class="page-link">
+                    <i class="fas fa-chevron-left me-2"></i> Previous
+                </a>
+            {% else %}
+                <span class="page-link disabled">
+                    <i class="fas fa-chevron-left me-2"></i> Previous
+                </span>
+            {% endif %}
+            
+            {% for num in users.paginator.page_range %}
+                {% if users.number == num %}
+                    <span class="page-link current">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if users.has_next %}
+                <a href="?page={{ users.next_page_number }}" class="page-link">
+                    Next <i class="fas fa-chevron-right ms-2"></i>
+                </a>
+            {% else %}
+                <span class="page-link disabled">
+                    Next <i class="fas fa-chevron-right ms-2"></i>
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Custom Confirmation Popup -->
+    <div class="confirmation-popup" id="confirmationPopup">
+        <div class="confirmation-content">
+            <h3 id="confirmationTitle"></h3>
+            <p id="confirmationMessage"></p>
+            <div class="confirmation-buttons">
+                <button class="btn confirm-yes" id="confirmYes">Yes</button>
+                <button class="btn confirm-no" id="confirmNo">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate table rows on load
+    const rows = document.querySelectorAll('.user-table tbody tr');
+    rows.forEach((row, index) => {
+        if (row.cells.length > 1) {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                row.style.transition = 'all 0.6s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, index * 100);
+        }
+    });
+
+    // Search functionality (now client-side filtering only for status)
+    document.getElementById('statusFilter').addEventListener('change', function(e) {
+        const status = e.target.value;
+        const rows = document.querySelectorAll('.user-row');
+        
+        rows.forEach(row => {
+            const isBlocked = row.querySelector('.profile-icon').classList.contains('red');
+            if (status === 'all') {
+                row.style.display = '';
+            } else if (status === 'active' && !isBlocked) {
+                row.style.display = '';
+            } else if (status === 'blocked' && isBlocked) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Custom Confirmation Popup Logic
+    const popup = document.getElementById('confirmationPopup');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    const confirmationTitle = document.getElementById('confirmationTitle');
+    const confirmationMessage = document.getElementById('confirmationMessage');
+    let currentActionUrl = '';
+
+    document.querySelectorAll('.btn.block, .btn.unblock').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const action = this.dataset.action;
+            const userId = this.dataset.userId;
+            currentActionUrl = this.getAttribute('href');
+
+            confirmationTitle.textContent = action === 'block' ? 'Block User' : 'Unblock User';
+            confirmationMessage.textContent = `Are you sure you want to ${action} this user?`;
+            popup.style.display = 'flex';
+        });
+    });
+
+    confirmYes.addEventListener('click', function() {
+        window.location.href = currentActionUrl;
+    });
+
+    confirmNo.addEventListener('click', function() {
+        popup.style.display = 'none';
+    });
+
+    // Close popup when clicking outside
+    popup.addEventListener('click', function(e) {
+        if (e.target === popup) {
+            popup.style.display = 'none';
+        }
+    });
+
+    // Enhanced hover effects
+    document.querySelectorAll('.user-table tbody tr').forEach(row => {
+        if (row.cells.length > 1) {
+            row.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#21262d';
+                this.style.transform = 'translateX(5px)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '#161b22';
+                this.style.transform = 'translateX(0)';
+            });
+        }
+    });
+
+    // Button click animations
+    document.querySelectorAll('.btn, .page-link').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!this.classList.contains('disabled')) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => { this.style.transform = ''; }, 150);
+            }
+        });
+    });
+
+    // Search form focus effects
+    const searchForm = document.querySelector('.search-form input');
+    if (searchForm) {
+        searchForm.addEventListener('focus', function() {
+            this.style.borderColor = '#58a6ff';
+        });
+        searchForm.addEventListener('blur', function() {
+            this.style.borderColor = '#30363d';
+        });
+    }
+
+    // Filter select focus effects
+    document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('focus', function() {
+            this.style.borderColor = '#58a6ff';
+        });
+        select.addEventListener('blur', function() {
+            this.style.borderColor = '#30363d';
+        });
+    });
+});
+</script>
+{% endblock %}

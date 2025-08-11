@@ -1,0 +1,262 @@
+.user-list-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #666;
+}
+
+.search-input {
+    padding: 10px 10px 10px 36px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e0;
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.profile-icon {
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.profile-icon:hover {
+    transform: scale(1.1);
+}
+
+.profile-icon.red {
+    color: #ef4444;
+}
+
+.profile-icon.green {
+    color: #10b981;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.user-table-wrapper {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    margin-top: 1rem;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.user-table th,
+.user-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.user-table th {
+    color: #1f2937;
+    font-weight: 600;
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+}
+
+.user-table tr {
+    transition: background-color 0.2s ease;
+}
+
+.user-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    font-weight: 500;
+    color: white;
+    transition: all 0.2s ease;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn.block {
+    background-color: #10b981;
+}
+
+.btn.block:hover {
+    background-color: #059669;
+}
+
+.btn.unblock {
+    background-color: #ef4444;
+}
+
+.btn.unblock:hover {
+    background-color: #dc2626;
+}
+
+.confirmation-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.confirmation-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.confirmation-content h3 {
+    margin: 0 0 1rem;
+    color: #1f2937;
+    font-size: 1.25rem;
+}
+
+.confirmation-content p {
+    margin: 0 0 1.5rem;
+    color: #4b5563;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn.confirm-yes {
+    background-color: #3b82f6;
+}
+
+.btn.confirm-yes:hover {
+    background-color: #2563eb;
+}
+
+.btn.confirm-no {
+    background-color: #6b7280;
+}
+
+.btn.confirm-no:hover {
+    background-color: #4b5563;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 0 1rem;
+}
+
+.page-info {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.page-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover:not(.disabled) {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+.page-link.current {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.page-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .user-list-page {
+        padding: 1rem;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .filter-bar {
+        flex-direction: column;
+    }
+    
+    .user-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
