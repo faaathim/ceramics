@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile_detail.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container-fluid nav-container">
+            <div class="d-flex align-items-center">
+                <div class="logo me-4">
+                    <img src="{% static 'images/LOGO.png' %}" alt="Logo">
+                </div>
+            </div>
+            
+            <ul class="nav-center d-flex justify-content-center">
+                <li><a href="{% url 'user:home' %}" class="px-2">Home</a></li>
+                <li><a href="#about" class="px-2">About</a></li>
+                <li><a href="#blog" class="px-2">Blog</a></li>
+                <li><a href="{% url 'user:shop' %}" class="px-2">Shop</a></li>
+                <li><a href="#workshop" class="px-2">Workshop</a></li>
+            </ul>
+            
+            <div class="nav-icons d-flex align-items-center">
+                <a href="#">
+                    <svg class="nav-icon me-3" viewBox="0 0 24 24" fill="white">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </a>
+                <a href="{% url 'user:profile_detail' %}">
+                    <svg class="nav-icon me-3" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </a>
+                <a href="#">
+                    <svg class="nav-icon me-3" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </a>
+                <a href="#" class="position-relative">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="white">
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="profile-container">
+        <h1 class="profile-title">PROFILE</h1>
+
+        <div class="profile-layout">
+            <!-- Sidebar - Left Side -->
+            <div class="sidebar">
+                <!-- Profile Avatar and Name -->
+                <div class="profile-avatar-section">
+                    <div class="avatar-circle">
+                        {% if profile.profile_photo %}
+                            <img src="{{ profile.profile_photo.url }}" alt="Profile Photo">
+                        {% else %}
+                            <div class="avatar-placeholder">
+                                <div class="avatar-placeholder-circle"></div>
+                                <div class="avatar-placeholder-line"></div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h2 class="profile-name">{{ profile.first_name }} {{ profile.last_name }}</h2>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <div class="sidebar-menu">
+                    <a href="#" class="menu-item">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                        </svg>
+                        <span class="menu-text">Orders</span>
+                        <span class="badge-count">4</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                        <span class="menu-text">Wishlist</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                        </svg>
+                        <span class="menu-text">Wallet</span>
+                    </a>
+
+                    <div class="menu-section-title">Manage account</div>
+
+                    <a href="#" class="menu-item active">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <span class="menu-text">Personal info</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        <span class="menu-text">Addresses</span>
+                    </a>
+
+                    <div class="menu-section-title">Customer service</div>
+
+                    <a href="#" class="menu-item">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/>
+                        </svg>
+                        <span class="menu-text">Helps</span>
+                    </a>
+
+                    <a href="#" class="menu-item">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                        </svg>
+                        <span class="menu-text">About us</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form Section - Right Side -->
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" value="{{ profile.first_name }}" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">Second Name</label>
+                            <input type="text" class="form-control" value="{{ profile.last_name }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">Mobile Number</label>
+                            <input type="text" class="form-control" value="{{ profile.mobile_number }}" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">Email ID</label>
+                            <input type="email" class="form-control" value="{{ profile.user.email }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group-full">
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-control" value="{{ profile.address }}" readonly>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-control" value="{{ profile.city }}" readonly>
+                        </div>
+                        <div>
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-control" value="{{ profile.state }}" readonly>
+                        </div>
+                    </div>
+
+                    <div>
+                        <a href="{% url 'user:edit_profile' %}" class="btn-edit">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3 class="footer-logo">CERAMIC</h3>
+                <p class="footer-description">Nisl, purus vitae, ultrices nunc. Sit ac sit suscipit hendrerit. Gravida massa volutpat aenean odio erat nullam fringilla.</p>
+            </div>
+
+            <div class="footer-column">
+                <h4 class="footer-title">QUICK LINKS</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'user:home' %}">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="{% url 'user:shop' %}">Shop</a></li>
+                    <li><a href="#blogs">Blogs</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4 class="footer-title">HELP & INFO</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Track Your Order</a></li>
+                    <li><a href="#">Returns policies</a></li>
+                    <li><a href="#">Shipping + Delivery</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Faqs</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4 class="footer-title">CONTACT US</h4>
+                <ul class="footer-contact">
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="white" width="16" height="16">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        Phoenix, Arizona
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="white" width="16" height="16">
+                            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                        </svg>
+                        ceramics@gmail.com
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" fill="white" width="16" height="16">
+                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                        </svg>
+                        888 333 9999
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-payment">
+                <span>We ship with:</span>
+                <div class="payment-icons">
+                    <span class="payment-badge">DHL</span>
+                    <span class="payment-badge">✓</span>
+                </div>
+            </div>
+            <div class="footer-payment">
+                <span>Payment options:</span>
+                <div class="payment-icons">
+                    <span class="payment-badge">VISA</span>
+                    <span class="payment-badge">MC</span>
+                    <span class="payment-badge">AE</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-copyright">
+            <p>© Copyright 2025 Ceramic. Design by {{ profile.first_name }} {{ profile.last_name }}</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

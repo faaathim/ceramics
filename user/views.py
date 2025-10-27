@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.db.models import Q
 from product.models import Product
 from category.models import Category
 from django.views.decorators.cache import never_cache
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileForm
 
 # Create your views here.
 
@@ -80,3 +82,24 @@ def shop(request):
         'max_price': max_price,
         'sort_by': sort_by,
     })
+
+
+@login_required
+def profile_detail(request):
+    profile = request.user.profile
+    return render(request, 'user/profile_detail.html', {'profile': profile})
+
+
+@login_required
+def edit_profile(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('user:profile_detail')
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'user/edit_profile.html', {'form': form})
+
+

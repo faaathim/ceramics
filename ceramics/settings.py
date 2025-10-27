@@ -23,7 +23,7 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = 'l+lq4=zmyqy901%=9wg+tx!tr4&2p(08+_m$h2*5n(ozi@2w%c'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -95,13 +95,14 @@ WSGI_APPLICATION = 'ceramics.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': os.getenv('POSTGRES_PORT'),
+        'NAME': 'ceramics_db',
+        'USER': 'postgres',
+        'PASSWORD': 'postSQL2025',  
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+
 
 
 
