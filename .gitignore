@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+# Virtualenv
+venv/
+env/
+.venv/
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# Environment files
+.env
+.env.*
+
+# IDEs / macOS
+.vscode/
+.idea/
+.DS_Store
+
+# Node / build artifacts (if applicable)
+node_modules/
+npm-debug.log
+dist/
+build/
+
+# Byte-compiled / coverage
+.coverage
+htmlcov/
+
+# mac / system
+*.swp

@@ -1,0 +1,33 @@
+{# user_profile/templates/user_profile/change_email_verify.html #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}{% include "user_navbar.html" %}{% endblock %}
+
+{% block content %}
+<div class="container small-form">
+  <h2>Verify New Email</h2>
+  <p>We sent a 4-digit code to your new email address. Enter it below to confirm the change.</p>
+
+  {% if messages %}
+    {% for m in messages %}<div class="{{ m.tags }}">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Verify</button>
+  </form>
+
+  <div>
+    {% if seconds_left > 0 %}
+      <p>Resend available in {{ seconds_left }}s</p>
+    {% else %}
+      <form method="post" action="{% url 'user_profile:change_email_resend' %}">
+        {% csrf_token %}
+        <button type="submit">Resend OTP</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

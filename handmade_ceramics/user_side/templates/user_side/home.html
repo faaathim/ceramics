@@ -1,0 +1,721 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handmade Ceramic Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            background-color: #ffffff;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            background-color: #2b2d31;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            padding-top: 120px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 650px;
+            padding: 0 4rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 300;
+            color: #ffffff;
+            letter-spacing: 8px;
+            line-height: 1.3;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            animation: fadeInUp 1s ease-out 0.2s both;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .hero-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.7;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            animation: fadeInUp 1s ease-out 0.4s both;
+            max-width: 520px;
+        }
+
+        .btn-buy-now {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn-buy-now::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            transition: left 0.4s ease;
+            z-index: -1;
+        }
+
+        .btn-buy-now:hover {
+            color: #2b2d31;
+        }
+
+        .btn-buy-now:hover::before {
+            left: 0;
+        }
+
+        /* Latest Arrivals Section */
+        .latest-arrivals-section {
+            padding: 100px 0;
+            background-color: #ffffff;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #1a1a1a;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+            color: #666666;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        /* Product Cards */
+        .product-card {
+            position: relative;
+            margin-bottom: 40px;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            border-color: #1a1a1a;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 120%;
+            overflow: hidden;
+            background-color: #f8f8f8;
+        }
+
+        .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.08);
+        }
+
+        .product-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            transition: background 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .product-card:hover .product-overlay {
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 1;
+        }
+
+        .quick-view-btn {
+            padding: 0.8rem 2rem;
+            background: #ffffff;
+            color: #1a1a1a;
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .product-card:hover .quick-view-btn {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .quick-view-btn:hover {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .product-category {
+            font-size: 0.7rem;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .product-price-original {
+            font-size: 0.9rem;
+            color: #999999;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
+
+        /* Pagination */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 60px;
+        }
+
+        .pagination {
+            gap: 10px;
+        }
+
+        .page-link {
+            color: #1a1a1a;
+            border: 1px solid #e8e8e8;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover {
+            background-color: #1a1a1a;
+            border-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .page-item.active .page-link {
+            background-color: #1a1a1a;
+            border-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .page-item.disabled .page-link {
+            background-color: #f8f8f8;
+            border-color: #e8e8e8;
+            color: #cccccc;
+        }
+
+        /* No Products Message */
+        .no-products-message {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .no-products-message h3 {
+            font-size: 1.5rem;
+            color: #666666;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        /* Craftsmanship Section */
+        .craftsmanship-section {
+            padding: 0;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .craftsmanship-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 700px;
+            overflow: hidden;
+            background-color: #f8f8f8;
+        }
+
+        .craftsmanship-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+
+        .craftsmanship-image-wrapper:hover .craftsmanship-image {
+            transform: scale(1.05);
+        }
+
+        .craftsmanship-content {
+            padding: 80px 100px;
+            background-color: #ffffff;
+        }
+
+        .craftsmanship-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #1a1a1a;
+            letter-spacing: 2px;
+            line-height: 1.4;
+            margin-bottom: 2rem;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .craftsmanship-text {
+            font-size: 0.95rem;
+            color: #666666;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .btn-learn-more {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 2px solid #1a1a1a;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-learn-more::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            transition: left 0.4s ease;
+            z-index: 0;
+        }
+
+        .btn-learn-more:hover {
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        .btn-learn-more:hover::before {
+            left: 0;
+        }
+
+        .btn-learn-more span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Responsive Design for Craftsmanship */
+        @media (max-width: 992px) {
+            .craftsmanship-image-wrapper {
+                height: 500px;
+            }
+
+            .craftsmanship-content {
+                padding: 60px 60px;
+            }
+
+            .craftsmanship-title {
+                font-size: 2rem;
+            }
+
+            .craftsmanship-text {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .craftsmanship-image-wrapper {
+                height: 400px;
+            }
+
+            .craftsmanship-content {
+                padding: 50px 40px;
+            }
+
+            .craftsmanship-title {
+                font-size: 1.8rem;
+                letter-spacing: 1px;
+            }
+
+            .craftsmanship-text {
+                font-size: 0.85rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .craftsmanship-image-wrapper {
+                height: 350px;
+            }
+
+            .craftsmanship-content {
+                padding: 40px 25px;
+            }
+
+            .craftsmanship-title {
+                font-size: 1.5rem;
+            }
+
+            .btn-learn-more {
+                padding: 0.8rem 2rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero-content {
+                padding: 0 3rem;
+            }
+
+            .hero-title {
+                font-size: 3.2rem;
+                letter-spacing: 6px;
+            }
+
+            .latest-arrivals-section {
+                padding: 70px 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding-top: 140px;
+                min-height: 90vh;
+            }
+
+            .hero-content {
+                padding: 0 2rem;
+                max-width: 100%;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+                letter-spacing: 4px;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-description {
+                font-size: 0.85rem;
+                margin-bottom: 2.5rem;
+            }
+
+            .latest-arrivals-section {
+                padding: 50px 0;
+            }
+
+            .section-header {
+                margin-bottom: 50px;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+                letter-spacing: 3px;
+            }
+
+            .section-subtitle {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-content {
+                padding: 0 1.5rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+                letter-spacing: 3px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                letter-spacing: 2px;
+            }
+
+            .product-info {
+                padding: 1rem;
+            }
+
+            .product-name {
+                font-size: 0.9rem;
+            }
+
+            .product-price {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    {% include 'user_navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section" style="background-image: url('{% static "user_authentication/images/background.png" %}');">        
+        <div class="hero-content">
+            <h1 class="hero-title">Handmade Ceramic Products</h1>
+            <p class="hero-description">
+                Handmade ceramic products bring a unique blend of artistry and functionality to any home or workspace.
+            </p>
+            <a href="#latest-arrivals" class="btn-buy-now">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- Latest Arrivals Section -->
+    <section id="latest-arrivals" class="latest-arrivals-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Latest Arrivals</h2>
+                <p class="section-subtitle">
+                    Whether you're looking for stylish home décor, unique handmade pieces, or innovative essentials, our fresh collection has something special for everyone.
+                </p>
+            </div>
+
+            {% if products_page %}
+                <div class="row">
+                    {% for product in products_page %}
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="product-card">
+                            <div class="product-image-wrapper">
+                                {% if product.images.first %}
+                                    <img src="{{ product.images.first.image.url }}" 
+                                         alt="{{ product.name }}" 
+                                         class="product-image">
+                                {% elif product.image %}
+                                    <img src="{{ product.image.url }}" 
+                                         alt="{{ product.name }}" 
+                                         class="product-image">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/400x480/f8f8f8/cccccc?text=No+Image" 
+                                         alt="{{ product.name }}" 
+                                         class="product-image">
+                                {% endif %}
+                                <div class="product-overlay">
+                                    <button class="quick-view-btn" onclick="window.location.href='#'">
+                                        Quick View
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-category">
+                                    {{ product.category.name|default:"Ceramics" }}
+                                </div>
+                                <h3 class="product-name">{{ product.name }}</h3>
+                                <div class="product-price">
+                                    {% if product.selling_price %}
+                                        ₹{{ product.selling_price }}
+                                    {% elif product.price %}
+                                        ₹{{ product.price }}
+                                    {% else %}
+                                        ₹0.00
+                                    {% endif %}
+                                    
+                                    {% if product.original_price and product.selling_price %}
+                                        {% if product.original_price > product.selling_price %}
+                                            <span class="product-price-original">₹{{ product.original_price }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if products_page.has_other_pages %}
+                <div class="pagination-wrapper">
+                    <nav aria-label="Product pagination">
+                        <ul class="pagination">
+                            {% if products_page.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ products_page.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {% for num in products_page.paginator.page_range %}
+                                {% if products_page.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > products_page.number|add:'-3' and num < products_page.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if products_page.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ products_page.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+            {% else %}
+                <div class="no-products-message">
+                    <h3>No products available at the moment</h3>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Craftsmanship Section -->
+    {% comment %} <section class="craftsmanship-section">
+        <div class="container-fluid p-0">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-6">
+                    <div class="craftsmanship-image-wrapper">
+                        <img src="{% static 'user_authentication/images/turning_mud_to_something_amazing.png' %}" 
+                             alt="Ceramic Craftsmanship" 
+                             class="craftsmanship-image">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="craftsmanship-content">
+                        <h2 class="craftsmanship-title">Turning Mud Into Something Amazing</h2>
+                        <p class="craftsmanship-text">
+                            What starts as a simple lump of clay is transformed into stunning works of art through the hands of skilled artisans. Handmade ceramics showcase the beauty of craftsmanship, where raw earth is shaped, fired, and glazed into elegant pottery, functional dinnerware, and decorative masterpieces. Every piece tells a story of patience, creativity, and tradition, proving that even the simplest materials can become something truly extraordinary.
+                        </p>
+                        <a href="#" class="btn-learn-more">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> {% endcomment %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+<div class="profile-page container">
+  <div class="left">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+  <div class="right">
+    <h2>Profile</h2>
+    <div class="profile-card">
+      {% if profile.profile_image %}
+        <img src="{{ profile.profile_image.url }}" alt="Profile Image" width="120">
+      {% else %}
+        <p>No profile image</p>
+      {% endif %}
+      <p><b>First Name:</b> {{ user.first_name }}</p>
+      <p><b>Last Name:</b> {{ user.last_name }}</p>
+      <p><b>Email:</b> {{ user.email }}</p>
+      <p><b>Mobile:</b> {{ profile.mobile }}</p>
+      <p><b>Address:</b> {{ profile.primary_address }}</p>
+      <p><b>City:</b> {{ profile.city }}</p>
+      <p><b>State:</b> {{ profile.state }}</p>
+      <a href="{% url 'user_profile:profile_edit' %}" class="btn">Edit</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

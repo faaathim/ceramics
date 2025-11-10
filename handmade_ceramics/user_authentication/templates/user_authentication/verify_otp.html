@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <h1>Enter the 4-digit code</h1>
+
+  <p>We sent a 4-digit code to your email. Please enter it below.</p>
+
+  {% if messages %}
+    <ul>
+      {% for m in messages %}
+        <li>{{ m }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <form method="post" id="otp-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+      {{ form.code.label_tag }}<br>
+      {{ form.code }} {{ form.code.errors }}
+    </div>
+    <button type="submit">Verify</button>
+  </form>
+
+  <div style="margin-top:16px;">
+    <button id="resend-btn" {% if not resend_allowed %}disabled{% endif %}>Resend OTP</button>
+    <span id="timer">{% if not resend_allowed %}Wait {{ seconds_left }}s{% endif %}</span>
+  </div>
+
+  <form id="resend-form" method="post" action="{% url 'user_authentication:resend_otp' %}" style="display:none;">
+    {% csrf_token %}
+  </form>
+
+  <script>
+    // Simple client-side countdown timer to disable resend button for 'seconds_left'
+    (function(){
+      var secondsLeft = {{ seconds_left|default:0 }};
+      var resendBtn = document.getElementById('resend-btn');
+      var timerSpan = document.getElementById('timer');
+      var resendForm = document.getElementById('resend-form');
+
+      function startTimer(sec){
+        resendBtn.disabled = true;
+        timerSpan.textContent = 'Wait ' + sec + 's';
+        var interval = setInterval(function(){
+          sec--;
+          if(sec <= 0){
+            clearInterval(interval);
+            resendBtn.disabled = false;
+            timerSpan.textContent = '';
+          } else {
+            timerSpan.textContent = 'Wait ' + sec + 's';
+          }
+        }, 1000);
+      }
+
+      if(secondsLeft > 0){
+        startTimer(secondsLeft);
+      }
+
+      resendBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        // submit hidden POST form to resend
+        resendForm.submit();
+      });
+    })();
+  </script>
+{% endblock %}

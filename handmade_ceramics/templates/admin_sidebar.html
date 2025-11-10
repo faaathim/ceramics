@@ -1,0 +1,323 @@
+<!-- admin_sidebar.html -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    .admin-sidebar {
+        background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 100px;
+        padding: 30px 0;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.6);
+        overflow-y: auto;
+        transition: all 0.3s ease;
+        border-right: 1px solid #2a2a2a;
+    }
+
+    .admin-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .admin-sidebar::-webkit-scrollbar-track {
+        background: #0f0f0f;
+    }
+
+    .admin-sidebar::-webkit-scrollbar-thumb {
+        background: #3a3a3a;
+        border-radius: 3px;
+    }
+
+    .admin-sidebar::-webkit-scrollbar-thumb:hover {
+        background: #4a4a4a;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu-item {
+        margin: 5px 15px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        color: #909090;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid transparent;
+    }
+
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(180deg, #505050, #707070);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-link:hover {
+        background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+        color: #e8e8e8;
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        border-color: #3a3a3a;
+    }
+
+    .sidebar-link:hover::before {
+        transform: scaleY(1);
+    }
+
+    .sidebar-link.active {
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        color: #e8e8e8;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        border-color: #404040;
+    }
+
+    .sidebar-link.active::before {
+        transform: scaleY(1);
+        background: linear-gradient(180deg, #9b8bdb, #8b7bcb);
+    }
+
+    .sidebar-icon {
+        width: 22px;
+        text-align: center;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-link:hover .sidebar-icon {
+        transform: scale(1.2);
+    }
+
+    .sidebar-link.active .sidebar-icon {
+        color: #9b8bdb;
+        animation: iconPulse 0.5s ease;
+    }
+
+    @keyframes iconPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    /* Logout button styling */
+    .logout-link {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #3a2a2a, #2a1a1a);
+        color: #e09070 !important;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: 1px solid #4a3a3a;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .logout-link:hover {
+        background: linear-gradient(135deg, #4a3a3a, #3a2a2a);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(224, 144, 112, 0.2);
+        border-color: #5a4a4a;
+        color: #ff9070 !important;
+    }
+
+    .logout-link .sidebar-icon {
+        color: #e09070;
+    }
+
+    .logout-link:hover .sidebar-icon {
+        color: #ff9070;
+        transform: scale(1.2);
+    }
+
+    @media (max-width: 768px) {
+        .admin-sidebar {
+            transform: translateX(-100%);
+        }
+    }
+</style>
+
+<aside class="admin-sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+            <a href="{% url 'custom_admin:dashboard' %}" 
+               class="sidebar-link" 
+               data-page="Dashboard" 
+               data-icon="fa-tachometer-alt">
+                <i class="fa-solid fa-gauge sidebar-icon"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'custom_admin:product_management:product_list' %}" 
+               class="sidebar-link" 
+               data-page="Products" 
+               data-icon="fa-box-open">
+                <i class="fa-solid fa-box sidebar-icon"></i>
+                <span>Products</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'custom_admin:user_management:user_list' %}" 
+               class="sidebar-link" 
+               data-page="User Management" 
+               data-icon="fa-users-cog">
+                <i class="fa-solid fa-user-group sidebar-icon"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="#orders" 
+               class="sidebar-link" 
+               data-page="Orders" 
+               data-icon="fa-shopping-cart">
+                <i class="fa-solid fa-cart-shopping sidebar-icon"></i>
+                <span>Orders</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'custom_admin:category_management:category_list' %}" 
+               class="sidebar-link" 
+               data-page="Categories" 
+               data-icon="fa-tags">
+                <i class="fa-solid fa-layer-group sidebar-icon"></i>
+                <span>Category</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="#coupons" 
+               class="sidebar-link" 
+               data-page="Coupons" 
+               data-icon="fa-ticket-alt">
+                <i class="fa-solid fa-ticket sidebar-icon"></i>
+                <span>Coupons</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="#offers" 
+               class="sidebar-link" 
+               data-page="Offers" 
+               data-icon="fa-gift">
+                <i class="fa-solid fa-gift sidebar-icon"></i>
+                <span>Offers</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'custom_admin:logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket sidebar-icon"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all sidebar links (except logout)
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const pageTitle = document.getElementById('pageTitle');
+
+        // Function to update active state and navbar title
+        function updateActivePage(clickedLink) {
+            // Remove active class from all links
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+            
+            // Add active class to clicked link
+            clickedLink.classList.add('active');
+            
+            // Update navbar title if pageTitle element exists
+            if (pageTitle) {
+                const pageName = clickedLink.getAttribute('data-page');
+                const iconClass = clickedLink.getAttribute('data-icon');
+                pageTitle.innerHTML = `<i class="fas ${iconClass}"></i>${pageName}`;
+            }
+        }
+
+        // Function to check if link matches current path
+        function isCurrentPage(link) {
+            const currentPath = window.location.pathname;
+            const linkPath = link.getAttribute('href');
+            
+            // Check if it's the exact current page or contains the path
+            return currentPath === linkPath || 
+                   (linkPath !== '#' && currentPath.includes(linkPath.replace('#', '')));
+        }
+
+        // Set initial active state based on current URL
+        let foundActive = false;
+        sidebarLinks.forEach(link => {
+            if (isCurrentPage(link)) {
+                updateActivePage(link);
+                foundActive = true;
+            }
+        });
+
+        // If no match found, check for keyword matches in URL
+        if (!foundActive) {
+            const currentPath = window.location.pathname.toLowerCase();
+            
+            sidebarLinks.forEach(link => {
+                const pageName = link.getAttribute('data-page').toLowerCase();
+                
+                if (currentPath.includes('user') && pageName.includes('user')) {
+                    updateActivePage(link);
+                    foundActive = true;
+                } else if (currentPath.includes('product') && pageName.includes('product')) {
+                    updateActivePage(link);
+                    foundActive = true;
+                } else if (currentPath.includes('order') && pageName.includes('order')) {
+                    updateActivePage(link);
+                    foundActive = true;
+                } else if (currentPath.includes('category') && pageName.includes('categor')) {
+                    updateActivePage(link);
+                    foundActive = true;
+                } else if (currentPath.includes('coupon') && pageName.includes('coupon')) {
+                    updateActivePage(link);
+                    foundActive = true;
+                } else if (currentPath.includes('offer') && pageName.includes('offer')) {
+                    updateActivePage(link);
+                    foundActive = true;
+                }
+            });
+        }
+
+        // If still no match, default to Dashboard
+        if (!foundActive && sidebarLinks.length > 0) {
+            updateActivePage(sidebarLinks[0]);
+        }
+
+        // Add click event to all sidebar links
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Only prevent default for hash links
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                }
+                updateActivePage(this);
+            });
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

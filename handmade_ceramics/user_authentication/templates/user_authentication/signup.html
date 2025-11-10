@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static socialaccount %}
+
+{% block top %}
+  {% include "user_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'user_authentication/css/login.css' %}">
+
+<div class="container small-form">
+  <h2>Sign Up</h2>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="form-group">
+      {{ form.first_name.label_tag }}
+      {{ form.first_name }}
+      {% for error in form.first_name.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.last_name.label_tag }}
+      {{ form.last_name }}
+      {% for error in form.last_name.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.email.label_tag }}
+      {{ form.email }}
+      {% for error in form.email.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.password1.label_tag }}
+      {{ form.password1 }}
+      {% for error in form.password1.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.password2.label_tag }}
+      {{ form.password2 }}
+      {% for error in form.password2.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn">Sign up</button>
+  </form>
+
+  <hr>
+  <p style="text-align:center;">OR</p>
+
+  <a href="{% provider_login_url 'google' %}" class="google-btn">
+    <img src="{% static 'user_authentication/img/google-logo.png' %}" alt="Google logo" width="20" style="vertical-align:middle; margin-right:8px;">
+    Sign up with Google
+  </a>
+
+  <p>Already have an account? <a href="{% url 'user_authentication:login' %}">Log in</a></p>
+</div>
+{% endblock %}

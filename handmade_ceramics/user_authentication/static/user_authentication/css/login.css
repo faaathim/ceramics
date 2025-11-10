@@ -1,0 +1,120 @@
+.login-container {
+    width: 400px;
+    margin: 60px auto;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .login-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .error {
+    color: red;
+    font-size: 13px;
+  }
+  
+  .messages p {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .messages .error { background: #ffd6d6; }
+  .messages .success { background: #d6ffd8; }
+  .messages .warning { background: #fff5d6; }
+  
+  .btn {
+    width: 100%;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn:hover {
+    background-color: #555;
+  }
+  
+  .extras {
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  .small-form {
+    width: 400px;
+    margin: 60px auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    border: 1px solid #ddd;
+  }
+  .small-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  
+  .google-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-weight: 500;
+    color: #444;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  
+  .google-btn img {
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  
+  .google-btn:hover {
+    background: #f5f5f5;
+  }
+
+  .google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    color: #444;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+  }
+  
+  .google-btn:hover {
+    background-color: #f7f7f7;
+    border-color: #bbb;
+  }
+  
+  
+  

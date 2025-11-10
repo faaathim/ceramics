@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static socialaccount %}
+
+{% block top %}
+  {% include "user_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'user_authentication/css/login.css' %}">
+
+<div class="login-container">
+  <h2>User Login</h2>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+    <div class="form-group">
+      <label>Email</label>
+      {{ form.email }}
+      {% for error in form.email.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      {{ form.password }}
+      {% for error in form.password.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="form-group remember-me">
+      {{ form.remember_me }} Remember Me
+    </div>
+
+    <button type="submit" class="btn">Login</button>
+
+    <div class="extras">
+      <a href="#">Forgot Password?</a> |
+      <a href="{% url 'user_authentication:signup' %}">Create Account</a>
+    </div>
+  </form>
+
+  <hr>
+  <p style="text-align:center;">OR</p>
+
+  <a href="{% provider_login_url 'google' %}" class="google-btn">
+    <img src="{% static 'user_authentication/img/google-logo.png' %}" alt="Google logo" width="20" style="vertical-align:middle; margin-right:8px;">
+    Sign in with Google
+  </a>
+</div>
+{% endblock %}

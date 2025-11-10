@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .product-management-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            min-height: calc(100vh - 70px);
+        }
+
+        .search-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 20px 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+            border-color: #404040;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            color: #606060;
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 14px 20px 14px 48px;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            background: #0f0f0f;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #9b8bdb;
+            background: #1a1a1a;
+            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
+        }
+
+        .search-input:focus ~ .search-icon {
+            color: #9b8bdb;
+        }
+
+        .search-input::placeholder {
+            color: #606060;
+        }
+
+        .btn-search, .btn-clear, .btn-add {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
+            color: #ffffff;
+            border: 2px solid transparent;
+        }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
+        }
+
+        .btn-search:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            background: transparent;
+            color: #909090;
+            border: 2px solid #404040;
+        }
+
+        .btn-clear:hover {
+            background: #2a2a2a;
+            color: #e8e8e8;
+            border-color: #505050;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-clear:active {
+            transform: translateY(0);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+            color: #70c090;
+            border: 2px solid #4a6a5a;
+        }
+
+        .btn-add:hover {
+            background: linear-gradient(135deg, #3a5a4a, #4a6a5a);
+            color: #80d0a0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(112, 192, 144, 0.5);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        .table-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+
+        .table-container:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .product-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+        .product-table thead {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        }
+
+        .product-table th {
+            padding: 20px 25px;
+            text-align: left;
+            font-weight: 600;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #404040;
+        }
+
+        .product-table tbody tr {
+            border-bottom: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .product-table tbody tr:hover {
+            background: linear-gradient(135deg, #252525, #303030);
+            transform: scale(1.01);
+        }
+
+        .product-table td {
+            padding: 20px 25px;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+        }
+
+        .product-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #404040;
+            transition: all 0.3s ease;
+        }
+
+        .product-img:hover {
+            transform: scale(1.1);
+            border-color: #9b8bdb;
+            box-shadow: 0 5px 15px rgba(155, 139, 219, 0.4);
+        }
+
+        .no-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #404040;
+        }
+
+        .no-image i {
+            color: #606060;
+            font-size: 1.5rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #e8e8e8;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #9b8bdb;
+            font-size: 0.85rem;
+            background: rgba(155, 139, 219, 0.15);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .status-listed {
+            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+            color: #70c090;
+        }
+
+        .status-unlisted {
+            background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
+            color: #c0c070;
+        }
+
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .date-text {
+            color: #e8e8e8;
+            font-size: 0.95rem;
+        }
+
+        .actions-wrapper {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+            color: #70a0c0;
+            border-color: #4a5a6a;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #3a4a5a, #4a5a6a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(112, 160, 192, 0.3);
+            color: #80b0d0;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+            color: #e07070;
+            border-color: #6a4a4a;
+        }
+
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #5a3a3a, #6a4a4a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(224, 112, 112, 0.3);
+            color: #f08080;
+        }
+
+        .pagination-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-container:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+            border-color: #505050;
+        }
+
+        .pagination-info {
+            color: #b0b0b0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-info i {
+            color: #9b8bdb;
+        }
+
+        .pagination-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pagination-links a {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            color: #e8e8e8;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #404040;
+        }
+
+        .pagination-links a:hover {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(155, 139, 219, 0.4);
+            border-color: #9b8bdb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #606060;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-table tbody tr {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .product-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+        .product-table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+        .product-table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+        .product-table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+        .product-table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+
+        @media (max-width: 768px) {
+            .product-management-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-wrapper {
+                width: 100%;
+            }
+
+            .actions-wrapper {
+                flex-direction: column;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+
+    <div class="product-management-content">
+        <!-- Search Section -->
+        <div class="search-container">
+            <form method="get" class="search-form">
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="search-input" 
+                        placeholder="Search by product name or category..."
+                        value="{{ query|default:'' }}"
+                    >
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <button type="submit" class="btn-search">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+                {% if query %}
+                    <a href="{% url 'product_list' %}" class="btn-clear">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </a>
+                {% endif %}
+                <a href="{% url 'custom_admin:product_management:product_create' %}" class="btn-add">
+                    <i class="fas fa-plus"></i>
+                    Add Product
+                </a>
+            </form>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-container">
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th><i class="fas fa-image"></i> Image</th>
+                        <th><i class="fas fa-box"></i> Product Name</th>
+                        <th><i class="fas fa-tag"></i> Category</th>
+                        <th><i class="fas fa-list"></i> Status</th>
+                        <th><i class="fas fa-calendar"></i> Created</th>
+                        <th><i class="fas fa-cog"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if product.main_image %}
+                                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-img">
+                                {% elif product.images.first %}
+                                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-img">
+                                {% else %}
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td><strong class="product-name">{{ product.name }}</strong></td>
+                            <td>
+                                <span class="category-badge">
+                                    <i class="fas fa-tag"></i>
+                                    {{ product.category.name }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if product.is_listed %}
+                                    <span class="status-badge status-listed">
+                                        <i class="fas fa-check-circle"></i>
+                                        Listed
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge status-unlisted">
+                                        <i class="fas fa-eye-slash"></i>
+                                        Unlisted
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="date-text">{{ product.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="actions-wrapper">
+                                    <a href="{% url 'custom_admin:product_management:product_edit' product.pk %}" 
+                                        class="action-btn btn-edit">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
+                                    <a href="#" 
+                                       class="action-btn btn-delete"
+                                       onclick="return confirm('Are you sure you want to delete this product?')">
+                                        <i class="fas fa-trash"></i>
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-box-open"></i>
+                                    <p>No products found.</p>
+                                    {% if query %}
+                                        <small style="color: #909090;">Try adjusting your search terms.</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if products.paginator.num_pages > 1 %}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                <i class="fas fa-file-alt"></i>
+                <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+            </div>
+            <div class="pagination-links">
+                {% if products.has_previous %}
+                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </a>
+                    <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">
+                        <i class="fas fa-angle-left"></i> Previous
+                    </a>
+                {% endif %}
+                {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}">
+                        Next <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ products.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced image hover effects
+            document.querySelectorAll('.product-img').forEach(img => {
+                img.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1)';
+                    this.style.borderColor = '#9b8bdb';
+                    this.style.boxShadow = '0 5px 15px rgba(155, 139, 219, 0.4)';
+                });
+                img.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.borderColor = '#404040';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Button click animation
+            document.querySelectorAll('.action-btn, .pagination-links a, .btn-search, .btn-clear, .btn-add').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => { this.style.transform = ''; }, 150);
+                });
+            });
+
+            // Search input focus effects
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.length > 0) {
+                        document.querySelector('.search-icon').style.color = '#9b8bdb';
+                    } else {
+                        document.querySelector('.search-icon').style.color = '#606060';
+                    }
+                });
+            }
+        });
+    </script>
+  </section>
+</div>
+{% endblock %}

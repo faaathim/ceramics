@@ -1,0 +1,70 @@
+{# user_side/templates/user_side/shop.html #}
+{% extends "base.html" %}
+{% load static %}
+{% block top %}{% include "user_navbar.html" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Shop</h1>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <aside class="filters" style="float:left; width:260px;">
+    <form method="get" id="filter-form">
+      {{ form.q.label_tag }}<br>{{ form.q }}<br><br>
+
+      {{ form.category.label_tag }}<br>{{ form.category }}<br><br>
+
+      <label>Price range</label><br>
+      Min: {{ form.price_min }}<br>
+      Max: {{ form.price_max }}<br><br>
+
+      {{ form.sort.label_tag }}<br>{{ form.sort }}<br><br>
+
+      <button type="submit">Apply</button>
+      <a href="{% url 'user_side:shop' %}">Clear</a>
+    </form>
+  </aside>
+
+  <section class="product-list" style="margin-left:280px;">
+    {% if products_page and products_page.object_list %}
+      <div class="grid">
+        {% for p in products_page.object_list %}
+          <article class="product-card">
+            <a href="{% url 'custom_admin:product_management:product_detail' p.pk %}">
+              <div class="thumb">
+                {% if p.main_image %}
+                  <img src="{{ p.main_image.url }}" alt="{{ p.name }}" width="220" height="220">
+                {% elif p.images.first %}
+                  <img src="{{ p.images.first.image.url }}" alt="{{ p.name }}" width="220" height="220">
+                {% else %}
+                  <div class="no-thumb">No image</div>
+                {% endif %}
+              </div>
+              <h3>{{ p.name }}</h3>
+              <div class="price">₹{{ p.price }}</div>
+            </a>
+          </article>
+        {% endfor %}
+      </div>
+
+      <div class="pagination">
+        {% if products_page.has_previous %}
+          <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">First</a>
+          <a href="?page={{ products_page.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Previous</a>
+        {% endif %}
+        <span>Page {{ products_page.number }} of {{ products_page.paginator.num_pages }}</span>
+        {% if products_page.has_next %}
+          <a href="?page={{ products_page.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Next</a>
+          <a href="?page={{ products_page.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">Last</a>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <p>No products found.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

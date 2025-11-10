@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            body {
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .dashboard-content {
+                margin-left: 250px;
+                margin-top: 70px;
+                padding: 40px;
+                min-height: calc(100vh - 70px);
+            }
+
+            .stats-card {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                border: 1px solid #333333;
+            }
+
+            .stats-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #404040, #606060);
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+            .stats-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+                border-color: #505050;
+            }
+
+            .stats-card:hover::before {
+                transform: scaleX(1);
+            }
+
+            .stats-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .stats-title {
+                color: #b0b0b0;
+                font-size: 0.95rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .stats-icon {
+                width: 55px;
+                height: 55px;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                transition: all 0.3s ease;
+            }
+
+            .stats-card:hover .stats-icon {
+                transform: rotate(10deg) scale(1.1);
+            }
+
+            .icon-purple {
+                background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+                color: #9b8bdb;
+            }
+
+            .icon-yellow {
+                background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
+                color: #e0b060;
+            }
+
+            .icon-green {
+                background: linear-gradient(135deg, #2a3a2a, #3a4a3a);
+                color: #70c090;
+            }
+
+            .icon-orange {
+                background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
+                color: #e09070;
+            }
+
+            .stats-value {
+                font-size: 2.2rem;
+                font-weight: 700;
+                color: #e8e8e8;
+                margin: 15px 0 10px 0;
+            }
+
+            .stats-change {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .change-positive {
+                color: #70c090;
+            }
+
+            .change-negative {
+                color: #e07070;
+            }
+
+            .change-icon {
+                font-size: 1rem;
+            }
+
+            .chart-card {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+                border-radius: 20px;
+                padding: 35px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+                margin-top: 35px;
+                transition: all 0.3s ease;
+                border: 1px solid #333333;
+            }
+
+            .chart-card:hover {
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+                border-color: #505050;
+            }
+
+            .chart-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .chart-title {
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: #e8e8e8;
+            }
+
+            .month-selector {
+                padding: 10px 20px;
+                border: 2px solid #404040;
+                border-radius: 10px;
+                background: #2a2a2a;
+                color: #b0b0b0;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .month-selector:hover {
+                border-color: #606060;
+                background: #333333;
+            }
+
+            .chart-placeholder {
+                height: 350px;
+                background: linear-gradient(135deg, #0f0f0f, #1f1f1f);
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #606060;
+                font-size: 1.1rem;
+                margin-bottom: 25px;
+                border: 1px solid #2a2a2a;
+            }
+
+            .report-section {
+                background: #0f0f0f;
+                padding: 25px;
+                border-radius: 15px;
+                margin-top: 20px;
+                border: 1px solid #2a2a2a;
+            }
+
+            .report-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .report-title {
+                font-weight: 700;
+                color: #e8e8e8;
+                font-size: 1.1rem;
+            }
+
+            .print-btn {
+                padding: 12px 28px;
+                background: linear-gradient(135deg, #404040, #505050);
+                color: #e8e8e8;
+                border: none;
+                border-radius: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                border: 1px solid #606060;
+            }
+
+            .print-btn:hover {
+                background: linear-gradient(135deg, #505050, #606060);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            }
+
+            .loading-animation {
+                width: 100%;
+                height: 6px;
+                background: #2a2a2a;
+                border-radius: 3px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .loading-bar {
+                height: 100%;
+                background: linear-gradient(90deg, #404040, #707070, #404040);
+                width: 40%;
+                animation: loading 1.5s infinite;
+                border-radius: 3px;
+            }
+
+            @keyframes loading {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(350%); }
+            }
+        </style>
+    </head>
+    <body> <div class="dashboard-content"> <!-- Stats Cards --> <div class="row g-4"> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total User</div> <div class="stats-value">40,689</div> <div class="stats-change change-positive"> <i class="fas fa-arrow-up change-icon"></i> <span>8.5% Up from yesterday</span> </div> </div> <div class="stats-icon icon-purple"> <i class="fas fa-users"></i> </div> </div> </div> </div> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total Order</div> <div class="stats-value">10,293</div> <div class="stats-change change-positive"> <i class="fas fa-arrow-up change-icon"></i> <span>1.3% Up from past week</span> </div> </div> <div class="stats-icon icon-yellow"> <i class="fas fa-box"></i> </div> </div> </div> </div> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total Sales</div> <div class="stats-value">$89,000</div> <div class="stats-change change-negative"> <i class="fas fa-arrow-down change-icon"></i> <span>4.3% Down from yesterday</span> </div> </div> <div class="stats-icon icon-green"> <i class="fas fa-chart-line"></i> </div> </div> </div> </div> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total Pending</div> <div class="stats-value">2,040</div> <div class="stats-change change-positive"> <i class="fas fa-arrow-up change-icon"></i> <span>1.8% Up from yesterday</span> </div> </div> <div class="stats-icon icon-orange"> <i class="fas fa-clock"></i> </div> </div> </div> </div> </div> <!-- Chart Section --> <div class="chart-card"> <div class="chart-header"> <h3 class="chart-title">Sales Details</h3> <select class="month-selector"> <option>October</option> <option>September</option> <option>August</option> <option>July</option> </select> </div> <div class="chart-placeholder"> <i class="fas fa-chart-area" style="font-size: 3rem; opacity: 0.3; margin-right: 15px;"></i> <span>Sales Chart Visualization</span> </div> <div class="loading-animation"> <div class="loading-bar"></div> </div> <!-- Print Report Section --> <div class="report-section"> <div class="report-header"> <h4 class="report-title">Print sales report</h4> <select class="month-selector" style="margin-right: 15px;"> <option>October</option> <option>September</option> <option>August</option> </select> <button class="print-btn"> <i class="fas fa-print"></i> <span>Print pdf</span> </button> </div> </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> </body>
+    </html>
+  </section>
+</div>
+{% endblock %}

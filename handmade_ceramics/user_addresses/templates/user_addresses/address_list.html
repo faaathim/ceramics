@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+<div class="left">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+<div class="container">
+    
+  <h2>My Addresses</h2>
+
+  {% if addresses %}
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+          <th>City</th>
+          <th>State</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for addr in addresses %}
+        <tr>
+          <td>{{ addr.first_name }} {{ addr.last_name }}</td>
+          <td>{{ addr.street_address }}</td>
+          <td>{{ addr.city }}</td>
+          <td>{{ addr.state }}</td>
+          <td>{{ addr.phone }}</td>
+          <td>{{ addr.email }}</td>
+          <td>
+            <a href="{% url 'user_addresses:address_edit' addr.id %}">Edit</a> |
+            <a href="{% url 'user_addresses:address_delete' addr.id %}">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No addresses found.</p>
+  {% endif %}
+
+  <a href="{% url 'user_addresses:address_add' %}" class="btn">Add New Address</a>
+</div>
+{% endblock %}
