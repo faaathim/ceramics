@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+    {% include "user_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container product-detail">
+
+    <!-- PRODUCT & VARIANT SECTION -->
+    <div class="product-main" style="display:flex; gap:30px; margin-top:20px;">
+
+        <!-- LEFT: IMAGE -->
+        <div class="gallery" style="width:420px;">
+            <img id="main-image" 
+                 src="#" 
+                 style="width:400px; height:400px; object-fit:cover; border-radius:10px;">
+        </div>
+
+        <!-- RIGHT: DETAILS -->
+        <div class="details" style="flex:1;">
+            <h1>{{ product.name }}</h1>
+
+            <!-- PRICE -->
+            <div class="price">
+                <h3 style="color:#333;">₹{{ product.price }}</h3>
+            </div>
+
+            <!-- STOCK -->
+            <div id="stock-box" style="margin:10px 0; font-size:16px;">
+                {% if variant.stock > 0 %}
+                    <span style="color:green;">In Stock ({{ variant.stock }})</span>
+                {% else %}
+                    <span style="color:red;">Out of Stock</span>
+                {% endif %}
+            </div>
+
+            <!-- COLOR OPTIONS -->
+            <div class="colors" style="margin:20px 0;">
+                <h4>Available Colors:</h4>
+                <div style="display:flex; gap:10px;">
+
+                    {% for v in variants %}
+                        <a href="?variant={{ v.id }}">
+                            <div style="
+                                width:30px; height:30px; border-radius:50%; 
+                                border:2px solid {% if v.id == variant.id %}black{% else %}#ddd{% endif %};
+                                background: {{ v.color }};
+                                cursor:pointer;">
+                            </div>
+                        </a>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="description" style="margin-top:20px;">
+                <h4>Description</h4>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <!-- ADD TO CART -->
+            <div class="actions" style="margin-top:30px;">
+                {% if variant.stock > 0 %}
+                    <form method="POST" action="#">
+                        {% csrf_token %}
+                        <label>Quantity:</label>
+                        <input type="number" name="qty" value="1" min="1" max="{{ variant.stock }}">
+                        <button type="submit">Add to Cart</button>
+                    </form>
+                {% else %}
+                    <button disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

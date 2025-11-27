@@ -1,13 +1,604 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container">
-  <h2>{{ title }}</h2>
+{% load static %}
 
-  <form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Save</button>
-    <a href="{% url 'user_addresses:address_list' %}" class="btn">Cancel</a>
-  </form>
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>{{ title|upper }}</h1>
+    </div>
+
+    <div class="profile-form-card">
+      <form method="POST" id="addressForm" novalidate>
+        {% csrf_token %}
+        
+        {% for field in form %}
+          {% if field.name == 'first_name' or field.name == 'last_name' %}
+            {% if field.name == 'first_name' %}
+            <div class="form-row">
+            {% endif %}
+              <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                  {% if field.field.required %}<span class="required">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                  <span class="error">{{ field.errors.0 }}</span>
+                {% endif %}
+                <span class="error" id="error-{{ field.name }}"></span>
+              </div>
+            {% if field.name == 'last_name' %}
+            </div>
+            {% endif %}
+
+          {% elif field.name == 'city' or field.name == 'state' %}
+            {% if field.name == 'city' %}
+            <div class="form-row">
+            {% endif %}
+              <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                  {% if field.field.required %}<span class="required">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                  <span class="error">{{ field.errors.0 }}</span>
+                {% endif %}
+                <span class="error" id="error-{{ field.name }}"></span>
+              </div>
+            {% if field.name == 'state' %}
+            </div>
+            {% endif %}
+
+          {% elif field.name == 'pin_code' or field.name == 'phone' %}
+            {% if field.name == 'pin_code' %}
+            <div class="form-row">
+            {% endif %}
+              <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                  {% if field.field.required %}<span class="required">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                  <span class="error">{{ field.errors.0 }}</span>
+                {% endif %}
+                <span class="error" id="error-{{ field.name }}"></span>
+              </div>
+            {% if field.name == 'phone' %}
+            </div>
+            {% endif %}
+
+          {% elif field.field.widget.input_type == 'checkbox' %}
+            <div class="form-group full-width checkbox-group">
+              <label class="checkbox-label">
+                {{ field }}
+                <span>{{ field.label }}</span>
+              </label>
+              {% if field.errors %}
+                <span class="error">{{ field.errors.0 }}</span>
+              {% endif %}
+            </div>
+
+          {% else %}
+            <div class="form-group full-width">
+              <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if field.field.required %}<span class="required">*</span>{% endif %}
+              </label>
+              {{ field }}
+              {% if field.errors %}
+                <span class="error">{{ field.errors.0 }}</span>
+              {% endif %}
+              <span class="error" id="error-{{ field.name }}"></span>
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Save</button>
+          <a href="{% url 'user_addresses:address_list' %}" class="btn-cancel">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+    position: sticky;
+    top: 20px;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 600;
+  }
+
+  .profile-form-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group.full-width {
+    margin-bottom: 30px;
+  }
+
+  .form-group label {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .required {
+    color: #ff6b6b;
+    margin-left: 4px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #666;
+  }
+
+  .form-group input.error-input,
+  .form-group select.error-input,
+  .form-group textarea.error-input {
+    border-color: #ff6b6b;
+  }
+
+  .form-group input.success-input,
+  .form-group select.success-input,
+  .form-group textarea.success-input {
+    border-color: #51cf66;
+  }
+
+  .checkbox-group {
+    margin-top: 10px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 15px;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+  }
+
+  .error {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+  .btn-save {
+    background: #fff;
+    color: #000;
+    border: 2px solid #fff;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-save:hover {
+    background: transparent;
+    color: #fff;
+  }
+
+  .btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-cancel {
+    display: inline-block;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 12px 40px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .btn-cancel:hover {
+    background: #fff;
+    color: #000;
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn-save,
+    .btn-cancel {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('addressForm');
+  
+  // Validation rules matching your Django validators
+  const validators = {
+    first_name: {
+      validate: (value) => {
+        if (!value.trim()) return 'First name is required';
+        if (value.trim().length < 2) return 'First name must be at least 2 characters';
+        if (!/^[A-Za-z\s]+$/.test(value)) return 'First name can only contain letters';
+        return null;
+      }
+    },
+    last_name: {
+      validate: (value) => {
+        if (value && !/^[A-Za-z\s]+$/.test(value)) return 'Last name can only contain letters';
+        return null;
+      }
+    },
+    city: {
+      validate: (value) => {
+        if (!value.trim()) return 'City is required';
+        if (!/^[A-Za-z\s]+$/.test(value)) return 'City name can only contain letters and spaces';
+        if (value.trim().length < 2) return 'City name must be at least 2 characters';
+        return null;
+      }
+    },
+    state: {
+      validate: (value) => {
+        if (!value.trim()) return 'State is required';
+        if (!/^[A-Za-z\s]+$/.test(value)) return 'State name can only contain letters and spaces';
+        if (value.trim().length < 2) return 'State name must be at least 2 characters';
+        return null;
+      }
+    },
+    pin_code: {
+      validate: (value) => {
+        if (!value.trim()) return 'Pin code is required';
+        if (!/^\d{6}$/.test(value)) return 'Pin code must be exactly 6 digits';
+        return null;
+      }
+    },
+    phone: {
+      validate: (value) => {
+        if (!value.trim()) return 'Phone number is required';
+        // Remove spaces and hyphens for validation
+        const cleanPhone = value.replace(/[\s-]/g, '');
+        if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+          return 'Enter a valid 10-digit Indian mobile number starting with 6-9';
+        }
+        return null;
+      }
+    },
+    email: {
+      validate: (value) => {
+        if (!value.trim()) return 'Email is required';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) return 'Enter a valid email address';
+        return null;
+      }
+    },
+    country: {
+      validate: (value) => {
+        if (!value.trim()) return 'Country is required';
+        return null;
+      }
+    },
+    street_address: {
+      validate: (value) => {
+        if (!value.trim()) return 'Street address is required';
+        if (value.trim().length < 5) return 'Street address must be at least 5 characters';
+        return null;
+      }
+    }
+  };
+
+  // Real-time validation for each field
+  Object.keys(validators).forEach(fieldName => {
+    const field = document.getElementById(`id_${fieldName}`);
+    if (!field) return;
+
+    // Validate on blur
+    field.addEventListener('blur', function() {
+      validateField(fieldName, this.value);
+    });
+
+    // Clear error on input
+    field.addEventListener('input', function() {
+      const errorSpan = document.getElementById(`error-${fieldName}`);
+      if (errorSpan && errorSpan.textContent) {
+        errorSpan.textContent = '';
+        this.classList.remove('error-input');
+      }
+    });
+
+    // Format phone number as user types
+    if (fieldName === 'phone') {
+      field.addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 10) value = value.slice(0, 10);
+        this.value = value;
+      });
+    }
+
+    // Format pin code
+    if (fieldName === 'pin_code') {
+      field.addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 6) value = value.slice(0, 6);
+        this.value = value;
+      });
+    }
+  });
+
+  function validateField(fieldName, value) {
+    const validator = validators[fieldName];
+    if (!validator) return true;
+
+    const error = validator.validate(value);
+    const errorSpan = document.getElementById(`error-${fieldName}`);
+    const field = document.getElementById(`id_${fieldName}`);
+
+    if (error) {
+      if (errorSpan) errorSpan.textContent = error;
+      if (field) field.classList.add('error-input');
+      return false;
+    } else {
+      if (errorSpan) errorSpan.textContent = '';
+      if (field) {
+        field.classList.remove('error-input');
+        if (value.trim()) field.classList.add('success-input');
+      }
+      return true;
+    }
+  }
+
+  // Form submission validation
+  form.addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    // Clear all previous errors
+    document.querySelectorAll('.error').forEach(el => {
+      if (el.id.startsWith('error-')) el.textContent = '';
+    });
+    document.querySelectorAll('.error-input').forEach(el => {
+      el.classList.remove('error-input');
+    });
+
+    // Validate all fields
+    Object.keys(validators).forEach(fieldName => {
+      const field = document.getElementById(`id_${fieldName}`);
+      if (field && !validateField(fieldName, field.value)) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      e.preventDefault();
+      // Scroll to first error
+      const firstError = document.querySelector('.error-input');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.focus();
+      }
+    }
+  });
+
+  // Auto-capitalize first letter of names and places
+  ['first_name', 'last_name', 'city', 'state'].forEach(fieldName => {
+    const field = document.getElementById(`id_${fieldName}`);
+    if (field) {
+      field.addEventListener('input', function() {
+        const words = this.value.split(' ');
+        const capitalized = words.map(word => {
+          if (!word) return word;
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        });
+        const cursorPos = this.selectionStart;
+        this.value = capitalized.join(' ');
+        this.setSelectionRange(cursorPos, cursorPos);
+      });
+    }
+  });
+});
+</script>
+
 {% endblock %}

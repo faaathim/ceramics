@@ -1,3 +1,4 @@
+
 import os
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -5,7 +6,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from PIL import Image
-
 
 def category_image_path(instance, filename):
     return f"categories/{instance.id or 'new'}/{filename}"
@@ -22,50 +22,46 @@ class CategoryManager(models.Manager):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=150)
-    description = models.TextField(blank=True)
-    image = models.ImageField(upload_to=category_image_path, blank=True, null=True)
+    name = models.CharField(max_length=150)                   
+    description = models.TextField(blank=True)                
+    image = models.ImageField(upload_to=category_image_path, blank=True, null=True) 
+
     is_listed = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+
     is_deleted = models.BooleanField(default=False)
 
-    objects = CategoryManager()
-    all_objects = models.Manager()
+    objects = CategoryManager()  
+    all_objects = models.Manager() 
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-created_at'] 
 
     def __str__(self):
-        return self.name
+        return self.name 
 
     def clean(self):
         if not self.is_deleted:
-            existing = Category.all_objects.filter(
-                name__iexact=self.name.strip(), is_deleted=False
-            )
+            existing = Category.all_objects.filter(name__iexact=self.name.strip(), is_deleted=False)
             if self.pk:
                 existing = existing.exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError({'name': 'A category with this name already exists.'})
 
+
     def save(self, *args, **kwargs):
         if not self.is_deleted:
             self.full_clean()
-
-        if self.pk is None and self.image:
-            saved_image = self.image
-            self.image = None
-            super().save(*args, **kwargs)
-            self.image = saved_image
 
         super().save(*args, **kwargs)
 
         if self.image:
             try:
-                img_path = self.image.path
+                img_path = self.image.path  
                 img = Image.open(img_path)
-                img = img.convert('RGB')
+                img = img.convert('RGB')  
                 width, height = img.size
                 new_edge = min(width, height)
                 left = (width - new_edge) / 2
@@ -77,3 +73,12 @@ class Category(models.Model):
                 img.save(img_path, format='JPEG', quality=85)
             except Exception:
                 pass
+
+
+        if not self.is_listed:
+            self.products.update(is_listed=False)
+        else:
+            for product in self.products.all():
+                if hasattr(product, 'can_be_listed') and product.can_be_listed():
+                    product.is_listed = True
+                    product.save(update_fields=['is_listed'])

@@ -1,33 +1,350 @@
-{# user_profile/templates/user_profile/change_email_verify.html #}
 {% extends "base.html" %}
 {% load static %}
 
-{% block top %}{% include "user_navbar.html" %}{% endblock %}
-
 {% block content %}
-<div class="container small-form">
-  <h2>Verify New Email</h2>
-  <p>We sent a 4-digit code to your new email address. Enter it below to confirm the change.</p>
+{% include 'user_navbar.html' %}
 
-  {% if messages %}
-    {% for m in messages %}<div class="{{ m.tags }}">{{ m }}</div>{% endfor %}
-  {% endif %}
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
+    {% include "user_profile/sidebar.html" %}
+  </div>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Verify</button>
-  </form>
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>VERIFY NEW EMAIL</h1>
+    </div>
 
-  <div>
-    {% if seconds_left > 0 %}
-      <p>Resend available in {{ seconds_left }}s</p>
-    {% else %}
-      <form method="post" action="{% url 'user_profile:change_email_resend' %}">
+    <div class="verify-card">
+      <div class="verify-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+      </div>
+
+      <h3 class="verify-email">{{ email }}</h3>
+      <p class="verify-description">Enter the 4-digit OTP sent to your email.</p>
+
+      <form method="POST" class="verify-form">
         {% csrf_token %}
-        <button type="submit">Resend OTP</button>
+        
+        <div class="form-group">
+          <label for="otp">Enter 4-Digit Code</label>
+          <input type="text" name="otp" id="otp" maxlength="4" required placeholder="••••">
+        </div>
+
+        <button type="submit" class="btn-verify">Verify Email</button>
       </form>
-    {% endif %}
+
+      <div class="resend-section">
+        {% if seconds_left > 0 %}
+          <p class="resend-timer">Resend OTP in <strong id="countdown">{{ seconds_left }}</strong> seconds</p>
+        {% else %}
+          <a href="{% url 'user_profile:resend_email_otp' %}" class="btn-resend">Resend OTP</a>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
+
+<script>
+  // Countdown timer
+  let secondsLeft = {{ seconds_left }};
+  
+  if (secondsLeft > 0) {
+    const countdownElement = document.getElementById('countdown');
+    const resendSection = document.querySelector('.resend-section');
+    
+    const timer = setInterval(function() {
+      secondsLeft--;
+      countdownElement.textContent = secondsLeft;
+      
+      if (secondsLeft <= 0) {
+        clearInterval(timer);
+        resendSection.innerHTML = '<a href="{% url "user_profile:resend_email_otp" %}" class="btn-resend">Resend OTP</a>';
+      }
+    }, 1000);
+  }
+</script>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+    position: sticky;
+    top: 20px;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 600;
+  }
+
+  .verify-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 50px;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .verify-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+
+  .verify-icon svg {
+    color: #4a90e2;
+  }
+
+  .verify-email {
+    color: #4a90e2;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .verify-description {
+    color: #ddd;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+
+  .verify-form {
+    margin-bottom: 30px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 25px;
+    text-align: left;
+  }
+
+  .form-group label {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .form-group input {
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 24px;
+    text-align: center;
+    letter-spacing: 12px;
+    font-weight: 600;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #4a90e2;
+  }
+
+  .form-group input::placeholder {
+    letter-spacing: 8px;
+    color: #666;
+  }
+
+  .btn-verify {
+    background: #4a90e2;
+    color: #fff;
+    border: 2px solid #4a90e2;
+    padding: 14px 50px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+  }
+
+  .btn-verify:hover {
+    background: #357abd;
+    border-color: #357abd;
+  }
+
+  .resend-section {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #3a3a3a;
+  }
+
+  .resend-timer {
+    color: #999;
+    font-size: 14px;
+  }
+
+  .resend-timer strong {
+    color: #4a90e2;
+    font-size: 18px;
+  }
+
+  .btn-resend {
+    background: transparent;
+    color: #4a90e2;
+    border: 2px solid #4a90e2;
+    padding: 10px 30px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-resend:hover {
+    background: #4a90e2;
+    color: #fff;
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .verify-card {
+      padding: 30px 20px;
+    }
+  }
+</style>
+
 {% endblock %}

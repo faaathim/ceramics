@@ -1,60 +1,486 @@
 {% extends "base.html" %}
 {% load static socialaccount %}
+{% block title %}Login{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  /* Reset and Base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    background-color: #0a0a0a;
+    overflow-x: hidden;
+  }
+  
+  /* Login Page Layout */
+  .login-page {
+    display: flex;
+    min-height: 70vh;
+    background-color: #0a0a0a;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  
+  /* Gallery Section - Left Side */
+  .gallery-section {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 30px 0 0;
+    background-color: #0a0a0a;
+  }
+  
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 580px;
+    width: 100%;
+  }
+  
+  .gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background-color: #1a1a1a;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    aspect-ratio: 1;
+    border: 1px solid #1a1a1a;
+  }
+  
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%) brightness(0.85) contrast(1.1);
+    transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .gallery-item:hover {
+    transform: translateY(-4px);
+    border-color: #2a2a2a;
+  }
+  
+  .gallery-item:hover img {
+    filter: grayscale(100%) brightness(1) contrast(1.1);
+    transform: scale(1.05);
+  }
+  
+  /* Form Section - Right Side */
+  .form-section {
+    flex: 0 0 auto;
+    background-color: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 70px;
+    border-left: 1px solid #1a1a1a;
+    min-height: auto;
+    border-radius: 16px;
+  }
+  
+  .login-container {
+    width: 100%;
+    max-width: 600px;
+  }
+  
+  .login-title {
+    font-size: 1.8rem;
+    font-weight: 300;
+    letter-spacing: 8px;
+    color: #ffffff;
+    text-align: left;
+    margin-bottom: 30px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    text-transform: uppercase;
+  }
+  
+  /* Form Styles */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #9a9a9a;
+    margin-bottom: 10px;
+    display: block;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 12px 0;
+    background-color: #0a0a0a !important;
+    border: none;
+    border-bottom: 1px solid #2a2a2a;
+    color: #ffffff !important;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    outline: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+  
+  .form-group input:focus {
+    border-bottom-color: #8a8a8a;
+    color: #ffffff !important;
+    background-color: #0a0a0a !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+  
+  .form-group input::placeholder {
+    color: #3a3a3a;
+  }
+  
+  .form-group input:focus::placeholder {
+    color: #4a4a4a;
+  }
+  
+  /* Override browser autofill styles */
+  .form-group input:-webkit-autofill,
+  .form-group input:-webkit-autofill:hover,
+  .form-group input:-webkit-autofill:focus,
+  .form-group input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #000000 inset !important;
+    box-shadow: 0 0 0px 1000px #000000 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    border-bottom: 1px solid #2a2a2a !important;
+  }
+  
+  .error-message {
+    color: #ffffff;
+    font-size: 0.7rem;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+  }
+  
+  .alert-messages {
+    margin-bottom: 24px;
+  }
+  
+  .alert {
+    padding: 12px 0;
+    border-radius: 0;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+    background-color: transparent;
+    color: #ffffff;
+    border-bottom: 1px solid #2a2a2a;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Forgot Password */
+  .forgot-password {
+    text-align: left;
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
+  
+  .forgot-password a {
+    color: #7a7a7a;
+    text-decoration: none;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    transition: color 0.25s ease;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .forgot-password a:hover {
+    color: #ffffff;
+  }
+  
+  /* Login Button */
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #ffffff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    border-radius: 0;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .btn-login:hover {
+    background-color: #000000;
+    color: #ffffff;
+    border-color: #ffffff;
+  }
+  
+  .btn-login:active {
+    transform: scale(0.98);
+  }
+  
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #2a2a2a;
+  }
+  
+  .divider span {
+    padding: 0 15px;
+    color: #5a5a5a;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  
+  /* Google Button */
+  .btn-google {
+    width: 100%;
+    padding: 14px;
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid #2a2a2a;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 0;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .btn-google:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+  }
+  
+  .google-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+  }
+  
+  /* Sign Up Link */
+  .signup-link {
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: #5a5a5a;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin-top: 20px;
+  }
+  
+  .signup-link a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: color 0.25s ease;
+    letter-spacing: 1px;
+  }
+  
+  .signup-link a:hover {
+    color: #9a9a9a;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .form-section {
+      flex: 0 0 450px;
+      padding: 50px 40px;
+    }
+    
+    .gallery-section {
+      padding: 50px 30px 50px 50px;
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    .login-page {
+      flex-direction: column;
+      min-height: 90vh;
+    }
+  
+    .gallery-section {
+      padding: 40px 30px;
+      min-height: 45vh;
+      justify-content: center;
+    }
+  
+    .form-section {
+      flex: 1;
+      padding: 60px 40px;
+      border-left: none;
+      border-top: 1px solid #1a1a1a;
+      min-height: auto;
+    }
+  
+    .gallery-grid {
+      max-width: 600px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .gallery-section {
+      display: none;
+    }
+  
+    .login-page {
+      min-height: 100vh;
+    }
+  
+    .form-section {
+      flex: 1;
+      padding: 40px 30px;
+      min-height: 100vh;
+      justify-content: center;
+    }
+  
+    .login-container {
+      max-width: 100%;
+    }
+  
+    .login-title {
+      font-size: 1.6rem;
+      margin-bottom: 40px;
+      letter-spacing: 6px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .form-section {
+      padding: 30px 20px;
+    }
+  
+    .login-title {
+      font-size: 1.4rem;
+      margin-bottom: 35px;
+      letter-spacing: 5px;
+    }
+  
+    .form-group {
+      margin-bottom: 25px;
+    }
+  
+    .btn-login,
+    .btn-google {
+      padding: 13px;
+      font-size: 0.65rem;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block top %}
   {% include "user_navbar.html" %}
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'user_authentication/css/login.css' %}">
-
-<div class="login-container">
-  <h2>User Login</h2>
-
-  {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-        <p class="{{ message.tags }}">{{ message }}</p>
-      {% endfor %}
+<div class="login-page">
+  <!-- Left side - Image Gallery -->
+  <div class="gallery-section">
+    <div class="gallery-grid">
+      <div class="gallery-item gallery-item-1">
+        <img src="{% static 'images/IMG.png' %}" alt="Pottery work">
+      </div>
+      <div class="gallery-item gallery-item-2">
+        <img src="{% static 'images/IMG (1).png' %}" alt="Ceramic cylinders">
+      </div>
+      <div class="gallery-item gallery-item-3">
+        <img src="{% static 'images/IMG (2).png' %}" alt="Ceramic collection">
+      </div>
+      <div class="gallery-item gallery-item-4">
+        <img src="{% static 'images/IMG (3).png' %}" alt="Pottery wheel">
+      </div>
     </div>
-  {% endif %}
+  </div>
 
-  <form method="POST" novalidate>
-    {% csrf_token %}
-    <div class="form-group">
-      <label>Email</label>
-      {{ form.email }}
-      {% for error in form.email.errors %}
-        <span class="error">{{ error }}</span>
-      {% endfor %}
+  <!-- Right side - Login Form -->
+  <div class="form-section">
+    <div class="login-container">
+      <h1 class="login-title">Login</h1>
+
+      <form method="POST" action="{% url 'user_authentication:login' %}" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label class="form-label">Email or Phone</label>
+          <input type="text" name="email" placeholder="Enter your email or phone" required>
+          {% for error in form.email.errors %}
+            <div class="error-message">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" placeholder="Enter your password" required>
+          {% for error in form.password.errors %}
+            <div class="error-message">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="forgot-password">
+          <a href="{% url 'user_authentication:forgot_password' %}">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-login">Sign In</button>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <a href="{% provider_login_url 'google' %}" class="btn-google">
+          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </a>
+
+        <div class="signup-link">
+          New here?
+          <a href="{% url 'user_authentication:signup' %}">Create account</a>
+        </div>
+      </form>
     </div>
-
-    <div class="form-group">
-      <label>Password</label>
-      {{ form.password }}
-      {% for error in form.password.errors %}
-        <span class="error">{{ error }}</span>
-      {% endfor %}
-    </div>
-
-    <div class="form-group remember-me">
-      {{ form.remember_me }} Remember Me
-    </div>
-
-    <button type="submit" class="btn">Login</button>
-
-    <div class="extras">
-      <a href="#">Forgot Password?</a> |
-      <a href="{% url 'user_authentication:signup' %}">Create Account</a>
-    </div>
-  </form>
-
-  <hr>
-  <p style="text-align:center;">OR</p>
-
-  <a href="{% provider_login_url 'google' %}" class="google-btn">
-    <img src="{% static 'user_authentication/img/google-logo.png' %}" alt="Google logo" width="20" style="vertical-align:middle; margin-right:8px;">
-    Sign in with Google
-  </a>
+  </div>
 </div>
+
+{% include "footer.html" %}
 {% endblock %}

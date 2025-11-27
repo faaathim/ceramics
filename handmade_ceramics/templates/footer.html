@@ -1,0 +1,292 @@
+{% load static %}
+
+<footer class="site-footer">
+  <div class="footer-container">
+    <!-- Brand Section -->
+    <div class="footer-section footer-brand">
+      <h2 class="footer-logo">CERAMIC</h2>
+      <p class="footer-description">
+        Nisi, purus vitae, ultrices nunc. Sit ac sit suscipit hendrerit. 
+        Gravida massa volutpat aenean odio erat nullam fringilla.
+      </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="footer-section">
+      <h3 class="footer-heading">QUICK LINKS</h3>
+      <ul class="footer-links">
+        <li><a href="{% url 'user_side:home' %}">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="{% url 'user_side:shop' %}">Shop</a></li>
+        <li><a href="#">Blogs</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Help & Info -->
+    <div class="footer-section">
+      <h3 class="footer-heading">HELP & INFO</h3>
+      <ul class="footer-links">
+        <li><a href="#">Track Your Order</a></li>
+        <li><a href="#">Returns policies</a></li>
+        <li><a href="#">Shipping + Delivery</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Faqs</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div class="footer-section">
+      <h3 class="footer-heading">CONTACT US</h3>
+      <ul class="footer-contact">
+        <li>
+          <i class="contact-icon">📍</i>
+          <span>Phoenix, Arizona</span>
+        </li>
+        <li>
+          <i class="contact-icon">✉</i>
+          <a href="mailto:ceramics@gmail.com">ceramics@gmail.com</a>
+        </li>
+        <li>
+          <i class="contact-icon">📞</i>
+          <a href="tel:8883339999">888 333 9999</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="footer-bottom">
+    <div class="footer-bottom-content">
+      <div class="shipping-payment">
+        <span class="footer-small-text">We ship with:</span>
+        <div class="shipping-logos">
+          <img src="{% static 'images/dhl-logo.png' %}" alt="DHL" class="shipping-logo">
+          <img src="{% static 'images/fedex-logo.png' %}" alt="FedEx" class="shipping-logo">
+        </div>
+        <span class="footer-small-text ml-4">Payment options:</span>
+        <div class="payment-logos">
+          <img src="{% static 'images/visa-logo.png' %}" alt="Visa" class="payment-logo">
+          <img src="{% static 'images/mastercard-logo.png' %}" alt="Mastercard" class="payment-logo">
+          <img src="{% static 'images/amex-logo.png' %}" alt="American Express" class="payment-logo">
+        </div>
+      </div>
+      <div class="copyright">
+        <p>© Copyright 2025 Ceramic. Design by Fathima Raihana</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+/* Footer Styles */
+.site-footer {
+  background-color: #0d0d0d;
+  color: #ffffff;
+  padding: 60px 0 0;
+  margin-top: 80px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 50px;
+}
+
+.footer-section {
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer-logo {
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 6px;
+  margin-bottom: 20px;
+  font-family: 'Georgia', serif;
+}
+
+.footer-description {
+  color: #999999;
+  line-height: 1.8;
+  font-size: 0.9rem;
+  max-width: 350px;
+}
+
+.footer-heading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-bottom: 25px;
+  color: #ffffff;
+}
+
+.footer-links,
+.footer-contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li,
+.footer-contact li {
+  margin-bottom: 15px;
+}
+
+.footer-links a,
+.footer-contact a {
+  color: #999999;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.footer-links a:hover,
+.footer-contact a:hover {
+  color: #ffffff;
+  transform: translateX(5px);
+}
+
+.footer-contact li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #999999;
+  font-size: 0.9rem;
+}
+
+.contact-icon {
+  font-style: normal;
+  font-size: 1rem;
+  min-width: 20px;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  background-color: #000000;
+  padding: 25px 0;
+}
+
+.footer-bottom-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.shipping-payment {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.footer-small-text {
+  color: #666666;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.shipping-logos,
+.payment-logos {
+  display: flex;
+  gap: 10px;
+}
+
+.shipping-logo,
+.payment-logo {
+  height: 20px;
+  filter: grayscale(100%) brightness(0.5);
+  transition: all 0.3s ease;
+}
+
+.shipping-logo:hover,
+.payment-logo:hover {
+  filter: grayscale(0%) brightness(1);
+  transform: translateY(-2px);
+}
+
+.copyright {
+  color: #666666;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.copyright p {
+  margin: 0;
+}
+
+.ml-4 {
+  margin-left: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .footer-container {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+  }
+  
+  .footer-section:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 0 20px;
+  }
+  
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 0 20px;
+  }
+  
+  .shipping-payment {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .ml-4 {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-footer {
+    padding: 40px 0 0;
+  }
+  
+  .footer-logo {
+    font-size: 1.5rem;
+  }
+  
+  .shipping-logos,
+  .payment-logos {
+    justify-content: center;
+  }
+}
+</style>

@@ -126,7 +126,7 @@
         /* Latest Arrivals Section */
         .latest-arrivals-section {
             padding: 100px 0;
-            background-color: #ffffff;
+            background-color: #fafafa;
         }
 
         .section-header {
@@ -153,35 +153,39 @@
             font-weight: 300;
         }
 
-        /* Product Cards */
+        /* Product Cards - Updated to match shop template */
         .product-card {
-            position: relative;
-            margin-bottom: 40px;
-            overflow: hidden;
             background: #ffffff;
-            border: 1px solid #e8e8e8;
-            transition: all 0.4s ease;
+            border: 1px solid #e5e5e5;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
+            margin-bottom: 30px;
         }
 
         .product-card:hover {
-            border-color: #1a1a1a;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            border-color: #000;
+        }
+
+        .product-card a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
         }
 
         .product-image-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 120%;
+            height: 280px;
             overflow: hidden;
-            background-color: #f8f8f8;
+            background: #f5f5f5;
+            border-radius: 16px 16px 0 0;
         }
 
         .product-image {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -189,7 +193,7 @@
         }
 
         .product-card:hover .product-image {
-            transform: scale(1.08);
+            transform: scale(1.1);
         }
 
         .product-overlay {
@@ -212,17 +216,19 @@
         }
 
         .quick-view-btn {
-            padding: 0.8rem 2rem;
-            background: #ffffff;
-            color: #1a1a1a;
+            padding: 12px 24px;
+            background: #000;
+            color: #fff;
             border: none;
+            font-size: 0.7rem;
+            font-weight: 800;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            font-weight: 600;
             letter-spacing: 2px;
-            transform: translateY(20px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            transform: translateY(10px);
             opacity: 0;
-            transition: all 0.4s ease;
         }
 
         .product-card:hover .quick-view-btn {
@@ -231,45 +237,45 @@
         }
 
         .quick-view-btn:hover {
-            background: #1a1a1a;
-            color: #ffffff;
+            background: #333;
         }
 
         .product-info {
-            padding: 1.5rem;
-            text-align: center;
+            padding: 20px;
         }
 
         .product-category {
             font-size: 0.7rem;
-            color: #999999;
+            color: #888;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: 700;
         }
 
         .product-name {
-            font-size: 1rem;
-            color: #1a1a1a;
-            margin-bottom: 0.8rem;
-            font-weight: 400;
-            letter-spacing: 0.5px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #000;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
 
         .product-price {
-            font-size: 1.1rem;
-            color: #1a1a1a;
-            font-weight: 500;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #000;
             letter-spacing: 0.5px;
         }
 
         .product-price-original {
             font-size: 0.9rem;
-            color: #999999;
+            color: #999;
             text-decoration: line-through;
-            margin-left: 0.5rem;
+            margin-left: 8px;
+            font-weight: 600;
         }
 
         /* Pagination */
@@ -284,42 +290,45 @@
         }
 
         .page-link {
-            color: #1a1a1a;
-            border: 1px solid #e8e8e8;
-            padding: 0.6rem 1.2rem;
+            color: #000;
+            background: #fff;
+            border: 2px solid #000;
+            padding: 12px 20px;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 700;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
+            border-radius: 8px;
         }
 
         .page-link:hover {
-            background-color: #1a1a1a;
-            border-color: #1a1a1a;
-            color: #ffffff;
+            background-color: #000;
+            border-color: #000;
+            color: #fff;
+            transform: translateY(-3px);
         }
 
         .page-item.active .page-link {
-            background-color: #1a1a1a;
-            border-color: #1a1a1a;
-            color: #ffffff;
+            background-color: #000;
+            border-color: #000;
+            color: #fff;
         }
 
         .page-item.disabled .page-link {
-            background-color: #f8f8f8;
-            border-color: #e8e8e8;
-            color: #cccccc;
+            background-color: #f5f5f5;
+            border-color: #ddd;
+            color: #999;
         }
 
         /* No Products Message */
         .no-products-message {
             text-align: center;
-            padding: 80px 20px;
+            padding: 100px 30px;
         }
 
         .no-products-message h3 {
-            font-size: 1.5rem;
-            color: #666666;
+            font-size: 1.3rem;
+            color: #999;
             font-weight: 300;
             letter-spacing: 2px;
         }
@@ -451,6 +460,10 @@
             .craftsmanship-text {
                 font-size: 0.85rem;
                 margin-bottom: 2rem;
+            }
+
+            .product-image-wrapper {
+                height: 300px;
             }
         }
 
@@ -591,51 +604,54 @@
             {% if products_page %}
                 <div class="row">
                     {% for product in products_page %}
+                    {% with v=product.variants.first %}
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="product-card">
-                            <div class="product-image-wrapper">
-                                {% if product.images.first %}
-                                    <img src="{{ product.images.first.image.url }}" 
-                                         alt="{{ product.name }}" 
-                                         class="product-image">
-                                {% elif product.image %}
-                                    <img src="{{ product.image.url }}" 
-                                         alt="{{ product.name }}" 
-                                         class="product-image">
-                                {% else %}
-                                    <img src="https://via.placeholder.com/400x480/f8f8f8/cccccc?text=No+Image" 
-                                         alt="{{ product.name }}" 
-                                         class="product-image">
-                                {% endif %}
-                                <div class="product-overlay">
-                                    <button class="quick-view-btn" onclick="window.location.href='#'">
-                                        Quick View
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-info">
-                                <div class="product-category">
-                                    {{ product.category.name|default:"Ceramics" }}
-                                </div>
-                                <h3 class="product-name">{{ product.name }}</h3>
-                                <div class="product-price">
-                                    {% if product.selling_price %}
-                                        ₹{{ product.selling_price }}
-                                    {% elif product.price %}
-                                        ₹{{ product.price }}
+                            <a href="{% url 'product_management:product_detail' product.id %}{% if v %}?variant={{ v.id }}{% endif %}">
+                                <!-- Product Image -->
+                                <div class="product-image-wrapper">
+                                    {% if v and v.main_image %}
+                                        <img src="{{ v.main_image.url }}" alt="{{ product.name }}" class="product-image">
+                                    {% elif v and v.images.first %}
+                                        <img src="{{ v.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                                    {% elif product.images.first %}
+                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
                                     {% else %}
-                                        ₹0.00
+                                        <img src="https://via.placeholder.com/400x480/f5f5f5/cccccc?text=No+Image" 
+                                             alt="{{ product.name }}" class="product-image">
                                     {% endif %}
-                                    
-                                    {% if product.original_price and product.selling_price %}
-                                        {% if product.original_price > product.selling_price %}
-                                            <span class="product-price-original">₹{{ product.original_price }}</span>
-                                        {% endif %}
-                                    {% endif %}
+
+                                    <div class="product-overlay">
+                                        <button class="quick-view-btn">
+                                            Quick View
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+
+                                <!-- Product Info -->
+                                <div class="product-info">
+                                    <div class="product-category">
+                                        {{ product.category.name|default:"Ceramics" }}
+                                    </div>
+
+                                    <h3 class="product-name">{{ product.name }}</h3>
+
+                                    <!-- PRICE -->
+                                    <div class="product-price">
+                                        {% if product.selling_price %}
+                                            ₹{{ product.selling_price }}
+                                            {% if product.original_price and product.original_price > product.selling_price %}
+                                                <span class="product-price-original">₹{{ product.original_price }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            ₹{{ product.price }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
                         </div>
                     </div>
+                    {% endwith %}
                     {% endfor %}
                 </div>
 
@@ -658,13 +674,9 @@
 
                             {% for num in products_page.paginator.page_range %}
                                 {% if products_page.number == num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                                 {% elif num > products_page.number|add:'-3' and num < products_page.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                    </li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                                 {% endif %}
                             {% endfor %}
 

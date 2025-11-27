@@ -3,48 +3,503 @@
 
 {% block content %}
 {% include 'user_navbar.html' %}
-<div class="left">
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
     {% include "user_profile/sidebar.html" %}
   </div>
 
-<div class="container">
-    
-  <h2>My Addresses</h2>
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>MY ADDRESSES</h1>
+    </div>
 
-  {% if addresses %}
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>State</th>
-          <th>Phone</th>
-          <th>Email</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for addr in addresses %}
-        <tr>
-          <td>{{ addr.first_name }} {{ addr.last_name }}</td>
-          <td>{{ addr.street_address }}</td>
-          <td>{{ addr.city }}</td>
-          <td>{{ addr.state }}</td>
-          <td>{{ addr.phone }}</td>
-          <td>{{ addr.email }}</td>
-          <td>
-            <a href="{% url 'user_addresses:address_edit' addr.id %}">Edit</a> |
-            <a href="{% url 'user_addresses:address_delete' addr.id %}">Delete</a>
-          </td>
-        </tr>
+    <!-- Messages Section -->
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            <span class="alert-icon">
+              {% if message.tags == 'success' %}
+                ✓
+              {% elif message.tags == 'error' %}
+                ✕
+              {% elif message.tags == 'warning' %}
+                ⚠
+              {% else %}
+                ℹ
+              {% endif %}
+            </span>
+            <span class="alert-message">{{ message }}</span>
+            <button class="alert-close">×</button>
+          </div>
         {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No addresses found.</p>
-  {% endif %}
+      </div>
+    {% endif %}
 
-  <a href="{% url 'user_addresses:address_add' %}" class="btn">Add New Address</a>
+    {% if addresses %}
+      <div class="addresses-table-wrapper">
+        <table class="addresses-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for addr in addresses %}
+            <tr>
+              <td>{{ addr.first_name }} {{ addr.last_name }}</td>
+              <td>{{ addr.street_address }}</td>
+              <td>{{ addr.city }}</td>
+              <td>{{ addr.state }}</td>
+              <td>{{ addr.phone }}</td>
+              <td>{{ addr.email }}</td>
+              <td>
+                <div class="action-buttons">
+                  <a href="{% url 'user_addresses:address_edit' addr.id %}" class="btn-edit">Edit</a>
+                  <a href="{% url 'user_addresses:address_delete' addr.id %}" class="btn-delete">Delete</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="no-addresses">
+        <p>No addresses found.</p>
+      </div>
+    {% endif %}
+
+    <a href="{% url 'user_addresses:address_add' %}" class="btn-add-address">Add New Address</a>
+  </div>
 </div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+    position: sticky;
+    top: 20px;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 600;
+  }
+
+  /* Messages Styles */
+  .messages-container {
+    margin-bottom: 30px;
+  }
+
+  .alert {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+
+  .alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  .alert-warning {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+  }
+
+  .alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+  }
+
+  .alert-icon {
+    font-size: 18px;
+    margin-right: 12px;
+    font-weight: bold;
+  }
+
+  .alert-message {
+    flex: 1;
+  }
+
+  .alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 15px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    line-height: 1;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  .alert.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Table Styles */
+  .addresses-table-wrapper {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+
+  .addresses-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .addresses-table thead {
+    background: #3a3a3a;
+  }
+
+  .addresses-table th {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    padding: 16px 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .addresses-table tbody tr {
+    border-bottom: 1px solid #3a3a3a;
+    transition: background 0.2s;
+  }
+
+  .addresses-table tbody tr:hover {
+    background: #333;
+  }
+
+  .addresses-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .addresses-table td {
+    color: #ddd;
+    font-size: 14px;
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+
+  .btn-edit {
+    background: #4a90e2;
+    color: #fff;
+  }
+
+  .btn-edit:hover {
+    background: #357abd;
+  }
+
+  .btn-delete {
+    background: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+  }
+
+  .btn-delete:hover {
+    background: #ff6b6b;
+    color: #fff;
+  }
+
+  .no-addresses {
+    text-align: center;
+    padding: 60px 20px;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    margin-bottom: 30px;
+  }
+
+  .no-addresses p {
+    color: #999;
+    font-size: 18px;
+  }
+
+  .btn-add-address {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 14px 40px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  .btn-add-address:hover {
+    background: #fff;
+    color: #000;
+  }
+
+  @media (max-width: 1200px) {
+    .addresses-table {
+      font-size: 13px;
+    }
+
+    .addresses-table th,
+    .addresses-table td {
+      padding: 12px 15px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .addresses-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .addresses-table {
+      min-width: 800px;
+    }
+
+    .btn-add-address {
+      width: 100%;
+      text-align: center;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .btn-edit,
+    .btn-delete {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+
+<script>
+  // Auto-hide messages after 3 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      setTimeout(function() {
+        alert.classList.add('fade-out');
+        setTimeout(function() {
+          alert.remove();
+        }, 300); // Wait for fade-out animation to complete
+      }, 3000); // 3 seconds
+    });
+
+    // Also allow manual close
+    document.querySelectorAll('.alert-close').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const alert = this.parentElement;
+        alert.classList.add('fade-out');
+        setTimeout(function() {
+          alert.remove();
+        }, 300);
+      });
+    });
+  });
+</script>
+
 {% endblock %}

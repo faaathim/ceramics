@@ -3,28 +3,272 @@
 
 {% block content %}
 {% include 'user_navbar.html' %}
-<div class="profile-page container">
-  <div class="left">
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
     {% include "user_profile/sidebar.html" %}
   </div>
 
-  <div class="right">
-    <h2>Profile</h2>
-    <div class="profile-card">
-      {% if profile.profile_image %}
-        <img src="{{ profile.profile_image.url }}" alt="Profile Image" width="120">
-      {% else %}
-        <p>No profile image</p>
-      {% endif %}
-      <p><b>First Name:</b> {{ user.first_name }}</p>
-      <p><b>Last Name:</b> {{ user.last_name }}</p>
-      <p><b>Email:</b> {{ user.email }}</p>
-      <p><b>Mobile:</b> {{ profile.mobile }}</p>
-      <p><b>Address:</b> {{ profile.primary_address }}</p>
-      <p><b>City:</b> {{ profile.city }}</p>
-      <p><b>State:</b> {{ profile.state }}</p>
-      <a href="{% url 'user_profile:profile_edit' %}" class="btn">Edit</a>
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>PROFILE</h1>
+    </div>
+
+    <div class="profile-form-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" value="{{ user.first_name }}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Second Name</label>
+          <input type="text" value="{{ user.last_name }}" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="text" value="{{ profile.mobile }}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Email ID</label>
+          <input type="text" value="{{ user.email }}" readonly>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Address</label>
+        <input type="text" value="{{ profile.primary_address }}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" value="{{ profile.city }}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>State</label>
+        <input type="text" value="{{ profile.state }}" readonly>
+      </div>
+
+      <a href="{% url 'user_profile:profile_edit' %}" class="btn-edit">Edit</a>
     </div>
   </div>
 </div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 600;
+  }
+
+  .profile-form-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group.full-width {
+    margin-bottom: 30px;
+  }
+
+  .form-group label {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .form-group input {
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #666;
+  }
+
+  .btn-edit {
+    display: inline-block;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 12px 40px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px;
+    transition: all 0.3s;
+  }
+
+  .btn-edit:hover {
+    background: #fff;
+    color: #000;
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+  }
+</style>
+
 {% endblock %}

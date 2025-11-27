@@ -4,25 +4,41 @@ from django.conf import settings
 from django.db.models import Q
 from decimal import Decimal
 from user_side.forms import ShopFilterForm
+from django.db.models import Prefetch
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 
 
 try:
-    from product_management.models import Product
+    from product_management.models import Product, Variant
 except Exception:
     Product = None
+    Variant = None
 
 try:
     from category_management.models import Category
 except Exception:
     Category = None
 
+
+@never_cache
+@login_required(login_url='user_authentication:login')
 def home(request):
     products_page = None
     categories = []
 
     if Product is not None:
-        qs = Product.objects.filter(is_listed=True)  
-        qs = qs.order_by('-created_at')             
+        variant_qs = Variant.objects.filter(
+            is_deleted=False,
+            is_listed=True
+        ).order_by('-created_at')
+
+        qs = Product.objects.filter(is_listed=True).prefetch_related(
+            Prefetch('variants', queryset=variant_qs, to_attr='listed_variants')
+        )
+
+        qs = qs.order_by('-created_at')
+
         page = request.GET.get('page', 1)
         paginator = Paginator(qs, 8)
         try:
@@ -31,9 +47,11 @@ def home(request):
             products_page = paginator.page(1)
         except EmptyPage:
             products_page = paginator.page(paginator.num_pages)
+
     else:
         products_page = None
 
+    # 👉 Load listed categories
     if Category is not None:
         categories = Category.objects.filter(is_listed=True).order_by('-created_at')[:12]
     else:
@@ -47,21 +65,28 @@ def home(request):
 
 
 
-
 def shop(request):
-    """
-    Product listing with backend search, filter, sort, pagination.
-    All input comes via GET; we use ShopFilterForm to validate/clean.
-    """
-    # bind GET to form so validation runs
+
     form = ShopFilterForm(request.GET or None)
 
-    products_qs = Product.objects.none() if Product is None else Product.objects.filter(is_listed=True)  # manager excludes is_deleted
-
     if Product is None:
-        # Product model missing, render friendly message
+        print("not working")
         return render(request, 'user_side/shop.html', {'form': form, 'products_page': None, 'error': 'Products not available.'})
 
+    # Base queryset: only listed products (your original behavior)
+    print("trying to work")
+    products_qs = Product.objects.filter(is_listed=True)
+
+    # Prefetch variants (listed ones) to avoid N+1 queries in template:
+    if Variant is not None:
+        print('yeah its working')
+        variants_qs = Variant.objects.filter(is_deleted=False, is_listed=True).order_by('-created_at')
+        products_qs = products_qs.prefetch_related(Prefetch('variants', queryset=variants_qs, to_attr='listed_variants'))
+    else:
+        products_qs = products_qs.prefetch_related('variants')
+
+    # Keep your existing form validation / filters / sorting exactly as-is.
+    products_qs_original = products_qs  # keep ref for fallback
     if form.is_valid():
         data = form.cleaned_data
         q = data.get('q')
@@ -70,21 +95,19 @@ def shop(request):
         price_max = data.get('price_max')
         sort = data.get('sort')
 
-        # Search: name or description (case-insensitive)
         if q:
             products_qs = products_qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
 
-        # Category filter
         if cat_id:
             products_qs = products_qs.filter(category_id=cat_id)
 
-        # Price range filter
         if price_min is not None:
+            from decimal import Decimal
             products_qs = products_qs.filter(price__gte=Decimal(price_min))
         if price_max is not None:
+            from decimal import Decimal
             products_qs = products_qs.filter(price__lte=Decimal(price_max))
 
-        # Sorting
         if sort == 'price_asc':
             products_qs = products_qs.order_by('price')
         elif sort == 'price_desc':
@@ -95,12 +118,10 @@ def shop(request):
             products_qs = products_qs.order_by('-name')
         elif sort == 'newest':
             products_qs = products_qs.order_by('-created_at')
-        # else default ordering from model (newest first)
     else:
-        # invalid form data -> ignore filters and show default queryset
-        products_qs = Product.objects.filter(is_listed=True)
+        products_qs = products_qs_original
 
-    # BACKEND pagination, 12 per page
+    # Pagination (same as before)
     page = request.GET.get('page', 1)
     paginator = Paginator(products_qs, 12)
     try:
@@ -110,7 +131,7 @@ def shop(request):
     except EmptyPage:
         products_page = paginator.page(paginator.num_pages)
 
-    # keep current query string for pagination links - helper
+    # Keep current query string for pagination links - helper
     get_copy = request.GET.copy()
     if 'page' in get_copy:
         get_copy.pop('page')
@@ -122,3 +143,4 @@ def shop(request):
         'query_string': base_qs,
     }
     return render(request, 'user_side/shop.html', context)
+

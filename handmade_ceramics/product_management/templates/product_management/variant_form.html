@@ -1,0 +1,1258 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ action }} Variant</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+        <style>
+            body {
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .form-content {
+                margin-left: 250px;
+                margin-top: 70px;
+                padding: 40px;
+                min-height: calc(100vh - 70px);
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            }
+
+            .form-container {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+                border-radius: 20px;
+                padding: 0;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+                max-width: 800px;
+                width: 100%;
+                border: 1px solid #333333;
+                overflow: hidden;
+                animation: formSlideIn 0.4s ease;
+            }
+
+            @keyframes formSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .form-header {
+                background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+                padding: 30px 40px;
+                border-bottom: 2px solid #404040;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .form-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #d0b070, #c0a060);
+            }
+
+            .form-title {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #e8e8e8;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .form-icon {
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: #d0b070;
+            }
+
+            .product-badge {
+                display: inline-block;
+                color: #d0b070;
+                background: rgba(208, 176, 112, 0.15);
+                padding: 8px 16px;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                margin-top: 10px;
+            }
+
+            .form-body {
+                padding: 40px;
+            }
+
+            .form-group {
+                margin-bottom: 30px;
+            }
+
+            .form-label {
+                display: block;
+                color: #b0b0b0;
+                font-weight: 600;
+                font-size: 0.95rem;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .form-label i {
+                color: #d0b070;
+                margin-right: 8px;
+            }
+
+            .form-input,
+            .form-textarea,
+            .form-select {
+                width: 100%;
+                padding: 14px 20px;
+                border: 2px solid #404040;
+                border-radius: 12px;
+                background: #0f0f0f;
+                color: #e8e8e8;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .form-textarea {
+                resize: vertical;
+                min-height: 100px;
+            }
+
+            .form-select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23d0b070' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 20px center;
+                padding-right: 50px;
+            }
+
+            .form-input:focus,
+            .form-textarea:focus,
+            .form-select:focus {
+                outline: none;
+                border-color: #d0b070;
+                background: #1a1a1a;
+                box-shadow: 0 0 0 4px rgba(208, 176, 112, 0.1);
+            }
+
+            .form-input::placeholder,
+            .form-textarea::placeholder {
+                color: #606060;
+            }
+
+            .file-upload-area {
+                position: relative;
+                border: 2px dashed #404040;
+                border-radius: 12px;
+                padding: 30px;
+                text-align: center;
+                background: #0f0f0f;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .file-upload-area:hover {
+                border-color: #d0b070;
+                background: #1a1a1a;
+            }
+
+            .file-upload-area.dragover {
+                border-color: #d0b070;
+                background: #1a1a1a;
+                transform: scale(1.02);
+            }
+
+            .file-upload-icon {
+                font-size: 3rem;
+                color: #606060;
+                margin-bottom: 15px;
+            }
+
+            .file-upload-text {
+                color: #b0b0b0;
+                font-size: 0.95rem;
+                margin-bottom: 10px;
+            }
+
+            .file-upload-hint {
+                color: #606060;
+                font-size: 0.85rem;
+            }
+
+            .file-input {
+                position: absolute;
+                opacity: 0;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                cursor: pointer;
+            }
+
+            /* Crop Modal */
+            .crop-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+            }
+
+            .crop-modal.active {
+                display: flex;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            .crop-container {
+                background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+                border-radius: 20px;
+                padding: 30px;
+                max-width: 90%;
+                max-height: 90%;
+                width: 700px;
+                border: 1px solid #404040;
+                box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+            }
+
+            .crop-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #404040;
+            }
+
+            .crop-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #e8e8e8;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .crop-title i {
+                color: #d0b070;
+            }
+
+            .crop-close {
+                background: transparent;
+                border: none;
+                color: #909090;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 5px 10px;
+                transition: all 0.3s ease;
+            }
+
+            .crop-close:hover {
+                color: #e07070;
+                transform: rotate(90deg);
+            }
+
+            .crop-image-container {
+                max-height: 400px;
+                margin-bottom: 25px;
+                background: #0f0f0f;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+
+            #cropImage {
+                max-width: 100%;
+                display: block;
+            }
+
+            .crop-controls {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 25px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .crop-btn {
+                padding: 10px 20px;
+                background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+                color: #e8e8e8;
+                border: 1px solid #404040;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .crop-btn:hover {
+                background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
+                border-color: #d0b070;
+                transform: translateY(-2px);
+            }
+
+            .crop-btn.active {
+                background: linear-gradient(135deg, #d0b070, #c0a060);
+                border-color: #d0b070;
+            }
+
+            .crop-footer {
+                display: flex;
+                gap: 15px;
+                justify-content: flex-end;
+            }
+
+            .btn-crop-apply {
+                padding: 12px 30px;
+                background: linear-gradient(135deg, #d0b070, #c0a060);
+                color: #1a1a1a;
+                border: none;
+                border-radius: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .btn-crop-apply:hover {
+                background: linear-gradient(135deg, #e0c080, #d0b070);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 20px rgba(208, 176, 112, 0.5);
+            }
+
+            .btn-crop-cancel {
+                padding: 12px 30px;
+                background: transparent;
+                color: #909090;
+                border: 2px solid #404040;
+                border-radius: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .btn-crop-cancel:hover {
+                background: #2a2a2a;
+                border-color: #505050;
+                color: #e8e8e8;
+            }
+
+            .current-image-preview {
+                margin-top: 20px;
+                padding: 20px;
+                background: #0f0f0f;
+                border-radius: 12px;
+                border: 1px solid #2a2a2a;
+            }
+
+            .current-image-label {
+                color: #909090;
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+                display: block;
+            }
+
+            .image-preview {
+                width: 150px;
+                height: 150px;
+                border-radius: 12px;
+                object-fit: cover;
+                border: 2px solid #404040;
+                transition: all 0.3s ease;
+                margin: 5px;
+            }
+
+            .image-preview:hover {
+                transform: scale(1.05);
+                border-color: #d0b070;
+                box-shadow: 0 5px 20px rgba(208, 176, 112, 0.3);
+            }
+
+            .gallery-preview {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .gallery-preview img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .checkbox-container {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 15px 20px;
+                background: #0f0f0f;
+                border-radius: 12px;
+                border: 2px solid #404040;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .checkbox-container:hover {
+                border-color: #d0b070;
+                background: #1a1a1a;
+            }
+
+            .checkbox-input {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                accent-color: #d0b070;
+            }
+
+            .checkbox-label {
+                color: #e8e8e8;
+                font-size: 1rem;
+                cursor: pointer;
+                margin: 0;
+            }
+
+            .error-message {
+                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+                border-left: 4px solid #e07070;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: #e07070;
+                font-size: 0.9rem;
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .error-message i {
+                font-size: 1.1rem;
+            }
+
+            .non-field-errors {
+                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+                border-left: 4px solid #e07070;
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 25px;
+            }
+
+            .non-field-errors ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .non-field-errors li {
+                color: #e07070;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 5px;
+            }
+
+            .non-field-errors li:last-child {
+                margin-bottom: 0;
+            }
+
+            .section-divider {
+                margin: 40px 0;
+                border: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #404040, transparent);
+            }
+
+            .section-title {
+                color: #d0b070;
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 25px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .section-title i {
+                font-size: 1.3rem;
+            }
+
+            .form-footer {
+                padding: 30px 40px;
+                background: #0f0f0f;
+                border-top: 1px solid #2a2a2a;
+                display: flex;
+                gap: 15px;
+                justify-content: flex-end;
+            }
+
+            .btn-submit, .btn-cancel {
+                padding: 14px 35px;
+                border: none;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                border: 2px solid transparent;
+            }
+
+            .btn-submit {
+                background: linear-gradient(135deg, #d0b070, #c0a060);
+                color: #1a1a1a;
+            }
+
+            .btn-submit:hover {
+                background: linear-gradient(135deg, #e0c080, #d0b070);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(208, 176, 112, 0.5);
+            }
+
+            .btn-submit:active {
+                transform: translateY(-1px);
+            }
+
+            .btn-cancel {
+                background: transparent;
+                color: #909090;
+                border-color: #404040;
+            }
+
+            .btn-cancel:hover {
+                background: #2a2a2a;
+                color: #e8e8e8;
+                border-color: #505050;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            }
+
+            .btn-cancel:active {
+                transform: translateY(-1px);
+            }
+
+            .info-badge {
+                display: inline-block;
+                padding: 6px 12px;
+                background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
+                color: #d0c070;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                margin-top: 8px;
+                border: 1px solid #4a4a3a;
+            }
+
+            .info-badge i {
+                margin-right: 5px;
+            }
+
+            @media (max-width: 768px) {
+                .form-content {
+                    padding: 20px;
+                    margin-left: 0;
+                }
+
+                .form-body {
+                    padding: 25px;
+                }
+
+                .form-footer {
+                    flex-direction: column-reverse;
+                }
+
+                .btn-submit, .btn-cancel {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .crop-controls {
+                    gap: 8px;
+                }
+
+                .crop-btn {
+                    padding: 8px 15px;
+                    font-size: 0.85rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="form-content">
+            <div class="form-container">
+                <!-- Form Header -->
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <div class="form-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        {{ action }} Variant
+                    </h2>
+                    <div class="product-badge">
+                        <i class="fas fa-box"></i> For: {{ product.name }}
+                    </div>
+                </div>
+
+                <!-- Form Body -->
+                <div class="form-body">
+                    <form method="post" enctype="multipart/form-data" id="variantForm">
+                        {% csrf_token %}
+                        
+                        <!-- Non-field errors -->
+                        {% if form.non_field_errors %}
+                        <div class="non-field-errors">
+                            <ul>
+                                {% for error in form.non_field_errors %}
+                                <li>
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Basic Information Section -->
+                        <div class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Variant Details
+                        </div>
+
+                        <!-- Color -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-palette"></i>
+                                Color / Variant Name
+                            </label>
+                            <input 
+                                type="text" 
+                                name="{{ form.color.name }}" 
+                                value="{{ form.color.value|default:'' }}"
+                                class="form-input"
+                                placeholder="e.g., Black, Navy Blue, Space Gray..."
+                                required
+                            >
+                            {% if form.color.errors %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ form.color.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-boxes"></i>
+                                Stock Quantity
+                            </label>
+                            <input 
+                                type="number" 
+                                name="{{ form.stock.name }}" 
+                                value="{{ form.stock.value|default:'' }}"
+                                class="form-input"
+                                placeholder="0"
+                                min="0"
+                                required
+                            >
+                            {% if form.stock.errors %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ form.stock.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- Images Section -->
+                        <div class="section-title">
+                            <i class="fas fa-images"></i>
+                            Variant Images
+                        </div>
+
+                        <!-- Main Image Upload -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-image"></i>
+                                Main Variant Image
+                            </label>
+                            <div class="file-upload-area" id="mainImageUploadArea">
+                                <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                <div class="file-upload-text">
+                                    <strong>Click to upload</strong> or drag and drop
+                                </div>
+                                <div class="file-upload-hint">
+                                    Main display image for this variant (PNG, JPG, max 5MB)
+                                </div>
+                                <input 
+                                    type="file" 
+                                    name="main_image"
+                                    class="file-input"
+                                    id="mainImageInput"
+                                    accept="image/*"
+                                >
+                            </div>
+                            <span class="info-badge">
+                                <i class="fas fa-info-circle"></i>
+                                Part of the minimum 3 images requirement
+                            </span>
+                            
+                            <!-- Current Main Image Preview -->
+                            {% if variant and variant.main_image %}
+                            <div class="current-image-preview">
+                                <span class="current-image-label">
+                                    <i class="fas fa-image"></i> Current Main Image:
+                                </span>
+                                <img src="{{ variant.main_image.url }}" class="image-preview" alt="Current main image">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Gallery Images Upload -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-images"></i>
+                                Gallery Images
+                            </label>
+                            <div class="file-upload-area" id="galleryUploadArea">
+                                <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                <div class="file-upload-text">
+                                    <strong>Click to upload</strong> or drag and drop multiple images
+                                </div>
+                                <div class="file-upload-hint">
+                                    Additional images for this variant (PNG, JPG, max 5MB each)
+                                </div>
+                                <input 
+                                    type="file" 
+                                    name="images"
+                                    class="file-input"
+                                    id="galleryInput"
+                                    accept="image/*"
+                                    multiple
+                                >
+                            </div>
+                            <span class="info-badge">
+                                <i class="fas fa-info-circle"></i>
+                                Total images (main + gallery): Min 3, Max 7
+                            </span>
+                            
+                            <!-- Current Gallery Preview -->
+                            {% if variant and variant.images.all %}
+                            <div class="current-image-preview">
+                                <span class="current-image-label">
+                                    <i class="fas fa-images"></i> Current Gallery Images:
+                                </span>
+                                <div class="gallery-preview">
+                                    {% for img in variant.images.all %}
+                                    <img src="{{ img.image.url }}" class="image-preview" alt="Gallery image">
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- Visibility Section -->
+                        <div class="section-title">
+                            <i class="fas fa-cog"></i>
+                            Variant Settings
+                        </div>
+
+                        <!-- Is Listed Checkbox -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-toggle-on"></i>
+                                Visibility
+                            </label>
+                            <div class="checkbox-container">
+                                <input 
+                                    type="checkbox" 
+                                    name="{{ form.is_listed.name }}"
+                                    class="checkbox-input"
+                                    id="isListed"
+                                    {% if form.is_listed.value %}checked{% endif %}
+                                >
+                                <label for="isListed" class="checkbox-label">
+                                    List this variant publicly
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Form Footer -->
+                <div class="form-footer">
+                    <button type="submit" form="variantForm" class="btn-submit">
+                        <i class="fas fa-save"></i>
+                        {{ action }} Variant
+                    </button>
+                    <a href="{% url 'custom_admin:product_management:variant_list' product.id %}" class="btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crop Modal (for main image) -->
+        <div class="crop-modal" id="cropModal">
+            <div class="crop-container">
+                <div class="crop-header">
+                    <h3 class="crop-title">
+                        <i class="fas fa-crop-alt"></i>
+                        Crop & Resize Image
+                    </h3>
+                    <button class="crop-close" id="closeCropModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="crop-image-container">
+                    <img id="cropImage" src="" alt="Image to crop">
+                </div>
+
+                <div class="crop-controls">
+                    <button class="crop-btn" id="zoomIn">
+                        <i class="fas fa-search-plus"></i> Zoom In
+                    </button>
+                    <button class="crop-btn" id="zoomOut">
+                        <i class="fas fa-search-minus"></i> Zoom Out
+                    </button>
+                    <button class="crop-btn" id="rotateLeft">
+                        <i class="fas fa-rotate-left"></i> Rotate Left
+                    </button>
+                    <button class="crop-btn" id="rotateRight">
+                        <i class="fas fa-rotate-right"></i> Rotate Right
+                    </button>
+                    <button class="crop-btn" id="flipH">
+                        <i class="fas fa-arrows-alt-h"></i> Flip H
+                    </button>
+                    <button class="crop-btn" id="flipV">
+                        <i class="fas fa-arrows-alt-v"></i> Flip V
+                    </button>
+                    <button class="crop-btn" id="reset">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+
+                <div class="crop-footer">
+                    <button class="btn-crop-apply" id="applyCrop">
+                        <i class="fas fa-check"></i>
+                        Apply Crop
+                    </button>
+                    <button class="btn-crop-cancel" id="cancelCrop">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+        <script>
+            let cropper = null;
+            const mainImageUploadArea = document.getElementById('mainImageUploadArea');
+            const mainImageInput = document.getElementById('mainImageInput');
+            const galleryUploadArea = document.getElementById('galleryUploadArea');
+            const galleryInput = document.getElementById('galleryInput');
+            const cropModal = document.getElementById('cropModal');
+            const cropImage = document.getElementById('cropImage');
+
+            // Main Image - Drag and drop
+            mainImageUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                mainImageUploadArea.classList.add('dragover');
+            });
+
+            mainImageUploadArea.addEventListener('dragleave', () => {
+                mainImageUploadArea.classList.remove('dragover');
+            });
+
+            mainImageUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                mainImageUploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    mainImageInput.files = e.dataTransfer.files;
+                    handleMainImageSelect(e.dataTransfer.files[0]);
+                }
+            });
+
+            mainImageInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleMainImageSelect(e.target.files[0]);
+                }
+            });
+
+            function handleMainImageSelect(file) {
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        cropImage.src = e.target.result;
+                        cropModal.classList.add('active');
+                        initCropper();
+                    };
+                    reader.readAsDataURL(file);
+                    updateMainImageFileName(file.name);
+                }
+            }
+
+            function updateMainImageFileName(name) {
+                const uploadText = mainImageUploadArea.querySelector('.file-upload-text');
+                uploadText.innerHTML = `<strong><i class="fas fa-image" style="color: #d0b070;"></i> ${name}</strong>`;
+            }
+
+            // Gallery handling
+            let selectedGalleryFiles = [];
+
+            galleryUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                galleryUploadArea.classList.add('dragover');
+            });
+
+            galleryUploadArea.addEventListener('dragleave', () => {
+                galleryUploadArea.classList.remove('dragover');
+            });
+
+            galleryUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                galleryUploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    addGalleryFiles(e.dataTransfer.files);
+                }
+            });
+
+            galleryInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    addGalleryFiles(e.target.files);
+                }
+            });
+
+            function addGalleryFiles(newFiles) {
+                for (let i = 0; i < newFiles.length; i++) {
+                    if (newFiles[i].type.startsWith('image/')) {
+                        selectedGalleryFiles.push(newFiles[i]);
+                    }
+                }
+                updateGalleryInput();
+                updateGalleryPreview();
+            }
+
+            function updateGalleryInput() {
+                const dataTransfer = new DataTransfer();
+                selectedGalleryFiles.forEach(file => {
+                    dataTransfer.items.add(file);
+                });
+                galleryInput.files = dataTransfer.files;
+            }
+
+            function updateGalleryPreview() {
+                const count = selectedGalleryFiles.length;
+                const uploadText = galleryUploadArea.querySelector('.file-upload-text');
+                
+                if (count === 0) {
+                    uploadText.innerHTML = `<strong>Click to upload</strong> or drag and drop multiple images`;
+                    const existingPreview = document.querySelector('.selected-gallery-preview');
+                    if (existingPreview) {
+                        existingPreview.remove();
+                    }
+                } else {
+                    uploadText.innerHTML = `<strong><i class="fas fa-check-circle" style="color: #70c090;"></i> ${count} image${count > 1 ? 's' : ''} selected</strong>`;
+                    showGalleryThumbnails();
+                    addClearAllButton();
+                }
+            }
+
+            function showGalleryThumbnails() {
+                let previewContainer = document.querySelector('.selected-gallery-preview');
+                if (previewContainer) {
+                    previewContainer.remove();
+                }
+                
+                previewContainer = document.createElement('div');
+                previewContainer.className = 'selected-gallery-preview';
+                previewContainer.style.cssText = `
+                    margin-top: 15px;
+                    padding: 15px;
+                    background: #0f0f0f;
+                    border-radius: 12px;
+                    border: 1px solid #2a2a2a;
+                `;
+                
+                const label = document.createElement('span');
+                label.className = 'current-image-label';
+                label.innerHTML = '<i class="fas fa-images"></i> Selected Images:';
+                previewContainer.appendChild(label);
+                
+                const thumbnailGrid = document.createElement('div');
+                thumbnailGrid.className = 'gallery-preview';
+                thumbnailGrid.style.cssText = `
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-top: 10px;
+                `;
+                
+                selectedGalleryFiles.forEach((file, index) => {
+                    const thumbnailWrapper = document.createElement('div');
+                    thumbnailWrapper.style.cssText = `
+                        position: relative;
+                        width: 100px;
+                        height: 100px;
+                    `;
+                    
+                    const img = document.createElement('img');
+                    img.className = 'image-preview';
+                    img.style.cssText = `
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        border-radius: 12px;
+                        border: 2px solid #404040;
+                    `;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.style.cssText = `
+                        position: absolute;
+                        top: -8px;
+                        right: -8px;
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #e07070, #d06060);
+                        border: 2px solid #1a1a1a;
+                        color: white;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.7rem;
+                        transition: all 0.3s ease;
+                        z-index: 10;
+                    `;
+                    
+                    removeBtn.addEventListener('click', () => removeGalleryFile(index));
+                    removeBtn.addEventListener('mouseenter', () => {
+                        removeBtn.style.transform = 'scale(1.1)';
+                        removeBtn.style.background = 'linear-gradient(135deg, #f08080, #e07070)';
+                    });
+                    removeBtn.addEventListener('mouseleave', () => {
+                        removeBtn.style.transform = 'scale(1)';
+                        removeBtn.style.background = 'linear-gradient(135deg, #e07070, #d06060)';
+                    });
+                    
+                    thumbnailWrapper.appendChild(img);
+                    thumbnailWrapper.appendChild(removeBtn);
+                    thumbnailGrid.appendChild(thumbnailWrapper);
+                });
+                
+                previewContainer.appendChild(thumbnailGrid);
+                galleryUploadArea.parentNode.insertBefore(previewContainer, galleryUploadArea.nextSibling);
+            }
+
+            function removeGalleryFile(index) {
+                selectedGalleryFiles.splice(index, 1);
+                updateGalleryInput();
+                updateGalleryPreview();
+            }
+
+            function addClearAllButton() {
+                const existingBtn = document.querySelector('.clear-gallery-btn');
+                if (existingBtn) {
+                    existingBtn.remove();
+                }
+                
+                if (selectedGalleryFiles.length > 0) {
+                    const clearBtn = document.createElement('button');
+                    clearBtn.type = 'button';
+                    clearBtn.className = 'clear-gallery-btn';
+                    clearBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Clear All Gallery Images';
+                    clearBtn.style.cssText = `
+                        margin-top: 10px;
+                        padding: 10px 20px;
+                        background: transparent;
+                        color: #e07070;
+                        border: 2px solid #4a2a2a;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 0.9rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    `;
+                    
+                    clearBtn.addEventListener('click', () => {
+                        selectedGalleryFiles = [];
+                        updateGalleryInput();
+                        updateGalleryPreview();
+                        clearBtn.remove();
+                    });
+                    
+                    clearBtn.addEventListener('mouseenter', () => {
+                        clearBtn.style.background = '#4a2a2a';
+                        clearBtn.style.borderColor = '#e07070';
+                    });
+                    
+                    clearBtn.addEventListener('mouseleave', () => {
+                        clearBtn.style.background = 'transparent';
+                        clearBtn.style.borderColor = '#4a2a2a';
+                    });
+                    
+                    const preview = document.querySelector('.selected-gallery-preview');
+                    if (preview) {
+                        preview.appendChild(clearBtn);
+                    }
+                }
+            }
+
+            // Cropper initialization
+            function initCropper() {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+            }
+
+            // Crop controls
+            document.getElementById('zoomIn').addEventListener('click', () => {
+                cropper.zoom(0.1);
+            });
+
+            document.getElementById('zoomOut').addEventListener('click', () => {
+                cropper.zoom(-0.1);
+            });
+
+            document.getElementById('rotateLeft').addEventListener('click', () => {
+                cropper.rotate(-45);
+            });
+
+            document.getElementById('rotateRight').addEventListener('click', () => {
+                cropper.rotate(45);
+            });
+
+            let scaleX = 1;
+            document.getElementById('flipH').addEventListener('click', () => {
+                scaleX = -scaleX;
+                cropper.scaleX(scaleX);
+            });
+
+            let scaleY = 1;
+            document.getElementById('flipV').addEventListener('click', () => {
+                scaleY = -scaleY;
+                cropper.scaleY(scaleY);
+            });
+
+            document.getElementById('reset').addEventListener('click', () => {
+                cropper.reset();
+                scaleX = 1;
+                scaleY = 1;
+            });
+
+            // Apply crop
+            document.getElementById('applyCrop').addEventListener('click', () => {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 500,
+                    height: 500,
+                    imageSmoothingQuality: 'high'
+                });
+                
+                cropModal.classList.remove('active');
+                
+                const uploadText = mainImageUploadArea.querySelector('.file-upload-text');
+                uploadText.innerHTML = `<strong><i class="fas fa-check-circle" style="color: #70c090;"></i> Image cropped and ready</strong>`;
+            });
+
+            // Cancel crop
+            function closeCropModal() {
+                cropModal.classList.remove('active');
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                mainImageInput.value = '';
+                const uploadText = mainImageUploadArea.querySelector('.file-upload-text');
+                uploadText.innerHTML = `<strong>Click to upload</strong> or drag and drop`;
+            }
+
+            document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
+            document.getElementById('closeCropModal').addEventListener('click', closeCropModal);
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
+  </section>
+</div>
+{% endblock %}
