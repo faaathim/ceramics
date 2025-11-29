@@ -8,6 +8,8 @@ from .models import Order, OrderItem
 from cart.models import CartItem
 from user_profile.models import Profile
 import io
+from reportlab.pdfgen import canvas # type: ignore
+
 
 
 @login_required
