@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="success-page-container">
+  <div class="success-content">
+    
+    <!-- Success Animation -->
+    <div class="success-animation">
+      <div class="checkmark-circle">
+        <div class="checkmark"></div>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message">
+      <h1>Order Placed Successfully!</h1>
+      <p class="lead">Thank you for shopping with us. Your order has been received and is being processed.</p>
+    </div>
+
+    <!-- Order Info Card -->
+    <div class="order-info-card">
+      <div class="info-row">
+        <span class="label">Order ID:</span>
+        <span class="value">#{{ order.order_id }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Order Date:</span>
+        <span class="value">{{ order.created_at|date:"F d, Y" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Total Amount:</span>
+        <span class="value amount">₹{{ order.total_amount }}</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="{% url 'orders:order_detail' order_id=order.order_id %}" class="btn-primary">
+        <span>📋</span> View Order Details
+      </a>
+      <a href="{% url 'user_side:shop' %}" class="btn-secondary">
+        <span>🛍️</span> Continue Shopping
+      </a>
+    </div>
+
+    <!-- Additional Info Cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="card-icon">📧</div>
+        <div class="card-content">
+          <h4>Confirmation Email</h4>
+          <p>We've sent a confirmation email to your registered email address.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+          <h4>Track Your Order</h4>
+          <p>You can track your order status in the Orders section.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon">🚚</div>
+        <div class="card-content">
+          <h4>Delivery Updates</h4>
+          <p>We'll keep you updated via SMS and email throughout delivery.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  body {
+    background: #0a0a0a;
+  }
+
+  .success-page-container {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+
+  .success-content {
+    max-width: 700px;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Success Animation */
+  .success-animation {
+    margin-bottom: 40px;
+    animation: scaleIn 0.6s ease-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .checkmark-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(76, 175, 80, 0.1);
+    border: 3px solid #4caf50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 20px rgba(76, 175, 80, 0);
+    }
+  }
+
+  .checkmark {
+    width: 60px;
+    height: 60px;
+    position: relative;
+  }
+
+  .checkmark::before {
+    content: '✓';
+    font-size: 80px;
+    color: #4caf50;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: checkmarkAppear 0.4s ease-out 0.3s both;
+  }
+
+  @keyframes checkmarkAppear {
+    from {
+      transform: translate(-50%, -50%) scale(0) rotate(-45deg);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  /* Success Message */
+  .success-message {
+    margin-bottom: 40px;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .success-message h1 {
+    color: #fff;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+  }
+
+  .success-message .lead {
+    color: #ddd;
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Order Info Card */
+  .order-info-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.6s ease-out 0.5s both;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #3a3a3a;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-row .label {
+    color: #999;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .info-row .value {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .info-row .amount {
+    color: #4caf50;
+    font-size: 24px;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 50px;
+    animation: fadeInUp 0.6s ease-out 0.6s both;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 2px solid;
+  }
+
+  .btn-primary span,
+  .btn-secondary span {
+    font-size: 20px;
+  }
+
+  .btn-primary {
+    background: #4caf50;
+    color: #000;
+    border-color: #4caf50;
+  }
+
+  .btn-primary:hover {
+    background: #45a049;
+    border-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border-color: #3a3a3a;
+  }
+
+  .btn-secondary:hover {
+    background: #2a2a2a;
+    border-color: #666;
+    transform: translateY(-2px);
+  }
+
+  /* Info Cards */
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    animation: fadeInUp 0.6s ease-out 0.7s both;
+  }
+
+  .info-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 25px 20px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .info-card:hover {
+    background: #333;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .card-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+  }
+
+  .card-content h4 {
+    color: #fff;
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+  }
+
+  .card-content p {
+    color: #999;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .success-message h1 {
+      font-size: 28px;
+    }
+
+    .success-message .lead {
+      font-size: 16px;
+    }
+
+    .checkmark-circle {
+      width: 120px;
+      height: 120px;
+    }
+
+    .checkmark::before {
+      font-size: 60px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .info-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .info-row {
+      flex-direction: column;
+      gap: 5px;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .success-page-container {
+      padding: 20px 15px;
+    }
+
+    .order-info-card {
+      padding: 20px;
+    }
+
+    .info-row .label,
+    .info-row .value {
+      font-size: 14px;
+    }
+
+    .info-row .amount {
+      font-size: 20px;
+    }
+  }
+</style>
+
+{% endblock %}

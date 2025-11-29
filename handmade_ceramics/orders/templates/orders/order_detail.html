@@ -1,0 +1,717 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <div class="header-with-back">
+        <a href="{% url 'orders:order_list' %}" class="btn-back">← Back to Orders</a>
+        <h1>ORDER DETAILS</h1>
+      </div>
+      <div class="order-id-badge">
+        Order ID: <span>{{ order.order_id }}</span>
+      </div>
+    </div>
+
+    <!-- Order Status Banner -->
+    <div class="status-banner status-{{ order.status|lower }}">
+      <div class="status-icon">
+        {% if order.status == 'PENDING' %}
+          ⏳
+        {% elif order.status == 'CONFIRMED' %}
+          ✓
+        {% elif order.status == 'DELIVERED' %}
+          📦
+        {% elif order.status == 'CANCELLED' %}
+          ✕
+        {% elif order.status == 'RETURNED' or order.status == 'RETURN_REQUESTED' %}
+          ↩
+        {% endif %}
+      </div>
+      <div class="status-info">
+        <h3>{{ order.get_status_display }}</h3>
+        <p>Order placed on {{ order.created_at|date:"F d, Y" }}</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="details-grid">
+      
+      <!-- Shipping Address Card -->
+      <div class="detail-card">
+        <div class="card-header">
+          <span class="card-icon">📍</span>
+          <h3>Shipping Address</h3>
+        </div>
+        <div class="card-content">
+          <p class="recipient-name">{{ order.shipping_full_name }}</p>
+          <p>{{ order.shipping_address }}</p>
+          <p>{{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}</p>
+          <p>{{ order.shipping_country }}</p>
+          <div class="contact-info">
+            <p><strong>Phone:</strong> {{ order.shipping_phone }}</p>
+            <p><strong>Email:</strong> {{ order.shipping_email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Info Card -->
+      <div class="detail-card">
+        <div class="card-header">
+          <span class="card-icon">💳</span>
+          <h3>Payment Information</h3>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">{{ order.payment_method }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Payment Status:</span>
+            <span class="value">
+              {% if order.is_paid %}
+                <span class="badge-paid">Paid</span>
+              {% else %}
+                <span class="badge-pending">Pending</span>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Summary Card -->
+      <div class="detail-card price-summary">
+        <div class="card-header">
+          <span class="card-icon">💰</span>
+          <h3>Price Summary</h3>
+        </div>
+        <div class="card-content">
+          <div class="price-row">
+            <span>Subtotal:</span>
+            <span>₹{{ order.subtotal }}</span>
+          </div>
+          <div class="price-row">
+            <span>Tax:</span>
+            <span>₹{{ order.tax_amount }}</span>
+          </div>
+          <div class="price-row">
+            <span>Shipping:</span>
+            <span>₹{{ order.shipping_charge }}</span>
+          </div>
+          <div class="price-row discount">
+            <span>Discount:</span>
+            <span>- ₹{{ order.discount_amount }}</span>
+          </div>
+          <div class="price-row total">
+            <span>Total Amount:</span>
+            <span>₹{{ order.total_amount }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Order Items Section -->
+    <div class="items-section">
+      <h2>Order Items</h2>
+      <div class="items-table-wrapper">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Variant</th>
+              <th>Unit Price</th>
+              <th>Quantity</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items.all %}
+            <tr>
+              <td class="product-name">{{ item.product_name }}</td>
+              <td>{{ item.variant_color }}</td>
+              <td>₹{{ item.unit_price }}</td>
+              <td class="text-center">{{ item.quantity }}</td>
+              <td class="item-total">₹{{ item.item_total }}</td>
+              <td>
+                <span class="item-status">{{ item.get_item_status_display }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons-section">
+      {% if order.status not in 'CANCELLED,DELIVERED' %}
+        <a href="{% url 'orders:cancel_order' order.order_id %}" class="btn-action btn-cancel">
+          <span>✕</span> Cancel Order
+        </a>
+      {% endif %}
+
+      {% if order.status == 'DELIVERED' and order.status != 'RETURNED' %}
+        <a href="{% url 'orders:return_order' order.order_id %}" class="btn-action btn-return">
+          <span>↩</span> Return Order
+        </a>
+      {% endif %}
+
+      <a href="{% url 'orders:download_invoice' order.order_id %}" class="btn-action btn-invoice">
+        <span>📄</span> Download Invoice
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+    position: sticky;
+    top: 20px;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section {
+    margin-bottom: 30px;
+  }
+
+  .header-with-back {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+
+  .btn-back {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #3a3a3a;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+
+  .btn-back:hover {
+    background: #2a2a2a;
+    border-color: #666;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .order-id-badge {
+    color: #999;
+    font-size: 16px;
+  }
+
+  .order-id-badge span {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Status Banner */
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 25px 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 2px solid;
+  }
+
+  .status-banner.status-pending {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: #ffc107;
+  }
+
+  .status-banner.status-confirmed {
+    background: rgba(3, 169, 244, 0.1);
+    border-color: #03a9f4;
+  }
+
+  .status-banner.status-delivered {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: #4caf50;
+  }
+
+  .status-banner.status-cancelled {
+    background: rgba(244, 67, 54, 0.1);
+    border-color: #f44336;
+  }
+
+  .status-banner.status-returned,
+  .status-banner.status-return_requested {
+    background: rgba(255, 152, 0, 0.1);
+    border-color: #ff9800;
+  }
+
+  .status-icon {
+    font-size: 48px;
+  }
+
+  .status-info h3 {
+    color: #fff;
+    font-size: 24px;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+  }
+
+  .status-info p {
+    color: #999;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  /* Details Grid */
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .detail-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #1a1a1a;
+    padding: 20px;
+    border-bottom: 1px solid #3a3a3a;
+  }
+
+  .card-icon {
+    font-size: 24px;
+  }
+
+  .card-header h3 {
+    color: #fff;
+    font-size: 18px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .card-content {
+    padding: 20px;
+    color: #ddd;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .card-content p {
+    margin: 0 0 8px 0;
+  }
+
+  .recipient-name {
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px !important;
+  }
+
+  .contact-info {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #3a3a3a;
+  }
+
+  .contact-info strong {
+    color: #999;
+    font-weight: 500;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .info-row .label {
+    color: #999;
+  }
+
+  .info-row .value {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .badge-paid,
+  .badge-pending {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-paid {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+  }
+
+  .badge-pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+
+  /* Price Summary */
+  .price-summary .card-content {
+    padding: 25px;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #ddd;
+  }
+
+  .price-row.discount {
+    color: #4caf50;
+  }
+
+  .price-row.total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #3a3a3a;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* Items Section */
+  .items-section {
+    margin-bottom: 30px;
+  }
+
+  .items-section h2 {
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .items-table-wrapper {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .items-table thead {
+    background: #1a1a1a;
+  }
+
+  .items-table th {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    padding: 18px 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .items-table tbody tr {
+    border-bottom: 1px solid #3a3a3a;
+    transition: background 0.2s;
+  }
+
+  .items-table tbody tr:hover {
+    background: #333;
+  }
+
+  .items-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .items-table td {
+    color: #ddd;
+    font-size: 15px;
+    padding: 18px 20px;
+    vertical-align: middle;
+  }
+
+  .product-name {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .item-total {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .item-status {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(3, 169, 244, 0.2);
+    color: #03a9f4;
+  }
+
+  /* Action Buttons */
+  .action-buttons-section {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: 2px solid;
+  }
+
+  .btn-action span {
+    font-size: 18px;
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: #f44336;
+    border-color: #f44336;
+  }
+
+  .btn-cancel:hover {
+    background: #f44336;
+    color: #fff;
+  }
+
+  .btn-return {
+    background: transparent;
+    color: #ff9800;
+    border-color: #ff9800;
+  }
+
+  .btn-return:hover {
+    background: #ff9800;
+    color: #000;
+  }
+
+  .btn-invoice {
+    background: transparent;
+    color: #4caf50;
+    border-color: #4caf50;
+  }
+
+  .btn-invoice:hover {
+    background: #4caf50;
+    color: #000;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .items-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .items-table {
+      min-width: 700px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .header-with-back {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .profile-header-section h1 {
+      font-size: 24px;
+    }
+
+    .status-banner {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .action-buttons-section {
+      flex-direction: column;
+    }
+
+    .btn-action {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+{% endblock %}

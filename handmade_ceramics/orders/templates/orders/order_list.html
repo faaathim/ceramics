@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>MY ORDERS</h1>
+    </div>
+
+    <!-- Search -->
+    <form method="GET" class="search-form">
+      <div class="search-group">
+        <input type="text" name="q" placeholder="Search by Order ID" value="{{ request.GET.q }}">
+        <button type="submit" class="btn-search">Search</button>
+      </div>
+    </form>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <a href="?status=all" class="filter-tab {% if not request.GET.status or request.GET.status == 'all' %}active{% endif %}">All</a>
+      <a href="?status=PENDING" class="filter-tab {% if request.GET.status == 'PENDING' %}active{% endif %}">Pending</a>
+      <a href="?status=CONFIRMED" class="filter-tab {% if request.GET.status == 'CONFIRMED' %}active{% endif %}">Confirmed</a>
+      <a href="?status=DELIVERED" class="filter-tab {% if request.GET.status == 'DELIVERED' %}active{% endif %}">Delivered</a>
+      <a href="?status=CANCELLED" class="filter-tab {% if request.GET.status == 'CANCELLED' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    {% if orders %}
+    <!-- Orders Table -->
+    <div class="orders-table-wrapper">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Total Questions</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td class="order-id">{{ order.order_id }}</td>
+            <td>{{ order.created_at|date:"M d, Y" }}</td>
+            <td class="amount">₹{{ order.total_amount }}</td>
+            <td class="text-center">{{ order.items.count }}</td>
+            <td>
+              <span class="status-badge status-{{ order.status|lower }}">
+                {{ order.get_status_display }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a href="{{ order.get_absolute_url }}" class="btn-action btn-view">View</a>
+                
+                {% if order.status != 'CANCELLED' and order.status != 'DELIVERED' %}
+                  <a href="{% url 'orders:cancel_order' order.order_id %}" class="btn-action btn-cancel">Cancel</a>
+                {% endif %}
+                
+                {% if order.status == 'DELIVERED' and order.status != 'RETURNED' %}
+                  <a href="{% url 'orders:return_order' order.order_id %}" class="btn-action btn-return">Return</a>
+                {% endif %}
+
+                <a href="{% url 'orders:download_invoice' order.order_id %}" class="btn-action btn-invoice">Invoice</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination-wrapper">
+      <div class="pagination-info">
+        Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </div>
+      <div class="pagination-controls">
+        {% if page_obj.has_previous %}
+          <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-btn">First</a>
+          <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-btn">&lt;</a>
+        {% endif %}
+        
+        <span class="page-current">{{ page_obj.number }}</span>
+        
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-btn">&gt;</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-btn">Last</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+      <div class="no-orders">
+        <p>No orders found.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin-bottom: 30px;
+    font-weight: 600;
+  }
+
+  /* Search Form */
+  .search-form {
+    margin-bottom: 30px;
+  }
+
+  .search-group {
+    display: flex;
+    gap: 15px;
+    max-width: 500px;
+  }
+
+  .search-group input {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  .search-group input:focus {
+    outline: none;
+    border-color: #666;
+  }
+
+  .search-group input::placeholder {
+    color: #888;
+  }
+
+  .btn-search {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-search:hover {
+    background: #e0e0e0;
+  }
+
+  /* Filter Tabs */
+  .filter-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #3a3a3a;
+    padding: 10px 24px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .filter-tab:hover {
+    border-color: #666;
+    background: #2a2a2a;
+  }
+
+  .filter-tab.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+
+  /* Orders Table */
+  .orders-table-wrapper {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .orders-table thead {
+    background: #1a1a1a;
+  }
+
+  .orders-table th {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid #3a3a3a;
+  }
+
+  .orders-table tbody tr {
+    border-bottom: 1px solid #3a3a3a;
+    transition: background 0.2s;
+  }
+
+  .orders-table tbody tr:hover {
+    background: #333;
+  }
+
+  .orders-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .orders-table td {
+    color: #ddd;
+    font-size: 15px;
+    padding: 20px;
+  }
+
+  .order-id {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .amount {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+
+  .status-confirmed {
+    background: rgba(3, 169, 244, 0.2);
+    color: #03a9f4;
+  }
+
+  .status-delivered {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+  }
+
+  .status-cancelled {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+  }
+
+  .status-returned {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: 1px solid;
+  }
+
+  .btn-view {
+    background: transparent;
+    color: #03a9f4;
+    border-color: #03a9f4;
+  }
+
+  .btn-view:hover {
+    background: #03a9f4;
+    color: #000;
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: #f44336;
+    border-color: #f44336;
+  }
+
+  .btn-cancel:hover {
+    background: #f44336;
+    color: #fff;
+  }
+
+  .btn-return {
+    background: transparent;
+    color: #ff9800;
+    border-color: #ff9800;
+  }
+
+  .btn-return:hover {
+    background: #ff9800;
+    color: #000;
+  }
+
+  .btn-invoice {
+    background: transparent;
+    color: #4caf50;
+    border-color: #4caf50;
+  }
+
+  .btn-invoice:hover {
+    background: #4caf50;
+    color: #000;
+  }
+
+  /* Pagination */
+  .pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 8px;
+  }
+
+  .pagination-info {
+    color: #ddd;
+    font-size: 14px;
+  }
+
+  .pagination-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .page-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #3a3a3a;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+
+  .page-btn:hover {
+    background: #3a3a3a;
+    border-color: #666;
+  }
+
+  .page-current {
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 12px;
+  }
+
+  /* No Orders */
+  .no-orders {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 60px 40px;
+    text-align: center;
+  }
+
+  .no-orders p {
+    color: #888;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .orders-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .orders-table {
+      min-width: 900px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .profile-header-section h1 {
+      font-size: 24px;
+    }
+
+    .search-group {
+      flex-direction: column;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-action {
+      width: 100%;
+      text-align: center;
+    }
+
+    .pagination-wrapper {
+      flex-direction: column;
+      gap: 15px;
+    }
+  }
+</style>
+
+{% endblock %}

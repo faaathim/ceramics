@@ -16,4 +16,8 @@ urlpatterns = [
 
     # product_management
     path('products/', include('product_management.urls', namespace='product_management')),
+
+    #orders
+    path('orders/', include('orders.admin_urls', namespace='orders_admin')),
+
 ]

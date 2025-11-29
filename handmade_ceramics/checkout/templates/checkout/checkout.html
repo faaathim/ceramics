@@ -1,0 +1,719 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>CHECKOUT</h1>
+    <div class="checkout-steps">
+      <div class="step active">
+        <div class="step-number">1</div>
+        <span>Address</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step active">
+        <div class="step-number">2</div>
+        <span>Review</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <span>Payment</span>
+      </div>
+    </div>
+  </div>
+
+  <form method="POST" action="{% url 'checkout:place_order' %}">
+    {% csrf_token %}
+    
+    <div class="checkout-grid">
+      
+      <!-- LEFT: ADDRESSES -->
+      <div class="checkout-section">
+        <div class="section-header">
+          <h2>
+            <span class="section-icon">📍</span>
+            Shipping Address
+          </h2>
+        </div>
+
+        {% if addresses %}
+          <div class="addresses-container">
+            {% for addr in addresses %}
+            <div class="address-card">
+              <input type="radio" name="address_id" value="{{ addr.id }}" id="addr_{{ addr.id }}" required>
+              <label for="addr_{{ addr.id }}">
+                <div class="address-content">
+                  <div class="address-header">
+                    <span class="address-name">{{ addr.full_name }}</span>
+                    <span class="address-type">Home</span>
+                  </div>
+                  <div class="address-details">
+                    <p>{{ addr.address_line }}</p>
+                    <p>{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                    <p class="address-phone">📞 {{ addr.phone }}</p>
+                  </div>
+                </div>
+                <div class="address-actions">
+                  <a href="{% url 'user_addresses:address_edit' addr.id %}?next=checkout" class="btn-edit-address">
+                    ✏️ Edit
+                  </a>
+                </div>
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <a href="{% url 'user_addresses:address_add' %}?next=checkout" class="btn-add-new">
+            <span>+</span> Add New Address
+          </a>
+
+        {% else %}
+          <div class="no-address">
+            <div class="no-address-icon">📍</div>
+            <h3>No Address Found</h3>
+            <p>Please add a shipping address to continue with your order.</p>
+            <a href="{% url 'user_addresses:address_add' %}?next=checkout" class="btn-add-first">
+              Add Address
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT: ORDER SUMMARY -->
+      <div class="checkout-section">
+        <div class="section-header sticky-header">
+          <h2>
+            <span class="section-icon">🛒</span>
+            Order Summary
+          </h2>
+        </div>
+
+        <div class="order-summary-card">
+          
+          <!-- Cart Items -->
+          <div class="cart-items-list">
+            {% for item in cart_items %}
+            <div class="cart-item">
+              <div class="item-image">
+                {% if item.variant.main_image %}
+                  <img src="{{ item.variant.main_image.url }}" alt="{{ item.variant.product.name }}">
+                {% else %}
+                  <div class="image-placeholder">📦</div>
+                {% endif %}
+              </div>
+              <div class="item-details">
+                <h4>{{ item.variant.product.name }}</h4>
+                <div class="item-meta">
+                  <span>Color: {{ item.variant.color }}</span>
+                  <span>Qty: {{ item.quantity }}</span>
+                </div>
+              </div>
+              <div class="item-price">
+                ₹{{ item.variant.product.price }}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="price-breakdown">
+            <div class="price-row">
+              <span>Subtotal</span>
+              <span>₹{{ subtotal }}</span>
+            </div>
+            <div class="price-row">
+              <span>Tax</span>
+              <span>₹{{ tax_amount }}</span>
+            </div>
+            <div class="price-row">
+              <span>Shipping</span>
+              <span>
+                {% if shipping_amount > 0 %}
+                  ₹{{ shipping_amount }}
+                {% else %}
+                  <span class="free-badge">Free</span>
+                {% endif %}
+              </span>
+            </div>
+            <div class="price-row discount">
+              <span>Discount</span>
+              <span>- ₹{{ discount }}</span>
+            </div>
+            <div class="price-row total">
+              <span>Total Amount</span>
+              <span>₹{{ total }}</span>
+            </div>
+          </div>
+
+          <!-- Payment Method Info -->
+          <div class="payment-info">
+            <div class="payment-icon">💳</div>
+            <div class="payment-text">
+              <strong>Cash on Delivery</strong>
+              <p>Pay when you receive your order</p>
+            </div>
+          </div>
+
+          <!-- Place Order Button -->
+          {% if addresses %}
+          <button type="submit" class="btn-place-order">
+            <span>✓</span> Place Order
+          </button>
+          {% else %}
+          <button type="button" class="btn-place-order disabled" disabled>
+            Add Address to Continue
+          </button>
+          {% endif %}
+
+          <!-- Security Badge -->
+          <div class="security-badge">
+            <span>🔒</span> Secure Checkout
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<style>
+  body {
+    background: #0a0a0a;
+  }
+
+  .checkout-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  /* Header */
+  .checkout-header {
+    margin-bottom: 40px;
+  }
+
+  .checkout-header h1 {
+    color: #fff;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 30px;
+  }
+
+  /* Progress Steps */
+  .checkout-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 30px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.4;
+  }
+
+  .step.active {
+    opacity: 1;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    border: 2px solid #3a3a3a;
+  }
+
+  .step.active .step-number {
+    background: #4caf50;
+    color: #000;
+    border-color: #4caf50;
+  }
+
+  .step span {
+    color: #999;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .step.active span {
+    color: #fff;
+  }
+
+  .step-line {
+    width: 80px;
+    height: 2px;
+    background: #3a3a3a;
+    margin-bottom: 30px;
+  }
+
+  /* Checkout Grid */
+  .checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .checkout-section {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 30px;
+    border: 1px solid #2a2a2a;
+  }
+
+  .section-header {
+    margin-bottom: 25px;
+  }
+
+  .section-header h2 {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+  }
+
+  .section-icon {
+    font-size: 28px;
+  }
+
+  /* Address Cards */
+  .addresses-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .address-card {
+    position: relative;
+  }
+
+  .address-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+  }
+
+  .address-card label {
+    display: block;
+    background: #2a2a2a;
+    border: 2px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .address-card input[type="radio"]:checked + label {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.05);
+  }
+
+  .address-card label:hover {
+    border-color: #666;
+  }
+
+  .address-content {
+    margin-bottom: 15px;
+  }
+
+  .address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .address-name {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .address-type {
+    background: #3a3a3a;
+    color: #999;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .address-details p {
+    color: #ddd;
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .address-phone {
+    color: #999 !important;
+    font-size: 14px !important;
+  }
+
+  .address-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-edit-address {
+    background: transparent;
+    color: #4caf50;
+    border: 1px solid #4caf50;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .btn-edit-address:hover {
+    background: #4caf50;
+    color: #000;
+  }
+
+  .btn-add-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: #fff;
+    border: 2px dashed #3a3a3a;
+    padding: 14px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .btn-add-new:hover {
+    border-color: #4caf50;
+    color: #4caf50;
+  }
+
+  .btn-add-new span {
+    font-size: 20px;
+  }
+
+  /* No Address State */
+  .no-address {
+    text-align: center;
+    padding: 60px 20px;
+    background: #2a2a2a;
+    border-radius: 12px;
+    border: 2px dashed #3a3a3a;
+  }
+
+  .no-address-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+  }
+
+  .no-address h3 {
+    color: #fff;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .no-address p {
+    color: #999;
+    margin-bottom: 25px;
+  }
+
+  .btn-add-first {
+    display: inline-block;
+    background: #4caf50;
+    color: #000;
+    padding: 12px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .btn-add-first:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+  }
+
+  /* Order Summary */
+  .order-summary-card {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #3a3a3a;
+  }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    background: #1a1a1a;
+    z-index: 10;
+    padding-bottom: 20px;
+    margin-bottom: 0;
+  }
+
+  /* Cart Items */
+  .cart-items-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 25px;
+    padding-right: 10px;
+  }
+
+  .cart-items-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .cart-items-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 3px;
+  }
+
+  .cart-items-list::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+    border-radius: 3px;
+  }
+
+  .cart-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #2a2a2a;
+  }
+
+  .item-image {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-placeholder {
+    font-size: 28px;
+  }
+
+  .item-details {
+    flex: 1;
+  }
+
+  .item-details h4 {
+    color: #fff;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+  }
+
+  .item-meta {
+    display: flex;
+    gap: 15px;
+    color: #999;
+    font-size: 13px;
+  }
+
+  .item-price {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* Price Breakdown */
+  .price-breakdown {
+    padding: 20px 0;
+    border-top: 1px solid #3a3a3a;
+    border-bottom: 1px solid #3a3a3a;
+    margin-bottom: 20px;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: #ddd;
+    font-size: 15px;
+  }
+
+  .price-row.discount {
+    color: #4caf50;
+  }
+
+  .price-row.total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #3a3a3a;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .free-badge {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Payment Info */
+  .payment-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #2a2a2a;
+  }
+
+  .payment-icon {
+    font-size: 32px;
+  }
+
+  .payment-text strong {
+    color: #fff;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .payment-text p {
+    color: #999;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  /* Place Order Button */
+  .btn-place-order {
+    width: 100%;
+    background: #4caf50;
+    color: #000;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-place-order:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+  }
+
+  .btn-place-order.disabled {
+    background: #3a3a3a;
+    color: #666;
+    cursor: not-allowed;
+  }
+
+  .btn-place-order.disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-place-order span {
+    font-size: 22px;
+  }
+
+  /* Security Badge */
+  .security-badge {
+    text-align: center;
+    margin-top: 15px;
+    color: #999;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .checkout-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .checkout-section:last-child {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .checkout-container {
+      padding: 20px 15px;
+    }
+
+    .checkout-header h1 {
+      font-size: 24px;
+    }
+
+    .checkout-steps {
+      padding: 20px 10px;
+    }
+
+    .step span {
+      font-size: 12px;
+    }
+
+    .step-line {
+      width: 40px;
+    }
+
+    .checkout-section {
+      padding: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 20px;
+    }
+
+    .cart-items-list {
+      max-height: 250px;
+    }
+  }
+</style>
+
+{% endblock %}

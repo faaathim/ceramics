@@ -581,11 +581,24 @@ def product_detail(request, pk):
     else:
         selected_variant = variants.first()
 
+    # --- SIMILAR ITEMS: Same category products ---
+    related_products = (
+        Product.objects.filter(
+            category=product.category,
+            is_deleted=False,
+            is_listed=True
+        )
+        .exclude(id=product.id)
+        .prefetch_related("variants__images")
+    )
+
     return render(request, "product_management/product_variant_detail.html", {
         "product": product,
         "variant": selected_variant,
         "variants": variants,
+        "related_products": related_products,
     })
+
 
 def variant_json(request, variant_id):
     """

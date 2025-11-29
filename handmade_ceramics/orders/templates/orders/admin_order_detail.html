@@ -1,0 +1,630 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .order-detail-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Messages */
+        .messages-container {
+            position: fixed;
+            top: 90px;
+            right: 30px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.4s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+            border-color: #4a6a5a;
+            color: #70c090;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+            border-color: #6a4a4a;
+            color: #e07070;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+        }
+
+        .order-id-badge {
+            font-family: 'Courier New', monospace;
+            color: #9b8bdb;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            padding: 12px 24px;
+            background: transparent;
+            color: #909090;
+            border: 2px solid #404040;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #2a2a2a;
+            color: #e8e8e8;
+            border-color: #505050;
+            transform: translateY(-2px);
+        }
+
+        /* Grid Layout */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        /* Card Styles */
+        .info-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+            border-color: #404040;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #404040;
+        }
+
+        .card-header i {
+            font-size: 1.5rem;
+            color: #9b8bdb;
+        }
+
+        .card-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            margin: 0;
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #9b8bdb;
+        }
+
+        .info-text {
+            color: #e8e8e8;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+
+        .info-text strong {
+            color: #9b8bdb;
+            font-weight: 600;
+        }
+
+        .info-label {
+            color: #909090;
+            font-size: 0.9rem;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .info-value {
+            color: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .amount-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .amount-row:last-child {
+            border-bottom: none;
+        }
+
+        .total-row {
+            padding: 20px 0 10px;
+            border-top: 2px solid #404040;
+            margin-top: 10px;
+        }
+
+        .total-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #70c090;
+        }
+
+        /* Status Form */
+        .status-form {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #404040;
+        }
+
+        .form-label {
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .status-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #404040;
+            border-radius: 10px;
+            background: #0f0f0f;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #9b8bdb;
+            background: #1a1a1a;
+            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
+        }
+
+        /* Items Table */
+        .items-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333333;
+            overflow: hidden;
+        }
+
+        .items-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid #404040;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .items-header i {
+            font-size: 1.5rem;
+            color: #9b8bdb;
+        }
+
+        .items-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            margin: 0;
+        }
+
+        .items-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+        .items-table thead {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        }
+
+        .items-table th {
+            padding: 20px 25px;
+            text-align: left;
+            font-weight: 600;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .items-table tbody tr:hover {
+            background: linear-gradient(135deg, #252525, #303030);
+        }
+
+        .items-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .items-table td {
+            padding: 20px 25px;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #e8e8e8;
+        }
+
+        .variant-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(155, 139, 219, 0.15);
+            color: #9b8bdb;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #70c090;
+        }
+
+        .item-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .item-status-pending {
+            background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
+            color: #d0c070;
+        }
+
+        .item-status-delivered {
+            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+            color: #70c090;
+        }
+
+        .item-status-cancelled {
+            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+            color: #e07070;
+        }
+
+        .item-status-returned {
+            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
+            color: #e0a070;
+        }
+
+        @media (max-width: 1200px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <div class="order-detail-content">
+        <!-- Messages Display -->
+        <div class="messages-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-{{ message.tags }}{% endif %}">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                        <button class="alert-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2 class="page-title">
+                <i class="fas fa-receipt"></i>
+                Order: <span class="order-id-badge">{{ order.order_id }}</span>
+            </h2>
+            <a href="{% url 'custom_admin:orders_admin:admin_order_list' %}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Orders
+            </a>
+        </div>
+
+        <!-- Detail Grid -->
+        <div class="detail-grid">
+            <!-- Customer & Shipping Card -->
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fas fa-user-circle"></i>
+                    <h3>Customer & Shipping Information</h3>
+                </div>
+
+                <div class="info-section">
+                    <div class="section-title">
+                        <i class="fas fa-user"></i>
+                        Customer Details
+                    </div>
+                    <p class="info-text">
+                        <strong>{{ order.user.get_full_name|default:order.user.username }}</strong>
+                    </p>
+                    <p class="info-text">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{{ order.user.email }}</span>
+                    </p>
+                </div>
+
+                <div class="info-section">
+                    <div class="section-title">
+                        <i class="fas fa-shipping-fast"></i>
+                        Shipping Address
+                    </div>
+                    <p class="info-text">
+                        <strong>{{ order.shipping_full_name }}</strong>
+                    </p>
+                    <p class="info-text">{{ order.shipping_address_line }}</p>
+                    <p class="info-text">
+                        {{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}
+                    </p>
+                    <p class="info-text">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">{{ order.shipping_phone }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Order Summary Card -->
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>Order Summary</h3>
+                </div>
+
+                <div class="amount-row">
+                    <span class="info-label">Subtotal:</span>
+                    <span class="price">₹{{ order.subtotal }}</span>
+                </div>
+                <div class="amount-row">
+                    <span class="info-label">Tax:</span>
+                    <span class="price">₹{{ order.tax_amount }}</span>
+                </div>
+                <div class="amount-row">
+                    <span class="info-label">Shipping:</span>
+                    <span class="price">₹{{ order.shipping_charge }}</span>
+                </div>
+                <div class="amount-row">
+                    <span class="info-label">Discount:</span>
+                    <span class="price">- ₹{{ order.discount_amount }}</span>
+                </div>
+                <div class="amount-row total-row">
+                    <span class="info-label" style="font-size: 1.2rem; font-weight: 700;">Total:</span>
+                    <span class="total-amount">₹{{ order.total_amount }}</span>
+                </div>
+
+                <!-- Status Change Form -->
+                <div class="status-form">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <label class="form-label">
+                            <i class="fas fa-sync-alt"></i>
+                            Change Order Status
+                        </label>
+                        <select name="status" class="status-select">
+                            {% for code, label in status_choices %}
+                                <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="items-card">
+            <div class="items-header">
+                <i class="fas fa-box-open"></i>
+                <h3>Order Items</h3>
+            </div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-box"></i> Product</th>
+                        <th><i class="fas fa-palette"></i> Variant</th>
+                        <th><i class="fas fa-tag"></i> Unit Price</th>
+                        <th><i class="fas fa-sort-numeric-up"></i> Quantity</th>
+                        <th><i class="fas fa-dollar-sign"></i> Total</th>
+                        <th><i class="fas fa-info-circle"></i> Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>
+                                <span class="product-name">{{ item.product_name }}</span>
+                            </td>
+                            <td>
+                                <span class="variant-badge">
+                                    <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                                    {{ item.variant_color }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="price">₹{{ item.unit_price }}</span>
+                            </td>
+                            <td>{{ item.quantity }}</td>
+                            <td>
+                                <span class="price">₹{{ item.item_total }}</span>
+                            </td>
+                            <td>
+                                <span class="item-status-badge item-status-{{ item.item_status|lower }}">
+                                    <i class="fas fa-circle"></i>
+                                    {{ item.get_item_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #606060;">
+                                <i class="fas fa-box-open" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
+                                No items found in this order.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.animation = 'slideOutRight 0.4s ease';
+                    setTimeout(() => alert.remove(), 400);
+                }, 5000);
+            });
+        });
+    </script>
+  </section>
+</div>
+{% endblock %}

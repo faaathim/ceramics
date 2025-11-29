@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .inventory-management-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            min-height: calc(100vh - 70px);
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            color: #9b8bdb;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid #333333;
+        }
+
+        .inventory-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+        .inventory-table thead {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        }
+
+        .inventory-table th {
+            padding: 20px 25px;
+            text-align: left;
+            font-weight: 600;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #404040;
+        }
+
+        .inventory-table tbody tr {
+            border-bottom: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .inventory-table tbody tr:hover {
+            background: linear-gradient(135deg, #252525, #303030);
+        }
+
+        .inventory-table td {
+            padding: 20px 25px;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #e8e8e8;
+        }
+
+        .variant-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #3a3a4a, #4a4a5a);
+            color: #9b8bdb;
+        }
+
+        .stock-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stock-number {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .stock-high {
+            color: #70c090;
+        }
+
+        .stock-medium {
+            color: #d0c070;
+        }
+
+        .stock-low {
+            color: #e0a070;
+        }
+
+        .stock-out {
+            color: #e07070;
+        }
+
+        .stock-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-high {
+            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+            color: #70c090;
+        }
+
+        .badge-medium {
+            background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
+            color: #d0c070;
+        }
+
+        .badge-low {
+            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
+            color: #e0a070;
+        }
+
+        .badge-out {
+            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+            color: #e07070;
+        }
+
+        .date-text {
+            color: #909090;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #606060;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333333;
+        }
+
+        .pagination-info {
+            color: #b0b0b0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-links a, .pagination-links span {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            color: #e8e8e8;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #404040;
+        }
+
+        .pagination-links a:hover {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
+            transform: translateY(-2px);
+            border-color: #9b8bdb;
+        }
+
+        .pagination-links .active {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
+            border-color: #9b8bdb;
+        }
+
+        .pagination-links .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-outline-info {
+            background: transparent;
+            color: #70a0c0;
+            border: 2px solid #4a5a6a;
+        }
+
+        .btn-outline-info:hover {
+            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+            color: #80b0d0;
+            transform: translateY(-2px);
+        }
+
+        .action-buttons {
+            margin-bottom: 25px;
+        }
+    </style>
+
+    <div class="inventory-management-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2 class="page-title">
+                <i class="fas fa-boxes"></i>
+                Inventory Management
+            </h2>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'custom_admin:orders_admin:admin_order_list' %}" class="btn btn-outline-info">
+                <i class="fas fa-shopping-cart"></i>
+                View Orders
+            </a>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="table-container">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-box"></i> Product</th>
+                        <th><i class="fas fa-palette"></i> Variant</th>
+                        <th><i class="fas fa-layer-group"></i> Stock</th>
+                        <th><i class="fas fa-clock"></i> Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in variants %}
+                        <tr>
+                            <td>
+                                <span class="product-name">{{ v.product.name }}</span>
+                            </td>
+                            <td>
+                                <span class="variant-badge">
+                                    <i class="fas fa-circle"></i>
+                                    {{ v.color }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="stock-info">
+                                    <span class="stock-number {% if v.stock == 0 %}stock-out{% elif v.stock < 10 %}stock-low{% elif v.stock < 50 %}stock-medium{% else %}stock-high{% endif %}">
+                                        {{ v.stock }}
+                                    </span>
+                                    {% if v.stock == 0 %}
+                                        <span class="stock-badge badge-out">
+                                            <i class="fas fa-times-circle"></i> Out of Stock
+                                        </span>
+                                    {% elif v.stock < 10 %}
+                                        <span class="stock-badge badge-low">
+                                            <i class="fas fa-exclamation-triangle"></i> Low
+                                        </span>
+                                    {% elif v.stock < 50 %}
+                                        <span class="stock-badge badge-medium">
+                                            <i class="fas fa-info-circle"></i> Medium
+                                        </span>
+                                    {% else %}
+                                        <span class="stock-badge badge-high">
+                                            <i class="fas fa-check-circle"></i> In Stock
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="date-text">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ v.updated_at|date:"d M Y H:i" }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <i class="fas fa-boxes"></i>
+                                    <p>No inventory items found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if variants.paginator.num_pages > 1 %}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                <i class="fas fa-file-alt"></i>
+                <span>Page {{ variants.number }} of {{ variants.paginator.num_pages }}</span>
+            </div>
+            <div class="pagination-links">
+                {% if variants.has_previous %}
+                    <a href="?page=1">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </a>
+                    <a href="?page={{ variants.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i> Previous
+                    </a>
+                {% else %}
+                    <span class="disabled">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </span>
+                    <span class="disabled">
+                        <i class="fas fa-angle-left"></i> Previous
+                    </span>
+                {% endif %}
+
+                {% for p in variants.paginator.page_range %}
+                    <a href="?page={{ p }}" class="{% if variants.number == p %}active{% endif %}">
+                        {{ p }}
+                    </a>
+                {% endfor %}
+
+                {% if variants.has_next %}
+                    <a href="?page={{ variants.next_page_number }}">
+                        Next <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ variants.paginator.num_pages }}">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% else %}
+                    <span class="disabled">
+                        Next <i class="fas fa-angle-right"></i>
+                    </span>
+                    <span class="disabled">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </section>
+</div>
+{% endblock %}

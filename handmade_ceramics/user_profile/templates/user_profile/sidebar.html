@@ -14,10 +14,16 @@
 
   <nav class="sidebar-nav">
     <div class="nav-section">
-      <a href="#" class="nav-item">
+      <a href="{% url 'orders:order_list' %}" class="nav-item {% if 'order' in request.resolver_match.url_name %}active{% endif %}">
         <span class="nav-icon">📦</span>
         <span class="nav-text">Orders</span>
-        <span class="nav-badge">1</span>
+        {% if user.is_authenticated %}
+          {% with order_count=user.order_set.count %}
+            {% if order_count > 0 %}
+              <span class="nav-badge">{{ order_count }}</span>
+            {% endif %}
+          {% endwith %}
+        {% endif %}
       </a>
       <a href="#" class="nav-item">
         <span class="nav-icon">❤️</span>

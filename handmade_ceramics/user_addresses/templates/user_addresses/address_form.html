@@ -15,7 +15,7 @@
     </div>
 
     <div class="profile-form-card">
-      <form method="POST" id="addressForm" novalidate>
+      <form method="POST">
         {% csrf_token %}
         
         {% for field in form %}
@@ -24,15 +24,11 @@
             <div class="form-row">
             {% endif %}
               <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                  {{ field.label }}
-                  {% if field.field.required %}<span class="required">*</span>{% endif %}
-                </label>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}
-                  <span class="error">{{ field.errors.0 }}</span>
+                  <span class="error">{{ field.errors }}</span>
                 {% endif %}
-                <span class="error" id="error-{{ field.name }}"></span>
               </div>
             {% if field.name == 'last_name' %}
             </div>
@@ -43,34 +39,26 @@
             <div class="form-row">
             {% endif %}
               <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                  {{ field.label }}
-                  {% if field.field.required %}<span class="required">*</span>{% endif %}
-                </label>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}
-                  <span class="error">{{ field.errors.0 }}</span>
+                  <span class="error">{{ field.errors }}</span>
                 {% endif %}
-                <span class="error" id="error-{{ field.name }}"></span>
               </div>
             {% if field.name == 'state' %}
             </div>
             {% endif %}
 
-          {% elif field.name == 'pin_code' or field.name == 'phone' %}
-            {% if field.name == 'pin_code' %}
+          {% elif field.name == 'pincode' or field.name == 'phone' %}
+            {% if field.name == 'pincode' %}
             <div class="form-row">
             {% endif %}
               <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                  {{ field.label }}
-                  {% if field.field.required %}<span class="required">*</span>{% endif %}
-                </label>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}
-                  <span class="error">{{ field.errors.0 }}</span>
+                  <span class="error">{{ field.errors }}</span>
                 {% endif %}
-                <span class="error" id="error-{{ field.name }}"></span>
               </div>
             {% if field.name == 'phone' %}
             </div>
@@ -83,29 +71,31 @@
                 <span>{{ field.label }}</span>
               </label>
               {% if field.errors %}
-                <span class="error">{{ field.errors.0 }}</span>
+                <span class="error">{{ field.errors }}</span>
               {% endif %}
             </div>
 
           {% else %}
             <div class="form-group full-width">
-              <label for="{{ field.id_for_label }}">
-                {{ field.label }}
-                {% if field.field.required %}<span class="required">*</span>{% endif %}
-              </label>
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
               {{ field }}
               {% if field.errors %}
-                <span class="error">{{ field.errors.0 }}</span>
+                <span class="error">{{ field.errors }}</span>
               {% endif %}
-              <span class="error" id="error-{{ field.name }}"></span>
             </div>
           {% endif %}
         {% endfor %}
 
         <div class="form-actions">
           <button type="submit" class="btn-save">Save</button>
-          <a href="{% url 'user_addresses:address_list' %}" class="btn-cancel">Cancel</a>
-        </div>
+      
+          {% if next == "checkout" %}
+              <a href="{% url 'checkout:checkout' %}" class="btn-cancel">Cancel</a>
+          {% else %}
+              <a href="{% url 'user_addresses:address_list' %}" class="btn-cancel">Cancel</a>
+          {% endif %}
+      </div>
+      
       </form>
     </div>
   </div>
@@ -275,11 +265,6 @@
     font-weight: 500;
   }
 
-  .required {
-    color: #ff6b6b;
-    margin-left: 4px;
-  }
-
   .form-group input,
   .form-group select,
   .form-group textarea {
@@ -290,7 +275,6 @@
     border-radius: 8px;
     font-size: 15px;
     font-family: inherit;
-    transition: border-color 0.3s;
   }
 
   .form-group input:focus,
@@ -298,18 +282,6 @@
   .form-group textarea:focus {
     outline: none;
     border-color: #666;
-  }
-
-  .form-group input.error-input,
-  .form-group select.error-input,
-  .form-group textarea.error-input {
-    border-color: #ff6b6b;
-  }
-
-  .form-group input.success-input,
-  .form-group select.success-input,
-  .form-group textarea.success-input {
-    border-color: #51cf66;
   }
 
   .checkbox-group {
@@ -336,7 +308,6 @@
     color: #ff6b6b;
     font-size: 13px;
     margin-top: 5px;
-    display: block;
   }
 
   .form-actions {
@@ -360,11 +331,6 @@
   .btn-save:hover {
     background: transparent;
     color: #fff;
-  }
-
-  .btn-save:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 
   .btn-cancel {
@@ -413,192 +379,5 @@
     }
   }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('addressForm');
-  
-  // Validation rules matching your Django validators
-  const validators = {
-    first_name: {
-      validate: (value) => {
-        if (!value.trim()) return 'First name is required';
-        if (value.trim().length < 2) return 'First name must be at least 2 characters';
-        if (!/^[A-Za-z\s]+$/.test(value)) return 'First name can only contain letters';
-        return null;
-      }
-    },
-    last_name: {
-      validate: (value) => {
-        if (value && !/^[A-Za-z\s]+$/.test(value)) return 'Last name can only contain letters';
-        return null;
-      }
-    },
-    city: {
-      validate: (value) => {
-        if (!value.trim()) return 'City is required';
-        if (!/^[A-Za-z\s]+$/.test(value)) return 'City name can only contain letters and spaces';
-        if (value.trim().length < 2) return 'City name must be at least 2 characters';
-        return null;
-      }
-    },
-    state: {
-      validate: (value) => {
-        if (!value.trim()) return 'State is required';
-        if (!/^[A-Za-z\s]+$/.test(value)) return 'State name can only contain letters and spaces';
-        if (value.trim().length < 2) return 'State name must be at least 2 characters';
-        return null;
-      }
-    },
-    pin_code: {
-      validate: (value) => {
-        if (!value.trim()) return 'Pin code is required';
-        if (!/^\d{6}$/.test(value)) return 'Pin code must be exactly 6 digits';
-        return null;
-      }
-    },
-    phone: {
-      validate: (value) => {
-        if (!value.trim()) return 'Phone number is required';
-        // Remove spaces and hyphens for validation
-        const cleanPhone = value.replace(/[\s-]/g, '');
-        if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-          return 'Enter a valid 10-digit Indian mobile number starting with 6-9';
-        }
-        return null;
-      }
-    },
-    email: {
-      validate: (value) => {
-        if (!value.trim()) return 'Email is required';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) return 'Enter a valid email address';
-        return null;
-      }
-    },
-    country: {
-      validate: (value) => {
-        if (!value.trim()) return 'Country is required';
-        return null;
-      }
-    },
-    street_address: {
-      validate: (value) => {
-        if (!value.trim()) return 'Street address is required';
-        if (value.trim().length < 5) return 'Street address must be at least 5 characters';
-        return null;
-      }
-    }
-  };
-
-  // Real-time validation for each field
-  Object.keys(validators).forEach(fieldName => {
-    const field = document.getElementById(`id_${fieldName}`);
-    if (!field) return;
-
-    // Validate on blur
-    field.addEventListener('blur', function() {
-      validateField(fieldName, this.value);
-    });
-
-    // Clear error on input
-    field.addEventListener('input', function() {
-      const errorSpan = document.getElementById(`error-${fieldName}`);
-      if (errorSpan && errorSpan.textContent) {
-        errorSpan.textContent = '';
-        this.classList.remove('error-input');
-      }
-    });
-
-    // Format phone number as user types
-    if (fieldName === 'phone') {
-      field.addEventListener('input', function(e) {
-        let value = this.value.replace(/\D/g, '');
-        if (value.length > 10) value = value.slice(0, 10);
-        this.value = value;
-      });
-    }
-
-    // Format pin code
-    if (fieldName === 'pin_code') {
-      field.addEventListener('input', function(e) {
-        let value = this.value.replace(/\D/g, '');
-        if (value.length > 6) value = value.slice(0, 6);
-        this.value = value;
-      });
-    }
-  });
-
-  function validateField(fieldName, value) {
-    const validator = validators[fieldName];
-    if (!validator) return true;
-
-    const error = validator.validate(value);
-    const errorSpan = document.getElementById(`error-${fieldName}`);
-    const field = document.getElementById(`id_${fieldName}`);
-
-    if (error) {
-      if (errorSpan) errorSpan.textContent = error;
-      if (field) field.classList.add('error-input');
-      return false;
-    } else {
-      if (errorSpan) errorSpan.textContent = '';
-      if (field) {
-        field.classList.remove('error-input');
-        if (value.trim()) field.classList.add('success-input');
-      }
-      return true;
-    }
-  }
-
-  // Form submission validation
-  form.addEventListener('submit', function(e) {
-    let isValid = true;
-    
-    // Clear all previous errors
-    document.querySelectorAll('.error').forEach(el => {
-      if (el.id.startsWith('error-')) el.textContent = '';
-    });
-    document.querySelectorAll('.error-input').forEach(el => {
-      el.classList.remove('error-input');
-    });
-
-    // Validate all fields
-    Object.keys(validators).forEach(fieldName => {
-      const field = document.getElementById(`id_${fieldName}`);
-      if (field && !validateField(fieldName, field.value)) {
-        isValid = false;
-      }
-    });
-
-    if (!isValid) {
-      e.preventDefault();
-      // Scroll to first error
-      const firstError = document.querySelector('.error-input');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        firstError.focus();
-      }
-    }
-  });
-
-  // Auto-capitalize first letter of names and places
-  ['first_name', 'last_name', 'city', 'state'].forEach(fieldName => {
-    const field = document.getElementById(`id_${fieldName}`);
-    if (field) {
-      field.addEventListener('input', function() {
-        const words = this.value.split(' ');
-        const capitalized = words.map(word => {
-          if (!word) return word;
-          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        });
-        const cursorPos = this.selectionStart;
-        this.value = capitalized.join(' ');
-        this.setSelectionRange(cursorPos, cursorPos);
-      });
-    }
-  });
-});
-</script>
 
 {% endblock %}

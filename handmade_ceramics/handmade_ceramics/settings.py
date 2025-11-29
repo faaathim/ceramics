@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     'user_side',
     'user_profile',
     'user_addresses',
+    'cart',
+    'orders',
+    'checkout',
 ]
 
 MIDDLEWARE = [
@@ -169,3 +172,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {'access_type': 'online'},
     }
 }
+
+# maximum number of units allowed per single cart item (site-wide)
+CART_MAX_QTY_PER_ITEM = 10
