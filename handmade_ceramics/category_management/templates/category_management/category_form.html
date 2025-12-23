@@ -693,7 +693,7 @@
 
                 <!-- Form Footer -->
                 <div class="form-footer">
-                    <button type="submit" form="categoryForm" class="btn-submit">
+                    <button type="submit" form="categoryForm" action="{% url 'custom_admin:category_management:category_create'%}" class="btn-submit">
                         <i class="fas fa-save"></i>
                         {{ action }}
                     </button>

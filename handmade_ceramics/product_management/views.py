@@ -514,7 +514,7 @@ def variant_edit(request, product_pk, pk):
     else:
         form = VariantForm(instance=variant)
 
-    return render(request, 'product_management/variant_edit.html', {
+    return render(request, 'product_management/variant_form.html', {
         'form': form, 'action': 'Edit', 'product': product, 'variant': variant
     })
 

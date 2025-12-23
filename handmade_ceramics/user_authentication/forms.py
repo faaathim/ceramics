@@ -1,39 +1,50 @@
 from django import forms
 import re
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 
-# Signup form for new user registration
+User = get_user_model()
+
+
 class SignupForm(forms.Form):
-    first_name = forms.CharField(max_length=30, required=True)
+    first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30, required=False)
-    email = forms.EmailField(max_length=254, required=True)
-    password1 = forms.CharField(
-        widget=forms.PasswordInput(),
-        label="Password",
-        help_text="Minimum 8 chars, at least 1 letter and 1 digit."
-    )
-    password2 = forms.CharField(widget=forms.PasswordInput(), label="Confirm password")
+    email = forms.EmailField()
+    password1 = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
 
+    # First name validation
+    def clean_first_name(self):
+        name = self.cleaned_data["first_name"].strip()
+        if not re.match(r"^[A-Za-z][A-Za-z\s'-]{1,29}$", name):
+            raise forms.ValidationError("Enter a valid first name.")
+        return name
+
+    # Last name validation
+    def clean_last_name(self):
+        name = self.cleaned_data.get("last_name", "").strip()
+        if name and not re.match(r"^[A-Za-z][A-Za-z\s'-]{1,29}$", name):
+            raise forms.ValidationError("Enter a valid last name.")
+        return name
+
+    # Email validation + trimming + uniqueness
     def clean_email(self):
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        email = self.cleaned_data['email'].lower()
+        email = self.cleaned_data["email"].strip().lower()
         if User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("An account with this email already exists.")
+            raise forms.ValidationError("Email already registered.")
         return email
 
+    # Password validation using Django validators
     def clean_password1(self):
-        pw = self.cleaned_data.get('password1') or ""
-        if len(pw) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters.")
-        if not re.search(r'[A-Za-z]', pw) or not re.search(r'\d', pw):
-            raise forms.ValidationError("Password must include at least one letter and one digit.")
-        return pw
+        password = self.cleaned_data.get("password1")
+        validate_password(password, user=None)
+        return password
 
+    # Confirm password
     def clean(self):
         cleaned = super().clean()
-        if cleaned.get('password1') and cleaned.get('password2'):
-            if cleaned['password1'] != cleaned['password2']:
-                raise forms.ValidationError("Passwords do not match.")
+        if cleaned.get("password1") != cleaned.get("password2"):
+            raise forms.ValidationError("Passwords do not match.")
         return cleaned
 
 
