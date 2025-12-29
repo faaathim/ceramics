@@ -24,30 +24,45 @@
             min-height: calc(100vh - 70px);
         }
 
-        /* Messages */
+        /* Enhanced Messages Container */
         .messages-container {
             position: fixed;
             top: 90px;
             right: 30px;
             z-index: 9999;
-            max-width: 400px;
+            max-width: 450px;
+            pointer-events: none;
         }
 
         .alert {
-            padding: 15px 20px;
-            margin-bottom: 15px;
+            pointer-events: all;
+            padding: 16px 20px;
+            margin-bottom: 12px;
             border-radius: 12px;
             border: 1px solid;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
-            animation: slideInRight 0.4s ease;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: currentColor;
         }
 
         @keyframes slideInRight {
             from {
-                transform: translateX(100%);
+                transform: translateX(120%);
                 opacity: 0;
             }
             to {
@@ -56,36 +71,120 @@
             }
         }
 
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .alert.hiding {
+            animation: slideOutRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
         .alert-success {
-            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+            background: linear-gradient(135deg, rgba(42, 74, 58, 0.95), rgba(58, 90, 74, 0.95));
             border-color: #4a6a5a;
             color: #70c090;
         }
 
-        .alert-error {
-            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+        .alert-error, .alert-danger {
+            background: linear-gradient(135deg, rgba(74, 42, 42, 0.95), rgba(90, 58, 58, 0.95));
             border-color: #6a4a4a;
             color: #e07070;
         }
 
-        .alert i {
-            font-size: 1.2rem;
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(74, 74, 42, 0.95), rgba(90, 90, 58, 0.95));
+            border-color: #6a6a4a;
+            color: #d0c070;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(42, 58, 74, 0.95), rgba(58, 74, 90, 0.95));
+            border-color: #4a5a6a;
+            color: #70a0c0;
+        }
+
+        .alert-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .alert-message {
+            display: block;
+            color: inherit;
+            font-weight: 500;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
         }
 
         .alert-close {
-            margin-left: auto;
+            flex-shrink: 0;
             background: none;
             border: none;
             color: inherit;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
             opacity: 0.7;
-            transition: opacity 0.3s;
+            transition: all 0.2s ease;
+            margin-top: 2px;
         }
 
         .alert-close:hover {
             opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .alert-close:active {
+            transform: scale(0.9);
+        }
+
+        /* Progress bar for auto-dismiss */
+        .alert-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.4;
+            animation: progressShrink 5s linear forwards;
+        }
+
+        @keyframes progressShrink {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
         }
 
         .search-container {
@@ -600,19 +699,35 @@
             transform: translateY(-2px);
             border-color: #9b8bdb;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .messages-container {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .alert {
+                padding: 12px 16px;
+            }
+        }
     </style>
 
     <div class="product-management-content">
-        <!-- Messages Display -->
-        <div class="messages-container">
+        <!-- Enhanced Messages Display -->
+        <div class="messages-container" id="messagesContainer">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-{{ message.tags }}{% endif %}">
-                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                        <span>{{ message }}</span>
-                        <button class="alert-close" onclick="this.parentElement.remove()">
+                    <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
+                        <i class="alert-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <div class="alert-content">
+                            <span class="alert-message">{{ message }}</span>
+                        </div>
+                        <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
                             <i class="fas fa-times"></i>
                         </button>
+                        <div class="alert-progress"></div>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -867,16 +982,54 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Auto-dismiss alerts after 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
+        // Enhanced Message Handling System
+        const MessageHandler = {
+            alerts: new Map(),
+            autoDismissDelay: 5000,
+
+            init() {
+                this.setupAlerts();
+            },
+
+            setupAlerts() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const alertId = alert.getAttribute('data-alert-id');
+                    const timeoutId = setTimeout(() => {
+                        this.dismissAlert(alert);
+                    }, this.autoDismissDelay);
+                    
+                    this.alerts.set(alertId, timeoutId);
+                });
+            },
+
+            dismissAlert(alertElement) {
+                if (!alertElement || !alertElement.parentElement) return;
+                
+                alertElement.classList.add('hiding');
+                
                 setTimeout(() => {
-                    alert.style.animation = 'slideOutRight 0.4s ease';
-                    setTimeout(() => alert.remove(), 400);
-                }, 5000);
-            });
-        });
+                    if (alertElement.parentElement) {
+                        alertElement.remove();
+                    }
+                }, 400);
+            },
+
+            clearTimeout(alertElement) {
+                const alertId = alertElement.getAttribute('data-alert-id');
+                if (this.alerts.has(alertId)) {
+                    clearTimeout(this.alerts.get(alertId));
+                    this.alerts.delete(alertId);
+                }
+            }
+        };
+
+        // Dismiss alert function (called by close button)
+        function dismissAlert(button) {
+            const alert = button.closest('.alert');
+            MessageHandler.clearTimeout(alert);
+            MessageHandler.dismissAlert(alert);
+        }
 
         // Delete Modal Functions
         function showDeleteModal(productId, productName) {
@@ -906,6 +1059,7 @@
         function closeToggleModal() {
             document.getElementById('toggleModal').classList.remove('show');
         }
+
         // Close modals when clicking outside
         window.onclick = function(event) {
             const deleteModal = document.getElementById('deleteModal');
@@ -919,29 +1073,19 @@
             }
         }
 
-        // Image hover effects
-        document.querySelectorAll('.product-img').forEach(img => {
-            img.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.1)';
-            });
-            img.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
+        // Initialize message handler on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            MessageHandler.init();
+        });
+
+        // Keyboard support - ESC to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeDeleteModal();
+                closeToggleModal();
+            }
         });
     </script>
   </section>
 </div>
-
-<style>
-@keyframes slideOutRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-</style>
 {% endblock %}

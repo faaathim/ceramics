@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "user_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container small-form">
+  <h2>Verify OTP</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <p class="{{ message.tags }}">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Verify</button>
+  </form>
+
+  <p id="timer">Resend OTP in <span id="countdown">60</span> seconds</p>
+  <a id="resendLink" href="{% url 'user_authentication:forgot_password' %}" style="display:none;">Resend OTP</a>
+</div>
+
+<script>
+let seconds = 60;
+let countdownEl = document.getElementById('countdown');
+let resendLink = document.getElementById('resendLink');
+let timer = setInterval(() => {
+  seconds--;
+  countdownEl.textContent = seconds;
+  if (seconds <= 0) {
+    clearInterval(timer);
+    document.getElementById('timer').style.display = 'none';
+    resendLink.style.display = 'inline';
+  }
+}, 1000);
+</script>
+{% endblock %}

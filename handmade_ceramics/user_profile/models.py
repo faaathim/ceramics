@@ -48,26 +48,6 @@ class Profile(models.Model):
         validators=[validate_indian_mobile]
     )
 
-    primary_address = models.TextField(blank=True)
-
-    city = models.CharField(
-        max_length=100,
-        blank=True,
-        validators=[validate_city]
-    )
-
-    state = models.CharField(
-        max_length=100,
-        blank=True,
-        validators=[validate_state]
-    )
-
-    pincode = models.CharField(
-        max_length=6,
-        blank=True,
-        validators=[validate_indian_pincode]
-    )
-
     def __str__(self):
         return f"Profile of {self.user.username}"
 

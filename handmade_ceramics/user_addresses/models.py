@@ -28,10 +28,10 @@ class Address(models.Model):
     pin_code = models.CharField(max_length=20, validators=[validate_indian_pincode])
     phone = models.CharField(max_length=20, validators=[validate_indian_mobile])
 
-    email = models.EmailField()
-
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    is_default = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']

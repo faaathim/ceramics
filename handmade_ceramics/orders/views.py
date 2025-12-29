@@ -144,66 +144,128 @@ def return_order(request, order_id):
         'profile': profile
     })
 
-
 @login_required
 def download_invoice(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    
-    # Create PDF
+
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer)
-    
-    # Header
-    p.setFont("Helvetica-Bold", 20)
-    p.drawString(100, 800, "INVOICE")
-    
-    # Order Details
-    p.setFont("Helvetica", 12)
-    p.drawString(100, 770, f"Order ID: {order.order_id}")
-    p.drawString(100, 750, f"Date: {order.created_at.strftime('%B %d, %Y')}")
-    p.drawString(100, 730, f"Status: {order.get_status_display()}")
-    
-    # Customer Details
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(100, 700, "Customer Information:")
-    p.setFont("Helvetica", 12)
-    p.drawString(100, 680, f"Name: {order.shipping_full_name}")
-    p.drawString(100, 660, f"Email: {order.user.email}")
-    p.drawString(100, 640, f"Phone: {order.shipping_phone}")
-    p.drawString(100, 620, f"Address: {order.shipping_address}")
-    p.drawString(100, 600, f"{order.shipping_city}, {order.shipping_state} - {order.shipping_pincode}")
-    
-    # Items Header
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(100, 570, "Order Items:")
-    
-    # Items Table
-    p.setFont("Helvetica", 11)
-    y = 550
-    for item in order.items.all():
-        item_text = f"{item.product_name}"
-        if item.variant_color:
-            item_text += f" ({item.variant_color})"
-        item_text += f" x {item.quantity} = ₹{item.item_total}"
-        p.drawString(100, y, item_text)
-        y -= 20
-    
-    # Total
-    y -= 20
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(100, y, f"Total Amount: ₹{order.total_amount}")
-    
-    # Footer
+
+    # Starting position
+    x_margin = 50
+    y = 800
+
+    # ------------------------
+    # Store / Invoice Header
+    # ------------------------
+    p.setFont("Helvetica-Bold", 18)
+    p.drawString(x_margin, y, "Handmade Ceramics Store")
+
+    y -= 25
     p.setFont("Helvetica", 10)
-    p.drawString(100, 50, "Thank you for your order!")
-    
+    p.drawString(x_margin, y, "Handcrafted ceramic products made with love")
+    y -= 15
+    p.drawString(x_margin, y, "Email: support@ceramics.com | Phone: +91-XXXXXXXXXX")
+
+    # Invoice title
+    p.setFont("Helvetica-Bold", 16)
+    p.drawRightString(550, 800, "INVOICE")
+
+    # ------------------------
+    # Order Details
+    # ------------------------
+    y -= 40
+    p.setFont("Helvetica", 11)
+    p.drawString(x_margin, y, f"Order ID: {order.order_id}")
+    y -= 15
+    p.drawString(x_margin, y, f"Order Date: {order.created_at.strftime('%d %B %Y')}")
+    y -= 15
+    p.drawString(x_margin, y, f"Order Status: {order.get_status_display()}")
+
+    # ------------------------
+    # Customer Details
+    # ------------------------
+    y -= 30
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(x_margin, y, "Billing Address")
+
+    y -= 18
+    p.setFont("Helvetica", 11)
+    p.drawString(x_margin, y, order.shipping_full_name)
+    y -= 15
+    p.drawString(x_margin, y, order.shipping_address_line)
+    y -= 15
+    p.drawString(
+        x_margin,
+        y,
+        f"{order.shipping_city}, {order.shipping_state} - {order.shipping_pincode}"
+    )
+    y -= 15
+    p.drawString(x_margin, y, f"Phone: {order.shipping_phone}")
+    y -= 15
+    p.drawString(x_margin, y, f"Email: {order.shipping_email}")
+
+    # ------------------------
+    # Order Items Header
+    # ------------------------
+    y -= 35
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(x_margin, y, "Order Items")
+
+    y -= 10
+    p.line(x_margin, y, 550, y)
+
+    # ------------------------
+    # Order Items List
+    # ------------------------
+    y -= 20
+    p.setFont("Helvetica", 11)
+
+    for item in order.items.all():
+        # Page break if space is low
+        if y < 100:
+            p.showPage()
+            y = 800
+            p.setFont("Helvetica", 11)
+
+        item_name = item.product_name
+        if item.variant_color:
+            item_name += f" ({item.variant_color})"
+
+        p.drawString(x_margin, y, item_name)
+        y -= 15
+
+        p.drawString(
+            x_margin + 20,
+            y,
+            f"Qty: {item.quantity}  |  Price: {item.unit_price:.2f}  |  Total: {item.item_total:.2f}"
+        )
+        y -= 20
+
+    # ------------------------
+    # Total Amount
+    # ------------------------
+    y -= 10
+    p.line(x_margin, y, 550, y)
+
+    y -= 25
+    p.setFont("Helvetica-Bold", 13)
+    p.drawRightString(550, y, f"Total Amount: {order.total_amount:.2f}")
+
+    # ------------------------
+    # Footer
+    # ------------------------
+    p.setFont("Helvetica", 9)
+    p.drawString(x_margin, 50, "This is a system generated invoice.")
+    p.drawRightString(550, 50, "Thank you for shopping with us!")
+
     p.showPage()
     p.save()
-    
+
     buffer.seek(0)
-    
-    # Return PDF response
-    response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_id}.pdf"'
-    
+
+    response = HttpResponse(buffer, content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="invoice_{order.order_id}.pdf"'
+    )
     return response

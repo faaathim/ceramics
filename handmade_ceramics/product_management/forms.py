@@ -8,15 +8,15 @@ class ProductForm(forms.ModelForm):
         fields = ['name', 'description', 'category', 'price', 'main_image', 'is_listed']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
         }
-
-    # stock is not in fields anymore (read-only/computed)
 
     def clean_price(self):
         price = self.cleaned_data.get('price')
         if price is None or price <= 0:
             raise forms.ValidationError("Price must be a positive number.")
         return price
+
 
 class ProductSearchForm(forms.Form):
     q = forms.CharField(required=False, label='Search', widget=forms.TextInput(attrs={'placeholder': 'Search by name or description'}))

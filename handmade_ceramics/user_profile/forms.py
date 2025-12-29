@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from .models import Profile
-from .validators import validate_profile_image, validate_indian_mobile, validate_indian_pincode, validate_small_text
+from .validators import validate_profile_image, validate_indian_mobile, validate_small_text
 
 User = get_user_model()
 
@@ -14,7 +14,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['profile_image', 'mobile', 'primary_address', 'city', 'state', 'pincode']
+        fields = ['profile_image', 'mobile']
 
     def __init__(self, *args, **kwargs):
         # accept the currently logged-in user so we can check uniqueness for email, etc.
@@ -33,12 +33,6 @@ class ProfileForm(forms.ModelForm):
         # use the validator function directly to reuse same logic
         validate_indian_mobile(mobile)
         return mobile
-
-    def clean_pincode(self):
-        pincode = self.cleaned_data.get('pincode')
-        print("inside clean pincode")
-        validate_indian_pincode(pincode)
-        return pincode
 
     def clean_profile_image(self):
         image = self.cleaned_data.get('profile_image')

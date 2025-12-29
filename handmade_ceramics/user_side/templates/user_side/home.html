@@ -604,7 +604,7 @@
             {% if products_page %}
                 <div class="row">
                     {% for product in products_page %}
-                    {% with v=product.variants.first %}
+                    {% with v=product.listed_variants.0 %}
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="product-card">
                             <a href="{% url 'custom_admin:product_management:product_detail' product.id %}{% if v %}?variant={{ v.id }}{% endif %}">

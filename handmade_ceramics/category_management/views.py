@@ -65,7 +65,7 @@ def category_create(request):
         if form.is_valid():
             category = form.save()  
             messages.success(request, f'Category \"{category.name}\" created.')
-            return redirect(reverse('category_management:category_list'))
+            return redirect('custom_admin:category_management:category_list')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -95,7 +95,7 @@ def category_edit(request, pk):
         if form.is_valid():
             form.save()  
             messages.success(request, f'Category \"{category.name}\" updated.')
-            return redirect(reverse('category_management:category_list'))
+            return redirect('custom_admin:category_management:category_list')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -118,7 +118,8 @@ def category_delete_confirm(request, pk):
         category.is_deleted = True
         category.save()  
         messages.success(request, f'Category \"{category.name}\" deleted (soft).')
-        return redirect(reverse('category_management:category_list'))
+        return redirect('custom_admin:category_management:category_list')
+
     return render(request, 'category_management/confirm_delete.html', {'category': category})
 
 
@@ -132,4 +133,6 @@ def category_toggle(request, category_id):
     category.save() 
     state = "listed" if category.is_listed else "unlisted"
     messages.info(request, f'Category \"{category.name}\" is now {state}.')
-    return redirect(reverse('custom_admin:category_management:category_list'))
+    return redirect('custom_admin:category_management:category_list')
+
+

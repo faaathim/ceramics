@@ -12,7 +12,11 @@ urlpatterns = [
     path('users/', include('user_management.urls', namespace='user_management')),
 
     # category_management
-    path('categories/', include('category_management.urls', namespace='category_management')),
+    path(
+        'categories/',
+        include(('category_management.urls', 'category_management'),
+        namespace='category_management')
+    ),
 
     # product_management
     path('products/', include('product_management.urls', namespace='product_management')),

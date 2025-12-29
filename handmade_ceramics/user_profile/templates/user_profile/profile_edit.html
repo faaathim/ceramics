@@ -78,49 +78,6 @@
         </div>
 
         <div class="form-group full-width">
-          <label for="{{ form.primary_address.id_for_label }}">Address</label>
-          {{ form.primary_address }}
-          {% if form.primary_address.errors %}
-            {% for error in form.primary_address.errors %}
-              <span class="error">{{ error }}</span>
-            {% endfor %}
-          {% endif %}
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="{{ form.city.id_for_label }}">City</label>
-            {{ form.city }}
-            {% if form.city.errors %}
-              {% for error in form.city.errors %}
-                <span class="error">{{ error }}</span>
-              {% endfor %}
-            {% endif %}
-          </div>
-
-          <div class="form-group">
-            <label for="{{ form.state.id_for_label }}">State</label>
-            {{ form.state }}
-            {% if form.state.errors %}
-              {% for error in form.state.errors %}
-                <span class="error">{{ error }}</span>
-              {% endfor %}
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="{{ form.pincode.id_for_label }}">PIN Code</label>
-          {{ form.pincode }}
-          <small class="form-hint">6-digit Indian PIN code</small>
-          {% if form.pincode.errors %}
-            {% for error in form.pincode.errors %}
-              <span class="error">{{ error }}</span>
-            {% endfor %}
-          {% endif %}
-        </div>
-
-        <div class="form-group full-width">
           <label>Profile Image</label>
           <small class="form-hint">Max size: 2MB | Formats: JPEG, PNG</small>
           <div class="image-upload-container">

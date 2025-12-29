@@ -73,10 +73,7 @@ def product_list(request):
 @transaction.atomic
 def product_create(request):
     """
-    Create product with improved validation messages:
-    - Check if images are provided
-    - Check if main image is provided
-    - Enforce total images (main + gallery) between 3 and 7 inclusive
+    Create product with improved validation and error messages
     """
     if request.method == 'POST':
         form = ProductForm(request.POST)
@@ -85,63 +82,72 @@ def product_create(request):
 
         # Step 1: Check if any images are provided
         if not main_file and not gallery_files:
-            messages.error(request, "Please upload at least one image. Images are required to create a product.")
+            form.add_error(None, "Please upload at least one image. Images are required to create a product.")
             return render(request, 'product_management/product_form.html', {
                 'form': form, 'action': 'Create', 'product': None
             })
 
         # Step 2: Check if main image is provided
         if not main_file:
-            messages.error(request, "Main image is mandatory. Please upload a main product image.")
+            form.add_error(None, "Main image is mandatory. Please upload a main product image.")
             return render(request, 'product_management/product_form.html', {
                 'form': form, 'action': 'Create', 'product': None
             })
 
         # Step 3: Count total images (main + gallery)
-        total_images = 1 + len(gallery_files)  # main is always 1 if we reach here
+        total_images = 1 + len(gallery_files)
         
         if total_images < 3:
-            messages.error(request, f"Please provide at least 3 images in total. You have uploaded {total_images} image(s). You need {3 - total_images} more image(s).")
+            form.add_error(None, f"Please provide at least 3 images in total. You have uploaded {total_images} image(s). You need {3 - total_images} more image(s).")
             return render(request, 'product_management/product_form.html', {
                 'form': form, 'action': 'Create', 'product': None
             })
         
         if total_images > 7:
-            messages.error(request, f"You can upload at most 7 images in total. You have uploaded {total_images} images. Please remove {total_images - 7} image(s).")
+            form.add_error(None, f"You can upload at most 7 images in total. You have uploaded {total_images} images. Please remove {total_images - 7} image(s).")
             return render(request, 'product_management/product_form.html', {
                 'form': form, 'action': 'Create', 'product': None
             })
 
         # Step 4: Validate form
         if form.is_valid():
-            product = form.save(commit=False)
-            # Product starts with 0 stock and unlisted until variants are added
-            product.stock = 0
-            product.is_listed = False
-            product.save()
+            try:
+                product = form.save(commit=False)
+                # Product starts with 0 stock and unlisted until variants are added
+                product.stock = 0
+                product.is_listed = False
+                product.save()
 
-            # Process main image
-            main_filename = f'{product.id}_main.jpg'
-            abs_main = os.path.join(settings.MEDIA_ROOT, 'products', 'main', main_filename)
-            rel_main = os.path.join('products', 'main', main_filename)
-            process_and_save_image(main_file, abs_main, size=(800, 800))
-            product.main_image = rel_main
-            product.save()
+                # Process main image
+                main_filename = f'{product.id}_main.jpg'
+                abs_main = os.path.join(settings.MEDIA_ROOT, 'products', 'main', main_filename)
+                rel_main = os.path.join('products', 'main', main_filename)
+                process_and_save_image(main_file, abs_main, size=(800, 800))
+                product.main_image = rel_main
+                product.save()
 
-            # Process gallery images
-            for idx, uploaded in enumerate(gallery_files):
-                fname = f'{idx}_{uploaded.name}'
-                rel_dir = os.path.join('products', str(product.id))
-                abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
-                rel_path = os.path.join(rel_dir, fname)
-                process_and_save_image(uploaded, abs_path, size=(1024, 1024))
-                ProductImage.objects.create(product=product, image=rel_path, order=idx)
+                # Process gallery images
+                for idx, uploaded in enumerate(gallery_files):
+                    fname = f'{idx}_{uploaded.name}'
+                    rel_dir = os.path.join('products', str(product.id))
+                    abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
+                    rel_path = os.path.join(rel_dir, fname)
+                    process_and_save_image(uploaded, abs_path, size=(1024, 1024))
+                    ProductImage.objects.create(product=product, image=rel_path, order=idx)
 
-            messages.success(request, f'Product "{product.name}" created successfully! Now add variants to list it for sale.')
-            return redirect(reverse('custom_admin:product_management:variant_list', args=[product.id]))
+                messages.success(request, f'Product "{product.name}" created successfully! Now add variants to list it for sale.')
+                return redirect(reverse('custom_admin:product_management:variant_list', args=[product.id]))
+            
+            except Exception as e:
+                # Rollback will happen automatically due to @transaction.atomic
+                messages.error(request, f"Error creating product: {str(e)}")
+                return render(request, 'product_management/product_form.html', {
+                    'form': form, 'action': 'Create', 'product': None
+                })
         else:
-            # Form validation errors
-            messages.error(request, "Please correct the errors below.")
+            # Form validation errors - these will be displayed in the template
+            pass
+
     else:
         form = ProductForm()
 

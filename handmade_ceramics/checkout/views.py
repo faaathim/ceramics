@@ -83,7 +83,7 @@ def place_order(request):
         user=user,
         shipping_full_name=f"{address.first_name} {address.last_name}".strip(),
         shipping_phone=address.phone,
-        shipping_email=address.email,
+        shipping_email=user.email,
         shipping_address_line=address.street_address,
         shipping_city=address.city,
         shipping_state=address.state,

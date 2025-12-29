@@ -47,7 +47,6 @@
               <th>City</th>
               <th>State</th>
               <th>Phone</th>
-              <th>Email</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -59,7 +58,6 @@
               <td>{{ addr.city }}</td>
               <td>{{ addr.state }}</td>
               <td>{{ addr.phone }}</td>
-              <td>{{ addr.email }}</td>
               <td>
                 <div class="action-buttons">
                   <a href="{% url 'user_addresses:address_edit' addr.id %}" class="btn-edit">Edit</a>

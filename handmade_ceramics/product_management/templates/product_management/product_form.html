@@ -211,7 +211,6 @@
             cursor: pointer;
         }
 
-        /* Image Preview Styles */
         .image-preview-container {
             margin-top: 20px;
             padding: 20px;
@@ -288,7 +287,6 @@
             font-weight: 600;
         }
 
-        /* Crop Modal */
         .crop-modal {
             display: none;
             position: fixed;
@@ -461,29 +459,6 @@
             font-size: 1.1rem;
         }
 
-        .non-field-errors {
-            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-            border-left: 4px solid #e07070;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .non-field-errors ul {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .non-field-errors li {
-            color: #e07070;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 5px;
-        }
-
         .section-divider {
             margin: 40px 0;
             border: 0;
@@ -566,6 +541,12 @@
             box-shadow: 0 8px 25px rgba(155, 139, 219, 0.5);
         }
 
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-cancel {
             background: transparent;
             color: #909090;
@@ -604,6 +585,183 @@
             border-color: #4a2a2a;
         }
 
+        /* Toast Messages */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+
+        .toast-message {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            border-left: 4px solid #9b8bdb;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .toast-message.error {
+            border-left-color: #e07070;
+        }
+
+        .toast-message.success {
+            border-left-color: #70c090;
+        }
+
+        .toast-message.warning {
+            border-left-color: #e0b870;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Django Messages Alert Styles */
+        .django-messages {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+
+        .django-message {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid #9b8bdb;
+        }
+
+        .django-message.error,
+        .django-message.danger {
+            border-left-color: #e07070;
+        }
+
+        .django-message.success {
+            border-left-color: #70c090;
+        }
+
+        .django-message.warning {
+            border-left-color: #e0b870;
+        }
+
+        .django-message.info {
+            border-left-color: #7ab8e0;
+        }
+
+        .django-message-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .django-message.error .django-message-icon,
+        .django-message.danger .django-message-icon {
+            color: #e07070;
+        }
+
+        .django-message.success .django-message-icon {
+            color: #70c090;
+        }
+
+        .django-message.warning .django-message-icon {
+            color: #e0b870;
+        }
+
+        .django-message.info .django-message-icon {
+            color: #7ab8e0;
+        }
+
+        .django-message-content {
+            flex-grow: 1;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .django-message-close {
+            background: transparent;
+            border: none;
+            color: #909090;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .django-message-close:hover {
+            color: #e8e8e8;
+            transform: scale(1.1);
+        }
+
+        /* Form Errors Display */
+        .form-errors-container {
+            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+            border-left: 4px solid #e07070;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .form-errors-title {
+            color: #e07070;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-errors-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .form-errors-list li {
+            color: #e07070;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .form-errors-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-errors-list i {
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
         @media (max-width: 768px) {
             .form-content {
                 padding: 20px;
@@ -630,49 +788,41 @@
             .preview-grid {
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
-        }
 
-        /* Toast Messages */
-        .toast-container {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 10000;
-        }
-
-        .toast-message {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            border-left: 4px solid #9b8bdb;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 300px;
-            animation: slideInRight 0.3s ease;
-        }
-
-        .toast-message.error {
-            border-left-color: #e07070;
-        }
-
-        .toast-message.success {
-            border-left-color: #70c090;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
+            .toast-container,
+            .django-messages {
+                top: 20px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
             }
-            to {
-                transform: translateX(0);
-                opacity: 1;
+
+            .toast-message,
+            .django-message {
+                min-width: auto;
             }
         }
     </style>
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+    <div class="django-messages" id="djangoMessages">
+        {% for message in messages %}
+        <div class="django-message {{ message.tags }}" data-message-id="{{ forloop.counter }}">
+            <i class="django-message-icon fas 
+                {% if message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+                {% elif message.tags == 'success' %}fa-check-circle
+                {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                {% else %}fa-info-circle
+                {% endif %}"></i>
+            <div class="django-message-content">{{ message }}</div>
+            <button type="button" class="django-message-close" onclick="closeDjangoMessage({{ forloop.counter }})">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="form-content">
         <div class="form-container">
@@ -693,12 +843,16 @@
                     
                     <!-- Non-field errors -->
                     {% if form.non_field_errors %}
-                    <div class="non-field-errors">
-                        <ul>
+                    <div class="form-errors-container">
+                        <div class="form-errors-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Please correct the following errors:
+                        </div>
+                        <ul class="form-errors-list">
                             {% for error in form.non_field_errors %}
                             <li>
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ error }}
+                                <i class="fas fa-times-circle"></i>
+                                <span>{{ error }}</span>
                             </li>
                             {% endfor %}
                         </ul>
@@ -953,23 +1107,48 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
+    <!-- Toast Container for JavaScript Messages -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        // Toast notification function
+        // Function to close Django messages
+        function closeDjangoMessage(id) {
+            const message = document.querySelector(`[data-message-id="${id}"]`);
+            if (message) {
+                message.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => message.remove(), 300);
+            }
+        }
+
+        // Auto-dismiss Django messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const djangoMessages = document.querySelectorAll('.django-message');
+            djangoMessages.forEach((message, index) => {
+                setTimeout(() => {
+                    message.style.animation = 'slideInRight 0.3s ease reverse';
+                    setTimeout(() => message.remove(), 300);
+                }, 5000 + (index * 500));
+            });
+        });
+
+        // Toast notification function for JavaScript-triggered messages
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast-message ${type}`;
             
             const icon = type === 'error' ? 'fa-exclamation-circle' : 
-                        type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+                        type === 'success' ? 'fa-check-circle' : 
+                        type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+            
+            const iconColor = type === 'error' ? '#e07070' : 
+                            type === 'success' ? '#70c090' : 
+                            type === 'warning' ? '#e0b870' : '#7ab8e0';
             
             toast.innerHTML = `
-                <i class="fas ${icon}" style="color: ${type === 'error' ? '#e07070' : type === 'success' ? '#70c090' : '#9b8bdb'}; font-size: 1.2rem;"></i>
+                <i class="fas ${icon}" style="color: ${iconColor}; font-size: 1.2rem;"></i>
                 <span style="color: #e8e8e8;">${message}</span>
             `;
             
@@ -978,12 +1157,12 @@
             setTimeout(() => {
                 toast.style.animation = 'slideInRight 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 4000);
         }
 
         // Global variables
         let cropper = null;
-        let currentCropTarget = null; // 'main' or gallery index
+        let currentCropTarget = null;
         let mainImageFile = null;
         let galleryFiles = [];
         let croppedMainBlob = null;
@@ -998,7 +1177,7 @@
 
         // Update image counter
         function updateImageCounter() {
-            const totalImages = (mainImageFile ? 1 : 0) + galleryFiles.length;
+            const totalImages = (croppedMainBlob ? 1 : 0) + croppedGalleryBlobs.length;
             const counter = document.getElementById('imageCounter');
             const countSpan = document.getElementById('imageCount');
             
@@ -1007,7 +1186,7 @@
             counter.classList.remove('warning', 'error');
             if (totalImages > 7) {
                 counter.classList.add('error');
-            } else if (totalImages < 3) {
+            } else if (totalImages < 3 && totalImages > 0) {
                 counter.classList.add('warning');
             }
         }
@@ -1053,7 +1232,9 @@
         });
 
         function handleMainImageSelect(file) {
-            if ((mainImageFile ? 0 : 1) + galleryFiles.length >= 7) {
+            const totalAfter = 1 + croppedGalleryBlobs.length;
+            
+            if (totalAfter > 7) {
                 showToast('Maximum 7 images allowed (including main image)', 'error');
                 return;
             }
@@ -1127,13 +1308,13 @@
                 return;
             }
 
-            const totalAfter = (mainImageFile ? 1 : 0) + galleryFiles.length + imageFiles.length;
+            const totalAfter = (croppedMainBlob ? 1 : 0) + croppedGalleryBlobs.length + imageFiles.length;
             if (totalAfter > 7) {
-                showToast(`Cannot add ${imageFiles.length} images. Maximum 7 images total allowed.`, 'error');
+                const canAdd = 7 - ((croppedMainBlob ? 1 : 0) + croppedGalleryBlobs.length);
+                showToast(`Cannot add ${imageFiles.length} images. You can only add ${canAdd} more image(s) to stay within the 7 image limit.`, 'error');
                 return;
             }
 
-            // Process first image for cropping
             if (imageFiles.length > 0) {
                 processGalleryImage(imageFiles[0], 0, imageFiles);
             }
@@ -1149,7 +1330,7 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 cropImage.src = e.target.result;
-                currentCropTarget = galleryFiles.length; // Index where this will be added
+                currentCropTarget = galleryFiles.length;
                 cropModal.classList.add('active');
                 initCropper();
             };
@@ -1260,16 +1441,16 @@
                     showMainImagePreview(blob);
                     showToast('Main image cropped successfully', 'success');
                 } else {
-                    // This is a gallery image
                     galleryFiles.push(pendingGalleryFiles[currentGalleryIndex]);
                     croppedGalleryBlobs.push(blob);
                     
-                    // Check if there are more images to process
                     if (currentGalleryIndex + 1 < pendingGalleryFiles.length) {
-                        const totalAfter = (mainImageFile ? 1 : 0) + galleryFiles.length + 1;
+                        const totalAfter = (croppedMainBlob ? 1 : 0) + croppedGalleryBlobs.length + 1;
                         if (totalAfter <= 7) {
                             processGalleryImage(pendingGalleryFiles[currentGalleryIndex + 1], currentGalleryIndex + 1, pendingGalleryFiles);
-                            return; // Don't close modal yet
+                            return;
+                        } else {
+                            showToast(`Skipped remaining images - 7 image limit reached`, 'warning');
                         }
                     }
                     
@@ -1315,36 +1496,48 @@
 
         // Form submission
         document.getElementById('submitBtn').addEventListener('click', async () => {
-            const totalImages = (mainImageFile ? 1 : 0) + galleryFiles.length;
+            const totalImages = (croppedMainBlob ? 1 : 0) + croppedGalleryBlobs.length;
+            
+            if (totalImages === 0) {
+                showToast('Please upload at least one image. Images are required to create a product.', 'error');
+                return;
+            }
+            
+            if (!croppedMainBlob) {
+                showToast('Main image is mandatory. Please upload a main product image.', 'error');
+                return;
+            }
             
             if (totalImages < 3) {
-                showToast('Please upload at least 3 images (main + gallery)', 'error');
+                const needed = 3 - totalImages;
+                showToast(`Please provide at least 3 images in total. You have uploaded ${totalImages} image(s). You need ${needed} more image(s).`, 'error');
                 return;
             }
             
             if (totalImages > 7) {
-                showToast('Maximum 7 images allowed. Please remove some images.', 'error');
+                const excess = totalImages - 7;
+                showToast(`You can upload at most 7 images in total. You have uploaded ${totalImages} images. Please remove ${excess} image(s).`, 'error');
                 return;
             }
 
-            // Create FormData and append cropped images
             const formData = new FormData(document.getElementById('productForm'));
             
-            // Remove original file inputs
             formData.delete('main_image');
             formData.delete('images');
             
-            // Add cropped main image
             if (croppedMainBlob) {
                 formData.append('main_image', croppedMainBlob, 'main_image.jpg');
             }
             
-            // Add cropped gallery images
             croppedGalleryBlobs.forEach((blob, index) => {
                 formData.append('images', blob, `gallery_${index}.jpg`);
             });
 
-            // Submit form
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Product...';
+
             try {
                 const response = await fetch(document.getElementById('productForm').action || window.location.href, {
                     method: 'POST',
@@ -1355,7 +1548,10 @@
                 });
 
                 if (response.redirected) {
-                    window.location.href = response.url;
+                    showToast('Product created successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = response.url;
+                    }, 500);
                 } else {
                     const html = await response.text();
                     document.body.innerHTML = html;
@@ -1363,10 +1559,11 @@
             } catch (error) {
                 showToast('Error submitting form. Please try again.', 'error');
                 console.error('Form submission error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
             }
         });
 
-        // Initialize counter
         updateImageCounter();
     </script>
   </section>

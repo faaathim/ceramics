@@ -97,6 +97,93 @@
                 color: #9b8bdb;
             }
 
+            .messages-container {
+                padding: 20px 40px;
+                background: #1a1a1a;
+            }
+
+            .alert-message {
+                padding: 16px 20px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideInDown 0.4s ease;
+                transition: all 0.3s ease;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .alert-message:last-child {
+                margin-bottom: 0;
+            }
+
+            .alert-message:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .alert-success {
+                background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+                border-left: 4px solid #70c090;
+                color: #70c090;
+            }
+
+            .alert-error {
+                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+                border-left: 4px solid #e07070;
+                color: #e07070;
+            }
+
+            .alert-warning {
+                background: linear-gradient(135deg, #4a4a2a, #3a3a2a);
+                border-left: 4px solid #e0c070;
+                color: #e0c070;
+            }
+
+            .alert-info {
+                background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+                border-left: 4px solid #70a0e0;
+                color: #70a0e0;
+            }
+
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .message-icon {
+                font-size: 1.2rem;
+                flex-shrink: 0;
+            }
+
+            .message-text {
+                flex: 1;
+            }
+
+            .message-close-btn {
+                background: transparent;
+                border: none;
+                color: inherit;
+                opacity: 0.7;
+                cursor: pointer;
+                padding: 5px;
+                font-size: 1.1rem;
+                transition: opacity 0.3s ease;
+                flex-shrink: 0;
+            }
+
+            .message-close-btn:hover {
+                opacity: 1;
+            }
+
             .form-body {
                 padding: 40px;
             }
@@ -200,7 +287,6 @@
                 cursor: pointer;
             }
 
-            /* Crop Modal */
             .crop-modal {
                 display: none;
                 position: fixed;
@@ -311,11 +397,6 @@
                 background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
                 border-color: #9b8bdb;
                 transform: translateY(-2px);
-            }
-
-            .crop-btn.active {
-                background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-                border-color: #9b8bdb;
             }
 
             .crop-footer {
@@ -528,24 +609,26 @@
                     padding: 20px;
                     margin-left: 0;
                 }
-
+                .form-header {
+                    padding: 25px 30px;
+                }
                 .form-body {
                     padding: 25px;
                 }
-
+                .messages-container {
+                    padding: 15px 25px;
+                }
                 .form-footer {
+                    padding: 20px 25px;
                     flex-direction: column-reverse;
                 }
-
                 .btn-submit, .btn-cancel {
                     width: 100%;
                     justify-content: center;
                 }
-
                 .crop-controls {
                     gap: 8px;
                 }
-
                 .crop-btn {
                     padding: 8px 15px;
                     font-size: 0.85rem;
@@ -556,7 +639,6 @@
     <body>
         <div class="form-content">
             <div class="form-container">
-                <!-- Form Header -->
                 <div class="form-header">
                     <h2 class="form-title">
                         <div class="form-icon">
@@ -566,12 +648,24 @@
                     </h2>
                 </div>
 
-                <!-- Form Body -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    <div class="alert-message alert-{{ message.tags }}">
+                        <i class="message-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <span class="message-text">{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="message-close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <div class="form-body">
-                    <form method="post" enctype="multipart/form-data" id="categoryForm">
+                    <form method="post" enctype="multipart/form-data" id="categoryForm" action="{% if action == 'Edit' %}{% url 'custom_admin:category_management:category_edit' category.id %}{% else %}{% url 'custom_admin:category_management:category_create' %}{% endif %}">
                         {% csrf_token %}
                         
-                        <!-- Non-field errors -->
                         {% if form.non_field_errors %}
                         <div class="non-field-errors">
                             <ul>
@@ -585,20 +679,12 @@
                         </div>
                         {% endif %}
 
-                        <!-- Category Name -->
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-tag"></i>
                                 Category Name
                             </label>
-                            <input 
-                                type="text" 
-                                name="{{ form.name.name }}" 
-                                value="{{ form.name.value|default:'' }}"
-                                class="form-input"
-                                placeholder="Enter category name..."
-                                required
-                            >
+                            <input type="text" name="{{ form.name.name }}" value="{{ form.name.value|default:'' }}" class="form-input" placeholder="Enter category name..." required>
                             {% if form.name.errors %}
                                 <div class="error-message">
                                     <i class="fas fa-exclamation-triangle"></i>
@@ -607,17 +693,12 @@
                             {% endif %}
                         </div>
 
-                        <!-- Description -->
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-align-left"></i>
                                 Description
                             </label>
-                            <textarea 
-                                name="{{ form.description.name }}"
-                                class="form-textarea"
-                                placeholder="Enter category description..."
-                            >{{ form.description.value|default:'' }}</textarea>
+                            <textarea name="{{ form.description.name }}" class="form-textarea" placeholder="Enter category description...">{{ form.description.value|default:'' }}</textarea>
                             {% if form.description.errors %}
                                 <div class="error-message">
                                     <i class="fas fa-exclamation-triangle"></i>
@@ -626,7 +707,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Image Upload -->
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-image"></i>
@@ -640,15 +720,8 @@
                                 <div class="file-upload-hint">
                                     Recommended: Square image (PNG, JPG, max 5MB)
                                 </div>
-                                <input 
-                                    type="file" 
-                                    name="temp_image"
-                                    class="file-input"
-                                    id="imageInput"
-                                    accept="image/*"
-                                >
+                                <input type="file" name="temp_image" class="file-input" id="imageInput" accept="image/*">
                             </div>
-                            <!-- Hidden input for cropped image -->
                             <input type="hidden" name="{{ form.image.name }}" id="croppedImageData">
                             
                             {% if form.image.errors %}
@@ -658,7 +731,6 @@
                                 </div>
                             {% endif %}
 
-                            <!-- Current Image Preview -->
                             {% if category and category.image %}
                             <div class="current-image-preview">
                                 <span class="current-image-label">
@@ -669,20 +741,13 @@
                             {% endif %}
                         </div>
 
-                        <!-- Is Listed Checkbox -->
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-toggle-on"></i>
                                 Visibility
                             </label>
                             <div class="checkbox-container">
-                                <input 
-                                    type="checkbox" 
-                                    name="{{ form.is_listed.name }}"
-                                    class="checkbox-input"
-                                    id="isListed"
-                                    {% if form.is_listed.value %}checked{% endif %}
-                                >
+                                <input type="checkbox" name="{{ form.is_listed.name }}" class="checkbox-input" id="isListed" {% if form.is_listed.value %}checked{% endif %}>
                                 <label for="isListed" class="checkbox-label">
                                     List this category publicly
                                 </label>
@@ -691,9 +756,8 @@
                     </form>
                 </div>
 
-                <!-- Form Footer -->
                 <div class="form-footer">
-                    <button type="submit" form="categoryForm" action="{% url 'custom_admin:category_management:category_create'%}" class="btn-submit">
+                    <button type="submit" form="categoryForm" class="btn-submit">
                         <i class="fas fa-save"></i>
                         {{ action }}
                     </button>
@@ -705,7 +769,6 @@
             </div>
         </div>
 
-        <!-- Crop Modal -->
         <div class="crop-modal" id="cropModal">
             <div class="crop-container">
                 <div class="crop-header">
@@ -723,38 +786,18 @@
                 </div>
 
                 <div class="crop-controls">
-                    <button class="crop-btn" id="zoomIn">
-                        <i class="fas fa-search-plus"></i> Zoom In
-                    </button>
-                    <button class="crop-btn" id="zoomOut">
-                        <i class="fas fa-search-minus"></i> Zoom Out
-                    </button>
-                    <button class="crop-btn" id="rotateLeft">
-                        <i class="fas fa-rotate-left"></i> Rotate Left
-                    </button>
-                    <button class="crop-btn" id="rotateRight">
-                        <i class="fas fa-rotate-right"></i> Rotate Right
-                    </button>
-                    <button class="crop-btn" id="flipH">
-                        <i class="fas fa-arrows-alt-h"></i> Flip H
-                    </button>
-                    <button class="crop-btn" id="flipV">
-                        <i class="fas fa-arrows-alt-v"></i> Flip V
-                    </button>
-                    <button class="crop-btn" id="reset">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
+                    <button class="crop-btn" id="zoomIn"><i class="fas fa-search-plus"></i> Zoom In</button>
+                    <button class="crop-btn" id="zoomOut"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                    <button class="crop-btn" id="rotateLeft"><i class="fas fa-rotate-left"></i> Rotate Left</button>
+                    <button class="crop-btn" id="rotateRight"><i class="fas fa-rotate-right"></i> Rotate Right</button>
+                    <button class="crop-btn" id="flipH"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
+                    <button class="crop-btn" id="flipV"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                    <button class="crop-btn" id="reset"><i class="fas fa-undo"></i> Reset</button>
                 </div>
 
                 <div class="crop-footer">
-                    <button class="btn-crop-apply" id="applyCrop">
-                        <i class="fas fa-check"></i>
-                        Apply Crop
-                    </button>
-                    <button class="btn-crop-cancel" id="cancelCrop">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </button>
+                    <button class="btn-crop-apply" id="applyCrop"><i class="fas fa-check"></i> Apply Crop</button>
+                    <button class="btn-crop-cancel" id="cancelCrop"><i class="fas fa-times"></i> Cancel</button>
                 </div>
             </div>
         </div>
@@ -768,7 +811,19 @@
             const cropImage = document.getElementById('cropImage');
             const croppedImageData = document.getElementById('croppedImageData');
 
-            // File upload drag and drop
+            document.addEventListener('DOMContentLoaded', function() {
+                const successMessages = document.querySelectorAll('.alert-success');
+                successMessages.forEach(function(message) {
+                    setTimeout(function() {
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateX(100%)';
+                        setTimeout(function() {
+                            message.remove();
+                        }, 300);
+                    }, 5000);
+                });
+            });
+
             fileUploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 fileUploadArea.classList.add('dragover');
@@ -781,7 +836,6 @@
             fileUploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 fileUploadArea.classList.remove('dragover');
-                
                 if (e.dataTransfer.files.length) {
                     fileInput.files = e.dataTransfer.files;
                     handleFileSelect(e.dataTransfer.files[0]);
@@ -811,7 +865,6 @@
                 if (cropper) {
                     cropper.destroy();
                 }
-                
                 cropper = new Cropper(cropImage, {
                     aspectRatio: 1,
                     viewMode: 1,
@@ -827,7 +880,6 @@
                 });
             }
 
-            // Crop controls
             document.getElementById('zoomIn').addEventListener('click', () => {
                 cropper.zoom(0.1);
             });
@@ -862,21 +914,17 @@
                 scaleY = 1;
             });
 
-            // Apply crop
             document.getElementById('applyCrop').addEventListener('click', () => {
                 const canvas = cropper.getCroppedCanvas({
                     width: 500,
                     height: 500,
                     imageSmoothingQuality: 'high'
                 });
-                
                 canvas.toBlob((blob) => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         croppedImageData.value = reader.result;
                         cropModal.classList.remove('active');
-                        
-                        // Update file upload text
                         const uploadText = fileUploadArea.querySelector('.file-upload-text');
                         uploadText.innerHTML = `<strong><i class="fas fa-check-circle" style="color: #70c090;"></i> Image cropped and ready</strong>`;
                     };
@@ -884,7 +932,6 @@
                 });
             });
 
-            // Cancel crop
             function closeCropModal() {
                 cropModal.classList.remove('active');
                 if (cropper) {
@@ -902,7 +949,6 @@
                 uploadText.innerHTML = `<strong><i class="fas fa-image" style="color: #9b8bdb;"></i> ${name}</strong>`;
             }
         </script>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
     </html>

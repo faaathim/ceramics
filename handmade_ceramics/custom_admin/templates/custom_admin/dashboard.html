@@ -29,6 +29,99 @@
                 min-height: calc(100vh - 70px);
             }
 
+            /* Messages styling */
+            .messages-container {
+                position: fixed;
+                top: 90px;
+                right: 30px;
+                z-index: 9999;
+                max-width: 400px;
+            }
+
+            .alert {
+                padding: 18px 24px;
+                border-radius: 12px;
+                margin-bottom: 15px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+                animation: slideInRight 0.4s ease-out, fadeOut 0.4s ease-out 4.6s;
+                position: relative;
+                border: 1px solid;
+            }
+
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(100px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
+
+            .alert-success {
+                background: linear-gradient(135deg, #2a3a2a, #3a4a3a);
+                border-color: #4a5a4a;
+                color: #70c090;
+            }
+
+            .alert-error {
+                background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
+                border-color: #5a4a4a;
+                color: #e09070;
+            }
+
+            .alert-info {
+                background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+                border-color: #4a4a5a;
+                color: #7090c0;
+            }
+
+            .alert-warning {
+                background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
+                border-color: #5a5a4a;
+                color: #e0b060;
+            }
+
+            .alert i {
+                font-size: 1.3rem;
+            }
+
+            .alert-close {
+                margin-left: auto;
+                background: none;
+                border: none;
+                color: inherit;
+                opacity: 0.6;
+                cursor: pointer;
+                font-size: 1.2rem;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: opacity 0.3s ease;
+            }
+
+            .alert-close:hover {
+                opacity: 1;
+            }
+
             .stats-card {
                 background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
                 border-radius: 20px;
@@ -261,7 +354,153 @@
             }
         </style>
     </head>
-    <body> <div class="dashboard-content"> <!-- Stats Cards --> <div class="row g-4"> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total User</div> <div class="stats-value">40,689</div> <div class="stats-change change-positive"> <i class="fas fa-arrow-up change-icon"></i> <span>8.5% Up from yesterday</span> </div> </div> <div class="stats-icon icon-purple"> <i class="fas fa-users"></i> </div> </div> </div> </div> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total Order</div> <div class="stats-value">10,293</div> <div class="stats-change change-positive"> <i class="fas fa-arrow-up change-icon"></i> <span>1.3% Up from past week</span> </div> </div> <div class="stats-icon icon-yellow"> <i class="fas fa-box"></i> </div> </div> </div> </div> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total Sales</div> <div class="stats-value">$89,000</div> <div class="stats-change change-negative"> <i class="fas fa-arrow-down change-icon"></i> <span>4.3% Down from yesterday</span> </div> </div> <div class="stats-icon icon-green"> <i class="fas fa-chart-line"></i> </div> </div> </div> </div> <div class="col-lg-3 col-md-6"> <div class="stats-card"> <div class="stats-header"> <div> <div class="stats-title">Total Pending</div> <div class="stats-value">2,040</div> <div class="stats-change change-positive"> <i class="fas fa-arrow-up change-icon"></i> <span>1.8% Up from yesterday</span> </div> </div> <div class="stats-icon icon-orange"> <i class="fas fa-clock"></i> </div> </div> </div> </div> </div> <!-- Chart Section --> <div class="chart-card"> <div class="chart-header"> <h3 class="chart-title">Sales Details</h3> <select class="month-selector"> <option>October</option> <option>September</option> <option>August</option> <option>July</option> </select> </div> <div class="chart-placeholder"> <i class="fas fa-chart-area" style="font-size: 3rem; opacity: 0.3; margin-right: 15px;"></i> <span>Sales Chart Visualization</span> </div> <div class="loading-animation"> <div class="loading-bar"></div> </div> <!-- Print Report Section --> <div class="report-section"> <div class="report-header"> <h4 class="report-title">Print sales report</h4> <select class="month-selector" style="margin-right: 15px;"> <option>October</option> <option>September</option> <option>August</option> </select> <button class="print-btn"> <i class="fas fa-print"></i> <span>Print pdf</span> </button> </div> </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> </body>
+    <body>
+        <!-- Messages Container -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                    <span>{{ message }}</span>
+                    <button class="alert-close" onclick="closeAlert('alert-{{ forloop.counter }}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="dashboard-content">
+            <!-- Stats Cards -->
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-title">Total User</div>
+                                <div class="stats-value">40,689</div>
+                                <div class="stats-change change-positive">
+                                    <i class="fas fa-arrow-up change-icon"></i>
+                                    <span>8.5% Up from yesterday</span>
+                                </div>
+                            </div>
+                            <div class="stats-icon icon-purple">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-title">Total Order</div>
+                                <div class="stats-value">10,293</div>
+                                <div class="stats-change change-positive">
+                                    <i class="fas fa-arrow-up change-icon"></i>
+                                    <span>1.3% Up from past week</span>
+                                </div>
+                            </div>
+                            <div class="stats-icon icon-yellow">
+                                <i class="fas fa-box"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-title">Total Sales</div>
+                                <div class="stats-value">$89,000</div>
+                                <div class="stats-change change-negative">
+                                    <i class="fas fa-arrow-down change-icon"></i>
+                                    <span>4.3% Down from yesterday</span>
+                                </div>
+                            </div>
+                            <div class="stats-icon icon-green">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-title">Total Pending</div>
+                                <div class="stats-value">2,040</div>
+                                <div class="stats-change change-positive">
+                                    <i class="fas fa-arrow-up change-icon"></i>
+                                    <span>1.8% Up from yesterday</span>
+                                </div>
+                            </div>
+                            <div class="stats-icon icon-orange">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Sales Details</h3>
+                    <select class="month-selector">
+                        <option>October</option>
+                        <option>September</option>
+                        <option>August</option>
+                        <option>July</option>
+                    </select>
+                </div>
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-area" style="font-size: 3rem; opacity: 0.3; margin-right: 15px;"></i>
+                    <span>Sales Chart Visualization</span>
+                </div>
+                <div class="loading-animation">
+                    <div class="loading-bar"></div>
+                </div>
+
+                <!-- Print Report Section -->
+                <div class="report-section">
+                    <div class="report-header">
+                        <h4 class="report-title">Print sales report</h4>
+                        <select class="month-selector" style="margin-right: 15px;">
+                            <option>October</option>
+                            <option>September</option>
+                            <option>August</option>
+                        </select>
+                        <button class="print-btn">
+                            <i class="fas fa-print"></i>
+                            <span>Print pdf</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Auto-hide messages after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.4s ease-out';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 400);
+                });
+            }, 5000);
+
+            // Close alert manually
+            function closeAlert(id) {
+                const alert = document.getElementById(id);
+                alert.style.transition = 'opacity 0.4s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 400);
+            }
+        </script>
+    </body>
     </html>
   </section>
 </div>
