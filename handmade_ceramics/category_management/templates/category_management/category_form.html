@@ -442,6 +442,75 @@
                 color: #e8e8e8;
             }
 
+            /* NEW: Image Preview for cropped images */
+            .image-preview-container {
+                margin-top: 20px;
+                padding: 20px;
+                background: #0f0f0f;
+                border-radius: 12px;
+                border: 2px solid #2a2a2a;
+                display: none;
+                animation: fadeInPreview 0.3s ease;
+            }
+
+            .image-preview-container.show {
+                display: block;
+            }
+
+            @keyframes fadeInPreview {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .preview-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .preview-label {
+                color: #9b8bdb;
+                font-size: 0.9rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .preview-remove-btn {
+                background: transparent;
+                border: 2px solid #e07070;
+                color: #e07070;
+                padding: 8px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 0.85rem;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .preview-remove-btn:hover {
+                background: #e07070;
+                color: #ffffff;
+                transform: translateY(-2px);
+            }
+
+            .preview-info {
+                text-align: center;
+                margin-top: 12px;
+                color: #909090;
+                font-size: 0.85rem;
+            }
+
             .current-image-preview {
                 margin-top: 20px;
                 padding: 20px;
@@ -731,6 +800,25 @@
                                 </div>
                             {% endif %}
 
+                            <!-- NEW: Image Preview for newly cropped images -->
+                            <div class="image-preview-container" id="imagePreviewContainer">
+                                <div class="preview-header">
+                                    <span class="preview-label">
+                                        <i class="fas fa-check-circle"></i>
+                                        Image Preview
+                                    </span>
+                                    <button type="button" class="preview-remove-btn" id="removePreview">
+                                        <i class="fas fa-trash"></i>
+                                        Remove
+                                    </button>
+                                </div>
+                                <img id="previewImage" class="image-preview" alt="Category preview">
+                                <div class="preview-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    This is how your category image will appear
+                                </div>
+                            </div>
+
                             {% if category and category.image %}
                             <div class="current-image-preview">
                                 <span class="current-image-label">
@@ -810,6 +898,9 @@
             const cropModal = document.getElementById('cropModal');
             const cropImage = document.getElementById('cropImage');
             const croppedImageData = document.getElementById('croppedImageData');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const previewImage = document.getElementById('previewImage');
+            const removePreviewBtn = document.getElementById('removePreview');
 
             document.addEventListener('DOMContentLoaded', function() {
                 const successMessages = document.querySelectorAll('.alert-success');
@@ -924,6 +1015,11 @@
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         croppedImageData.value = reader.result;
+                        
+                        // Show preview
+                        previewImage.src = reader.result;
+                        imagePreviewContainer.classList.add('show');
+                        
                         cropModal.classList.remove('active');
                         const uploadText = fileUploadArea.querySelector('.file-upload-text');
                         uploadText.innerHTML = `<strong><i class="fas fa-check-circle" style="color: #70c090;"></i> Image cropped and ready</strong>`;
@@ -940,6 +1036,17 @@
                 }
                 fileInput.value = '';
             }
+
+            // Remove preview handler
+            removePreviewBtn.addEventListener('click', () => {
+                imagePreviewContainer.classList.remove('show');
+                croppedImageData.value = '';
+                fileInput.value = '';
+                previewImage.src = '';
+                
+                const uploadText = fileUploadArea.querySelector('.file-upload-text');
+                uploadText.innerHTML = '<strong>Click to upload</strong> or drag and drop';
+            });
 
             document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
             document.getElementById('closeCropModal').addEventListener('click', closeCropModal);

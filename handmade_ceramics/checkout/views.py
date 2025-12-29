@@ -4,6 +4,8 @@ from django.db import transaction
 from cart.models import CartItem
 from user_addresses.models import Address
 from orders.models import Order, OrderItem
+from django.contrib import messages
+
 
 
 @login_required
@@ -50,35 +52,51 @@ def place_order(request):
 
     user = request.user
     address_id = request.POST.get("address_id")
-
     if not address_id:
         return redirect("checkout:checkout")
 
-    # Get the address safely
+    # Safely get the address
     try:
         address = Address.objects.get(id=address_id, user=user)
     except Address.DoesNotExist:
         return redirect("checkout:checkout")
 
-    # Get valid cart items (only saved, not-deleted variants/products)
-    cart_items = CartItem.objects.filter(
-        cart__user=user,
-        variant__isnull=False,
-        variant__is_deleted=False,
-        variant__product__isnull=False,
-        variant__product__is_deleted=False,
-    ).select_related("variant__product")
+    # Get cart items with product & variant, lock rows for update to avoid race conditions
+    cart_items = (
+        CartItem.objects
+        .filter(
+            cart__user=user,
+            variant__isnull=False,
+            variant__is_deleted=False,
+            variant__product__isnull=False,
+            variant__product__is_deleted=False,
+        )
+        .select_related("variant__product")
+        .select_for_update()  # locks the variants for this transaction
+    )
 
     if not cart_items.exists():
         return redirect("checkout:checkout")
 
+    # -------- Stock validation --------
+    for item in cart_items:
+        if item.quantity > item.variant.stock:
+            messages.error(
+                request,
+                f"Not enough stock for {item.variant.product.name} ({item.variant.color}). "
+                f"Available: {item.variant.stock}"
+            )
+            return redirect("checkout:checkout")
+    # ---------------------------------
+
+    # Calculate totals
     subtotal = sum(item.variant.product.price * item.quantity for item in cart_items)
     tax_amount = 0
     shipping_amount = 0
     discount = 0
     total = subtotal + tax_amount + shipping_amount - discount
 
-    # Create the order with correct address mapping
+    # Create order
     order = Order.objects.create(
         user=user,
         shipping_full_name=f"{address.first_name} {address.last_name}".strip(),
@@ -96,14 +114,10 @@ def place_order(request):
         payment_method="COD",
     )
 
-    # Create order items safely
+    # Create order items & reduce stock
     for item in cart_items:
         variant = item.variant
         product = variant.product
-
-        # Skip if variant or product has no ID (unsaved)
-        if not variant.id or not product.id:
-            continue
 
         OrderItem.objects.create(
             order=order,
@@ -115,14 +129,15 @@ def place_order(request):
             quantity=item.quantity,
         )
 
-        # Reduce stock safely
-        variant.stock = max(variant.stock - item.quantity, 0)
+        # Reduce stock
+        variant.stock -= item.quantity
         variant.save()
 
-    # Clear user's cart
+    # Clear cart
     CartItem.objects.filter(cart__user=user).delete()
 
     return redirect("checkout:success", order_id=order.order_id)
+
 
 
 @login_required

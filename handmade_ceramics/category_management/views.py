@@ -117,7 +117,7 @@ def category_delete_confirm(request, pk):
     if request.method == 'POST':
         category.is_deleted = True
         category.save()  
-        messages.success(request, f'Category \"{category.name}\" deleted (soft).')
+        messages.success(request, f'Category \"{category.name}\" deleted.')
         return redirect('custom_admin:category_management:category_list')
 
     return render(request, 'category_management/confirm_delete.html', {'category': category})

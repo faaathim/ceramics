@@ -674,14 +674,7 @@
             {% csrf_token %}
             <input type="hidden" name="variant_id" value="{{ variant.id }}">
         
-            <div class="quantity-controls">
-                <label class="quantity-label">Quantity</label>
-                <div class="quantity-input-wrapper">
-                    <button type="button" class="quantity-btn" onclick="decrementQty()">−</button>
-                    <input type="number" name="qty" id="qty-input" value="1" min="1" max="{{ variant.stock }}" readonly>
-                    <button type="button" class="quantity-btn" onclick="incrementQty()">+</button>
-                </div>
-            </div>
+            
         
             <div class="cart-wishlist-container">
                 <button type="submit" class="add-to-cart-btn">Add to Cart</button>

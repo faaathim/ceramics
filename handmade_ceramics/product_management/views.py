@@ -168,8 +168,9 @@ def product_edit(request, pk):
         gallery_files = request.FILES.getlist('images')
         
         # Check if user wants to remove images
-        remove_main = request.POST.get('remove_main_image') == 'true'
-        remove_gallery = request.POST.get('remove_gallery_images') == 'true'
+        remove_main = bool(request.POST.get('remove_main_image'))
+        remove_gallery = bool(request.POST.get('remove_gallery_images'))
+
 
         # ===== IMAGE COUNTING LOGIC =====
 
@@ -397,126 +398,136 @@ def variant_create(request, product_pk):
         'form': form, 'action': 'Create', 'product': product, 'variant': None
     })
 
-
 @admin_required
 @transaction.atomic
 def variant_edit(request, product_pk, pk):
     product = get_object_or_404(Product.all_objects, pk=product_pk)
-    variant = get_object_or_404(Variant, pk=pk)
-
-    if variant.product_id != product.id:
-        raise Http404
+    variant = get_object_or_404(Variant, pk=pk, product=product)
 
     if request.method == 'POST':
         form = VariantForm(request.POST, request.FILES, instance=variant)
+
         main_file = request.FILES.get('main_image')
         gallery_files = request.FILES.getlist('images')
-        
-        # Check removals
-        remove_main = request.POST.get('remove_main_image') == 'true'
-        remove_gallery = request.POST.get('remove_gallery_images') == 'true'
 
-        # ===== FIXED IMAGE COUNTING LOGIC =====
+        # Removal flags
+        remove_main = bool(request.POST.get('remove_main_image')) == '1'
+        remove_gallery = bool(request.POST.get('remove_gallery_images')) == '1'
 
-        # Determine if main image will exist
+        # ---------- CALCULATE FINAL IMAGE COUNT ----------
+        # Main image after edit
         if main_file:
+            # New main image uploaded
             will_have_main = True
-        elif variant.main_image and not remove_main:
-            will_have_main = True
-        else:
+        elif remove_main:
+            # Explicitly removing main
             will_have_main = False
-
-        # Determine gallery count
-        if remove_gallery:
-            existing_gallery = 0
         else:
-            existing_gallery = variant.images.count()
+            # Keep existing main (if any)
+            will_have_main = bool(variant.main_image)
 
-        new_gallery = len(gallery_files)
-
-        # New gallery always replaces old
-        if new_gallery > 0:
-            gallery_after = new_gallery
+        # Gallery after edit
+        if gallery_files:
+            # New gallery uploaded (replaces all)
+            gallery_after = len(gallery_files)
+        elif remove_gallery_ids:
+            gallery_after = variant.images.count() - len(ids)
         else:
-            gallery_after = existing_gallery
+            # Keep existing gallery
+            gallery_after = variant.images.count()
 
         total_after = (1 if will_have_main else 0) + gallery_after
 
-        # ===== VALIDATION =====
+        # ---------- IMAGE VALIDATION (ALWAYS CHECK) ----------
         if total_after < 3:
-            messages.error(request, "Total images (main + gallery) must be at least 3.")
-        elif total_after > 7:
-            messages.error(request, "Total images (main + gallery) cannot exceed 7.")
-        else:
-            if form.is_valid():
-                variant = form.save(commit=False)
-                
-                # If stock is 0, force unlist
-                if variant.stock == 0:
-                    variant.is_listed = False
+            messages.error(
+                request,
+                f"Total images must be at least 3. You will have {total_after} image(s)."
+            )
+            return render(request, 'product_management/variant_form.html', {
+                'form': form, 'action': 'Edit', 'product': product, 'variant': variant
+            })
 
-                # Handle main image removal
-                if remove_main and variant.main_image:
-                    try:
-                        path = os.path.join(settings.MEDIA_ROOT, variant.main_image.name)
-                        if os.path.isfile(path):
-                            os.remove(path)
-                    except Exception:
-                        pass
-                    variant.main_image = None
+        if total_after > 7:
+            messages.error(
+                request,
+                f"Total images cannot exceed 7. You will have {total_after} image(s)."
+            )
+            return render(request, 'product_management/variant_form.html', {
+                'form': form, 'action': 'Edit', 'product': product, 'variant': variant
+            })
 
-                # replace main image
-                if main_file:
-                    try:
-                        path = os.path.join(settings.MEDIA_ROOT, variant.main_image.name)
-                        if variant.main_image and os.path.isfile(path):
-                            os.remove(path)
-                    except Exception:
-                        pass
-                    main_filename = f'{variant.id}_main.jpg'
-                    abs_main = os.path.join(settings.MEDIA_ROOT, 'products', str(product.id), 'variants', str(variant.id), main_filename)
-                    rel_main = os.path.join('products', str(product.id), 'variants', str(variant.id), main_filename)
-                    process_and_save_image(main_file, abs_main, size=(800,800))
-                    variant.main_image = rel_main
+        remove_gallery_ids = request.POST.get('remove_gallery_ids')
 
-                # Handle gallery removal
-                if remove_gallery:
-                    for old in variant.images.all():
-                        try:
-                            path = os.path.join(settings.MEDIA_ROOT, old.image.name)
-                            if os.path.isfile(path):
-                                os.remove(path)
-                        except Exception:
-                            pass
-                    variant.images.all().delete()
+        if remove_gallery_ids:
+            ids = [int(i) for i in remove_gallery_ids.split(',') if i.isdigit()]
+            for img in variant.images.filter(id__in=ids):
+                img.image.delete(save=False)
+                img.delete()
+        # ---------- FORM VALIDATION ----------
+        if not form.is_valid():
+            print("form not valid")
+            messages.error(request, "Please correct the errors below.")
+            return render(request, 'product_management/variant_form.html', {
+                'form': form, 'action': 'Edit', 'product': product, 'variant': variant
+            })
 
-                # replace gallery
-                if gallery_files:
-                    for old in variant.images.all():
-                        try:
-                            path = os.path.join(settings.MEDIA_ROOT, old.image.name)
-                            if os.path.isfile(path):
-                                os.remove(path)
-                        except Exception:
-                            pass
-                    variant.images.all().delete()
-                    
-                    for idx, uploaded in enumerate(gallery_files):
-                        fname = f'{idx}_{uploaded.name}'
-                        rel_dir = os.path.join('products', str(product.id), 'variants', str(variant.id))
-                        abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
-                        rel_path = os.path.join(rel_dir, fname)
-                        process_and_save_image(uploaded, abs_path, size=(1024,1024))
-                        VariantImage.objects.create(variant=variant, image=rel_path, order=idx)
+        variant = form.save(commit=False)
 
-                if not variant.main_image and variant.images.exists():
-                    variant.main_image = variant.images.first().image.name
+        # Force unlist if stock is zero
+        if variant.stock == 0:
+            variant.is_listed = False
 
-                variant.save()
-                product.update_stock()
+        # ---------- MAIN IMAGE PROCESSING ----------
+        if remove_main and variant.main_image:
+            variant.main_image.delete(save=False)
+            variant.main_image = None
 
-                messages.success(request, 'Variant updated successfully.')
-                return redirect(reverse('custom_admin:product_management:variant_list', args=[product.id]))
+        if main_file:
+            if variant.main_image:
+                variant.main_image.delete(save=False)
+
+            main_filename = f'{variant.id}_main.jpg'
+            rel_main = os.path.join(
+                'products', str(product.id), 'variants', str(variant.id), main_filename
+            )
+            abs_main = os.path.join(settings.MEDIA_ROOT, rel_main)
+
+            process_and_save_image(main_file, abs_main, size=(800, 800))
+            variant.main_image = rel_main
+
+        # ---------- GALLERY PROCESSING ----------
+        if gallery_files:
+            # Replace entire gallery
+            for idx, uploaded in enumerate(gallery_files):
+                fname = f'{idx}_{uploaded.name}'
+                rel_dir = os.path.join(
+                    'products', str(product.id), 'variants', str(variant.id)
+                )
+                abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
+                rel_path = os.path.join(rel_dir, fname)
+
+                process_and_save_image(uploaded, abs_path, size=(1024, 1024))
+                VariantImage.objects.create(
+                    variant=variant,
+                    image=rel_path,
+                    order=idx
+                )
+
+        elif remove_gallery:
+            # Remove all gallery images
+            for img in variant.images.all():
+                img.image.delete(save=False)
+            variant.images.all().delete()
+
+        variant.save()
+        product.update_stock()
+
+        messages.success(request, 'Variant updated successfully.')
+        return redirect(
+            reverse('custom_admin:product_management:variant_list', args=[product.id])
+        )
+
     else:
         form = VariantForm(instance=variant)
 

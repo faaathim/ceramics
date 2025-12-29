@@ -41,7 +41,14 @@ class ProductQuerySet(models.QuerySet):
 
 class ProductManager(models.Manager):
     def get_queryset(self):
-        return ProductQuerySet(self.model, using=self._db).filter(is_deleted=False)
+        return (
+            ProductQuerySet(self.model, using=self._db)
+            .filter(
+                is_deleted=False,
+                category__is_deleted=False
+            )
+        )
+
 
 
 class Product(models.Model):

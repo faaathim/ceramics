@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from PIL import Image
+from product_management.models import Product
 
 def category_image_path(instance, filename):
     return f"categories/{instance.id or 'new'}/{filename}"
@@ -82,3 +83,22 @@ class Category(models.Model):
                 if hasattr(product, 'can_be_listed') and product.can_be_listed():
                     product.is_listed = True
                     product.save(update_fields=['is_listed'])
+
+    def soft_delete(self):
+
+        # Soft delete category
+        self.is_deleted = True
+        self.is_listed = False
+        self.save(update_fields=["is_deleted", "is_listed"])
+
+        # Soft delete related products
+        products = Product.all_objects.filter(category=self, is_deleted=False)
+
+        for product in products:
+            product.is_deleted = True
+            product.is_listed = False
+            product.save(update_fields=["is_deleted", "is_listed"])
+
+            # Soft delete variants
+            product.variants.update(is_deleted=True, is_listed=False)
+
