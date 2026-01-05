@@ -113,17 +113,30 @@ def admin_order_detail(request, order_id):
     items = order.items.select_related('variant', 'product').all()
 
     if request.method == 'POST':
-        # Changing order status via dropdown
         new_status = request.POST.get('status')
-        allowed = [choice[0] for choice in Order._meta.get_field('status').choices]
-        if new_status and new_status in allowed:
-            order.status = new_status
-            order.save()
-            messages.success(request, f"Order status updated to {order.get_status_display()}.")
-            return redirect(reverse('custom_admin:orders_admin:admin_order_detail', args=[order.order_id]))
 
-        else:
-            messages.error(request, "Invalid status selected.")
+        if not order.can_change_status(new_status):
+            messages.error(
+                request,
+                f"Invalid status change from "
+                f"{order.get_status_display()} to "
+                f"{new_status.replace('_', ' ').title()}."
+            )
+            return redirect(reverse(
+                'custom_admin:orders_admin:admin_order_detail',
+                args=[order.order_id]
+            ))
+
+        order.status = new_status
+        order.save()
+        messages.success(
+            request,
+            f"Order status updated to {order.get_status_display()}."
+        )
+        return redirect(reverse(
+            'custom_admin:orders_admin:admin_order_detail',
+            args=[order.order_id]
+        ))
 
     context = {
         'order': order,
@@ -131,6 +144,7 @@ def admin_order_detail(request, order_id):
         'status_choices': Order._meta.get_field('status').choices,
     }
     return render(request, 'orders/admin_order_detail.html', context)
+
 
 
 # ---------------------------

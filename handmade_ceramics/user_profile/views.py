@@ -6,11 +6,11 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 
-from .forms import ProfileForm
+from .forms import ProfileForm, ChangePasswordForm
 from .models import Profile, EmailChangeOTP
 from datetime import timedelta
 import base64
@@ -206,3 +206,36 @@ def resend_email_otp(request):
         messages.error(request, f"Failed to resend OTP: {str(e)}")
 
     return redirect('user_profile:verify_email_otp')
+
+
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        form = ChangePasswordForm(request.user, request.POST)
+
+        if form.is_valid():
+            user = request.user
+            user.set_password(form.cleaned_data["new_password"])
+            user.save()
+
+            messages.success(
+                request,
+                "Your password has been updated successfully. Please log in again."
+            )
+
+            logout(request)
+            return redirect("user_authentication:login")
+
+        # ❗ show validation errors
+        for error in form.errors.values():
+            messages.error(request, error)
+
+    else:
+        form = ChangePasswordForm(request.user)
+
+    return render(
+        request,
+        "user_profile/change_password.html",
+        {"form": form}
+    )

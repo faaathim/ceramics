@@ -17,10 +17,12 @@ ORDER_STATUS_CHOICES = [
     ('SHIPPED', 'Shipped'),
     ('OUT_FOR_DELIVERY', 'Out for delivery'),
     ('DELIVERED', 'Delivered'),
-    ('CANCELLED', 'Cancelled'),
     ('RETURN_REQUESTED', 'Return requested'),
+    ('RETURN_PROCESSING', 'Return processing'),
     ('RETURNED', 'Returned'),
+    ('CANCELLED', 'Cancelled'),
 ]
+
 
 
 def generate_order_id():
@@ -74,6 +76,18 @@ class Order(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    ORDER_STATUS_FLOW = {
+    'PENDING': ['CONFIRMED', 'CANCELLED'],
+    'CONFIRMED': ['SHIPPED', 'CANCELLED'],
+    'SHIPPED': ['OUT_FOR_DELIVERY', 'CANCELLED'],
+    'OUT_FOR_DELIVERY': ['DELIVERED'],
+    'DELIVERED': ['RETURN_REQUESTED'],
+    'RETURN_REQUESTED': ['RETURN_PROCESSING'],
+    'RETURN_PROCESSING': ['RETURNED'],
+    'RETURNED': [],
+    'CANCELLED': [],
+}
+
     class Meta:
         ordering = ['-created_at']
 
@@ -96,6 +110,10 @@ class Order(models.Model):
 
     def get_absolute_url(self):
         return reverse('orders:order_detail', args=[self.order_id])
+    
+    def can_change_status(self, new_status):
+        return new_status in self.ORDER_STATUS_FLOW.get(self.status, [])
+
 
 
 class OrderItem(models.Model):
@@ -130,6 +148,24 @@ class OrderItem(models.Model):
         return f"{self.product_name} x {self.quantity} ({self.order.order_id})"
 
     def save(self, *args, **kwargs):
-        # Ensure item_total is consistent with unit_price * quantity
-        self.item_total = (self.unit_price or 0) * (self.quantity or 0)
+    # Ensure an order_id exists before first save
+        if not self.order_id:
+            for _ in range(5):
+                candidate = generate_order_id()
+                if not Order.objects.filter(order_id=candidate).exists():
+                    self.order_id = candidate
+                    break
+            else:
+                self.order_id = generate_order_id()
+
+        # 🔒 STATUS TRANSITION PROTECTION
+        if self.pk:
+            old = Order.objects.get(pk=self.pk)
+            if old.status != self.status:
+                if not old.can_change_status(self.status):
+                    raise ValueError(
+                        f"Invalid status transition from {old.status} to {self.status}"
+                    )
+
         super().save(*args, **kwargs)
+

@@ -1,6 +1,7 @@
 # product_management/forms.py
 from django import forms
 from .models import Product, Variant
+from category_management.models import Category
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -10,6 +11,22 @@ class ProductForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
             'category': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Show only active (not deleted) categories
+        self.fields['category'].queryset = Category.objects.filter(is_listed=True)
+
+        # ✅ Edge case:
+        # If editing a product whose category is now inactive,
+        # still show it as a selected option
+        if self.instance.pk and self.instance.category:
+            self.fields['category'].queryset = (
+                Category.objects.filter(
+                    is_listed=True
+                ) | Category.all_objects.filter(pk=self.instance.category.pk)
+            )
 
     def clean_price(self):
         price = self.cleaned_data.get('price')

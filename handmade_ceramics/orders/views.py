@@ -63,47 +63,58 @@ def order_detail(request, order_id):
     
     return render(request, "orders/order_detail.html", context)
 
-
 @login_required
 @transaction.atomic
 def cancel_order(request, order_id):
     # Get user profile for sidebar
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    
+
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    
+
+    NON_CANCELLABLE_STATUSES = [
+        'OUT_FOR_DELIVERY',
+        'DELIVERED',
+        'RETURN_REQUESTED',
+        'RETURN_PROCESSING',
+        'RETURNED',
+    ]
+
     # Check if order can be cancelled
-    if order.status in ['CANCELLED', 'DELIVERED', 'RETURNED']:
+    if order.status in NON_CANCELLABLE_STATUSES:
         messages.error(request, 'This order cannot be cancelled.')
         return redirect('orders:order_list')
-    
+
     if request.method == 'POST':
         reason = request.POST.get('reason', '')
-        
+
         if not reason:
             messages.error(request, 'Please provide a cancellation reason.')
             return render(request, 'orders/order_cancel_form.html', {
                 'order': order,
                 'profile': profile
             })
-        
+
         order.status = 'CANCELLED'
         order.cancellation_reason = reason
         order.save()
-        
+
         # Return stock for all items
-        for item in order.items.all():
+        for item in order.items.select_related('variant'):
             if item.variant:
                 item.variant.stock += item.quantity
                 item.variant.save()
-        
-        messages.success(request, f'Order {order.order_id} has been cancelled successfully.')
+
+        messages.success(
+            request,
+            f'Order {order.order_id} has been cancelled successfully.'
+        )
         return redirect('orders:order_list')
-    
+
     return render(request, 'orders/order_cancel_form.html', {
         'order': order,
         'profile': profile
     })
+
 
 
 @login_required
@@ -111,38 +122,39 @@ def cancel_order(request, order_id):
 def return_order(request, order_id):
     # Get user profile for sidebar
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    
+
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    
+
+    # Only delivered orders can be returned
     if order.status != 'DELIVERED':
         messages.error(request, 'Only delivered orders can be returned.')
         return redirect('orders:order_list')
-    
-    if order.status == 'RETURNED':
-        messages.error(request, 'This order has already been returned.')
-        return redirect('orders:order_list')
-    
+
     if request.method == 'POST':
         reason = request.POST.get('reason', '')
-        
+
         if not reason:
             messages.error(request, 'Please provide a return reason.')
             return render(request, 'orders/order_return_form.html', {
                 'order': order,
                 'profile': profile
             })
-        
+
         order.status = 'RETURN_REQUESTED'
         order.return_reason = reason
         order.save()
-        
-        messages.success(request, f'Return request for order {order.order_id} has been submitted successfully.')
+
+        messages.success(
+            request,
+            f'Return request for order {order.order_id} has been submitted successfully.'
+        )
         return redirect('orders:order_list')
-    
+
     return render(request, 'orders/order_return_form.html', {
         'order': order,
         'profile': profile
     })
+
 
 @login_required
 def download_invoice(request, order_id):

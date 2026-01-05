@@ -20,7 +20,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '172.16.3.16',
-    '75acc85c9fb2.ngrok-free.app'
+    '.ngrok-free.app',
 ]
 
 # Application definition
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'cart',
     'orders',
     'checkout',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
 
 from .models import Cart, CartItem
@@ -138,18 +138,21 @@ def remove_cart_item(request, item_id):
     return redirect(reverse('cart:cart_page'))
 
 
+from django.http import JsonResponse
+
+
 @login_required
 def update_quantity(request, item_id):
     """
-    Update quantity for a cart item.
-    Accepts POST with either:
-      - action = 'increment' or 'decrement'
-      - or qty = <int> to set absolute value
+    AJAX: Update quantity for a cart item.
+    POST data:
+      - action = increment | decrement
+      - OR qty = <int>
 
-    Ensures 1 <= quantity <= min(variant.stock, site_max).
+    Returns JSON (no page reload)
     """
-    if request.method != 'POST':
-        return HttpResponseBadRequest("Invalid request method.")
+    if request.method != 'POST' or not request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return HttpResponseBadRequest("Invalid request")
 
     cart = _get_user_cart(request.user)
     item = get_object_or_404(CartItem, pk=item_id, cart=cart)
@@ -169,9 +172,9 @@ def update_quantity(request, item_id):
         try:
             new_qty = int(qty_val)
         except (ValueError, TypeError):
-            return HttpResponseBadRequest("Invalid quantity.")
+            return JsonResponse({'error': 'Invalid quantity'}, status=400)
     else:
-        return HttpResponseBadRequest("No action provided.")
+        return JsonResponse({'error': 'No action provided'}, status=400)
 
     if new_qty < 1:
         new_qty = 1
@@ -180,4 +183,12 @@ def update_quantity(request, item_id):
 
     item.quantity = new_qty
     item.save()
-    return redirect(reverse('cart:cart_page'))
+
+    return JsonResponse({
+        'item_id': item.id,
+        'quantity': item.quantity,
+        'item_total': item.quantity * getattr(item.variant.product, 'price', 0),
+        'cart_total': cart.total_price(),
+        'cart_items': cart.total_items(),
+    })
+

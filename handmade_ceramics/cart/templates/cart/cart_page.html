@@ -177,6 +177,12 @@
         transform: scale(1.2);
     }
 
+    .qty-btn:disabled {
+        color: #555555;
+        cursor: not-allowed;
+        transform: scale(1);
+    }
+
     .qty-display {
         min-width: 30px;
         text-align: center;
@@ -367,7 +373,7 @@
 </style>
 
 <div class="cart-main-container">
-    <h1 class="cart-title">CART <span>({{ items|length }} ITEM{% if items|length != 1 %}S{% endif %})</span></h1>
+    <h1 class="cart-title">CART <span id="cart-item-count">({{ items|length }} ITEM{% if items|length != 1 %}S{% endif %})</span></h1>
 
     {% if items %}
         <div class="cart-header-row">
@@ -380,7 +386,7 @@
         </div>
 
         {% for item in items %}
-        <div class="cart-product-row">
+        <div class="cart-product-row" data-item-id="{{ item.id }}">
             <div class="delete-column">
                 <form method="POST" action="{% url 'cart:remove_cart_item' item.id %}">
                     {% csrf_token %}
@@ -401,23 +407,17 @@
                 <div class="product-variant">Color: {{ item.variant.color|default:"N/A" }}</div>
             </div>
 
-            <div class="price-column">
+            <div class="price-column" data-price="{{ item.variant.product.price }}">
                 RS.{{ item.variant.product.price }}
             </div>
 
             <div class="quantity-column">
-                <form method="POST" action="{% url 'cart:update_quantity' item.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" name="action" value="decrement" class="qty-btn">−</button>
-                </form>
-                <span class="qty-display">{{ item.quantity }}</span>
-                <form method="POST" action="{% url 'cart:update_quantity' item.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" name="action" value="increment" class="qty-btn">+</button>
-                </form>
+                <button type="button" class="qty-btn qty-decrement" data-item-id="{{ item.id }}">−</button>
+                <span class="qty-display" data-item-id="{{ item.id }}">{{ item.quantity }}</span>
+                <button type="button" class="qty-btn qty-increment" data-item-id="{{ item.id }}">+</button>
             </div>
 
-            <div class="subtotal-column">
+            <div class="subtotal-column" data-item-id="{{ item.id }}">
                 RS.{% widthratio item.variant.product.price 1 item.quantity %}
             </div>
         </div>
@@ -436,7 +436,7 @@
                 <h3 class="totals-title">Cart Totals</h3>
                 <div class="totals-line">
                     <span>Subtotal</span>
-                    <span>Rs.{{ total_price }}</span>
+                    <span id="cart-subtotal">Rs.{{ total_price }}</span>
                 </div>
                 <div class="totals-line">
                     <span>Shipping</span>
@@ -444,7 +444,7 @@
                 </div>
                 <div class="totals-line final-total">
                     <span>Total</span>
-                    <span>Rs.{{ total_price }}</span>
+                    <span id="cart-total">Rs.{{ total_price }}</span>
                 </div>
                 <a href="{% url 'checkout:checkout' %}" class="btn-proceed-checkout">
                     <span>Proceed to Checkout</span>
@@ -459,4 +459,95 @@
         </div>
     {% endif %}
 </div>
+
+<script>
+    // Get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // Handle quantity update
+    function updateQuantity(itemId, action) {
+        const formData = new FormData();
+        formData.append('action', action);
+
+        fetch(`/cart/item/${itemId}/update/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Update quantity display
+            const qtyDisplay = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
+            if (qtyDisplay) {
+                qtyDisplay.textContent = data.quantity;
+            }
+
+            // Update item subtotal
+            const subtotalElement = document.querySelector(`.subtotal-column[data-item-id="${itemId}"]`);
+            if (subtotalElement) {
+                subtotalElement.textContent = `RS.${data.item_total}`;
+            }
+
+            // Update cart totals
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotal = document.getElementById('cart-total');
+            if (cartSubtotal) {
+                cartSubtotal.textContent = `Rs.${data.cart_total}`;
+            }
+            if (cartTotal) {
+                cartTotal.textContent = `Rs.${data.cart_total}`;
+            }
+
+            // Update cart item count in title
+            const itemCount = document.getElementById('cart-item-count');
+            if (itemCount) {
+                const count = data.cart_items;
+                itemCount.textContent = `(${count} ITEM${count !== 1 ? 'S' : ''})`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update quantity. Please try again.');
+        });
+    }
+
+    // Add event listeners to all increment buttons
+    document.querySelectorAll('.qty-increment').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            updateQuantity(itemId, 'increment');
+        });
+    });
+
+    // Add event listeners to all decrement buttons
+    document.querySelectorAll('.qty-decrement').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            updateQuantity(itemId, 'decrement');
+        });
+    });
+</script>
 {% endblock %}

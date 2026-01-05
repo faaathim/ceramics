@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from .models import Profile
 from .validators import validate_profile_image, validate_indian_mobile, validate_small_text
-
+from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
 
 class ProfileForm(forms.ModelForm):
@@ -67,3 +67,41 @@ class ProfileForm(forms.ModelForm):
             if self.user:
                 self.user.save()
         return profile
+
+class ChangePasswordForm(forms.Form):
+    current_password = forms.CharField(
+        widget=forms.PasswordInput,
+        label="Current Password"
+    )
+    new_password = forms.CharField(
+        widget=forms.PasswordInput,
+        label="New Password"
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput,
+        label="Confirm New Password"
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        current = self.cleaned_data.get("current_password")
+        if not self.user.check_password(current):
+            raise forms.ValidationError("Current password is incorrect.")
+        return current
+
+    def clean(self):
+        cleaned = super().clean()
+        new = cleaned.get("new_password")
+        confirm = cleaned.get("confirm_password")
+
+        if new and confirm and new != confirm:
+            raise forms.ValidationError("New passwords do not match.")
+
+        # Django built-in password rules
+        if new:
+            validate_password(new, self.user)
+
+        return cleaned
