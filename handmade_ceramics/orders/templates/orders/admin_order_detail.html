@@ -295,6 +295,93 @@
             box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
         }
 
+        /* Return Management Styles */
+        .return-management {
+            background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #5a4a4a;
+        }
+
+        .return-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #2a5a3a, #3a6a4a);
+            color: #70c090;
+            flex: 1;
+        }
+
+        .btn-approve:hover {
+            background: linear-gradient(135deg, #3a6a4a, #4a7a5a);
+            box-shadow: 0 5px 20px rgba(112, 192, 144, 0.3);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #5a2a2a, #6a3a3a);
+            color: #e07070;
+            flex: 1;
+        }
+
+        .btn-reject:hover {
+            background: linear-gradient(135deg, #6a3a3a, #7a4a4a);
+            box-shadow: 0 5px 20px rgba(224, 112, 112, 0.3);
+        }
+
+        .btn-complete {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
+            color: #ffffff;
+            width: 100%;
+        }
+
+        .btn-complete:hover {
+            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
+            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
+        }
+
+        .return-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #5a4a2a, #6a5a3a);
+            color: #e0c070;
+            margin-bottom: 15px;
+        }
+
+        .rejection-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #404040;
+            border-radius: 10px;
+            background: #0f0f0f;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .rejection-textarea:focus {
+            outline: none;
+            border-color: #9b8bdb;
+            background: #1a1a1a;
+            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
+        }
+
+        .rejection-textarea::placeholder {
+            color: #606060;
+        }
+
         /* Items Table */
         .items-card {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
@@ -553,6 +640,57 @@
                         </button>
                     </form>
                 </div>
+
+                <!-- Return Management Section -->
+                {% if order.status == "RETURN_REQUESTED" %}
+                <div class="return-management">
+                    <div class="return-status-badge">
+                        <i class="fas fa-undo-alt"></i>
+                        Return Requested - Action Required
+                    </div>
+                    <label class="form-label">
+                        <i class="fas fa-clipboard-check"></i>
+                        Review Return Request
+                    </label>
+                    <form method="post" action="{% url 'custom_admin:orders_admin:admin_verify_return' order.order_id %}">
+                        {% csrf_token %}
+                        
+                        <label class="form-label" style="margin-top: 15px;">
+                            <i class="fas fa-comment-dots"></i>
+                            Rejection Reason (if rejecting)
+                        </label>
+                        <textarea name="reason" class="rejection-textarea" placeholder="Enter reason for rejection (optional)"></textarea>
+                        
+                        <div class="return-actions">
+                            <button type="submit" name="action" value="approve" class="btn btn-approve">
+                                <i class="fas fa-check"></i>
+                                Approve Return
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-reject">
+                                <i class="fas fa-times"></i>
+                                Reject Return
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if order.status == "RETURN_PROCESSING" %}
+                <div class="return-management">
+                    <div class="return-status-badge">
+                        <i class="fas fa-sync-alt"></i>
+                        Return in Progress
+                    </div>
+                    <label class="form-label">
+                        <i class="fas fa-box-open"></i>
+                        Complete Return Process
+                    </label>
+                    <a href="{% url 'custom_admin:orders_admin:admin_complete_return' order.order_id %}" class="btn btn-complete">
+                        <i class="fas fa-flag-checkered"></i>
+                        Mark as Returned
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
 

@@ -72,6 +72,7 @@ class Order(models.Model):
     # Optional notes / reason fields
     cancellation_reason = models.TextField(blank=True, null=True)
     return_reason = models.TextField(blank=True, null=True)
+    return_rejection_reason = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,14 +80,15 @@ class Order(models.Model):
     ORDER_STATUS_FLOW = {
     'PENDING': ['CONFIRMED', 'CANCELLED'],
     'CONFIRMED': ['SHIPPED', 'CANCELLED'],
-    'SHIPPED': ['OUT_FOR_DELIVERY', 'CANCELLED'],
+    'SHIPPED': ['OUT_FOR_DELIVERY'],
     'OUT_FOR_DELIVERY': ['DELIVERED'],
     'DELIVERED': ['RETURN_REQUESTED'],
-    'RETURN_REQUESTED': ['RETURN_PROCESSING'],
+    'RETURN_REQUESTED': ['RETURN_PROCESSING', 'DELIVERED'],  # reject
     'RETURN_PROCESSING': ['RETURNED'],
     'RETURNED': [],
     'CANCELLED': [],
 }
+
 
     class Meta:
         ordering = ['-created_at']
@@ -148,24 +150,7 @@ class OrderItem(models.Model):
         return f"{self.product_name} x {self.quantity} ({self.order.order_id})"
 
     def save(self, *args, **kwargs):
-    # Ensure an order_id exists before first save
-        if not self.order_id:
-            for _ in range(5):
-                candidate = generate_order_id()
-                if not Order.objects.filter(order_id=candidate).exists():
-                    self.order_id = candidate
-                    break
-            else:
-                self.order_id = generate_order_id()
-
-        # 🔒 STATUS TRANSITION PROTECTION
-        if self.pk:
-            old = Order.objects.get(pk=self.pk)
-            if old.status != self.status:
-                if not old.can_change_status(self.status):
-                    raise ValueError(
-                        f"Invalid status transition from {old.status} to {self.status}"
-                    )
-
+        self.item_total = self.unit_price * self.quantity
         super().save(*args, **kwargs)
+
 

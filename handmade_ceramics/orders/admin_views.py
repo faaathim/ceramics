@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from .models import Order, OrderItem
 from product_management.models import Variant
+from django.db import transaction
 
 # Simple superuser check reused in your custom_admin
 def superuser_check(user):
@@ -171,3 +172,51 @@ def admin_inventory(request):
         'query_params': '',
     }
     return render(request, 'orders/admin_inventory.html', context)
+    
+@login_required(login_url='custom_admin:login')
+@user_passes_test(superuser_check, login_url='custom_admin:login')
+def admin_verify_return(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id)
+
+    if order.status != 'RETURN_REQUESTED':
+        messages.error(request, "No return request to verify.")
+        return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'approve':
+            order.status = 'RETURN_PROCESSING'
+            messages.success(request, "Return approved.")
+
+        elif action == 'reject':
+            order.status = 'DELIVERED'
+            order.return_rejection_reason = request.POST.get('reason', '')
+            messages.success(request, "Return rejected.")
+
+        order.save()
+
+    return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+
+@login_required(login_url='custom_admin:login')
+@user_passes_test(superuser_check, login_url='custom_admin:login')
+@transaction.atomic
+def admin_complete_return(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id)
+
+    if order.status != 'RETURN_PROCESSING':
+        messages.error(request, "Return not in processing state.")
+        return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+
+    # Restock items
+    for item in order.items.select_related('variant'):
+        if item.variant:
+            item.variant.stock += item.quantity
+            item.variant.save()
+
+    order.status = 'RETURNED'
+    order.save()
+
+    messages.success(request, "Return completed and stock updated.")
+    return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+
