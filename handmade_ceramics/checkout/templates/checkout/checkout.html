@@ -114,6 +114,48 @@
         <div class="order-summary-card">
           
           <!-- Cart Items -->
+           <!-- Coupon Section -->
+<div class="coupon-section" style="margin-bottom: 20px;">
+
+  {% if coupon %}
+    <!-- Applied Coupon -->
+    <div class="applied-coupon" style="background:#1a1a1a;padding:15px;border-radius:8px;border:1px solid #3a3a3a;">
+      <p style="color:#4caf50;font-weight:600;margin-bottom:10px;">
+        Coupon Applied: {{ coupon.code }}
+      </p>
+      <p style="color:#ddd;margin-bottom:10px;">
+        You saved ₹{{ discount }}
+      </p>
+
+      <form method="post" action="{% url 'coupons:remove_coupon' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-edit-address">
+          Remove Coupon
+        </button>
+      </form>
+    </div>
+
+  {% else %}
+    <!-- Apply Coupon -->
+    <form method="post" action="{% url 'coupons:apply_coupon' %}">
+      {% csrf_token %}
+      <div style="display:flex;gap:10px;">
+        <input
+          type="text"
+          name="coupon_code"
+          placeholder="Enter coupon code"
+          required
+          style="flex:1;padding:10px;border-radius:6px;border:1px solid #3a3a3a;background:#1a1a1a;color:#fff;"
+        >
+        <button type="submit" class="btn-edit-address">
+          Apply
+        </button>
+      </div>
+    </form>
+  {% endif %}
+
+</div>
+
           <div class="cart-items-list">
             {% for item in cart_items %}
             <div class="cart-item">
@@ -158,12 +200,19 @@
                 {% endif %}
               </span>
             </div>
-            <div class="price-row discount">
-              <span>Discount</span>
-              <span>- ₹{{ discount }}</span>
-            </div>
+            {% if discount and discount > 0 %}
+<div class="price-row discount">
+  <span>Discount</span>
+  <span>- ₹{{ discount }}</span>
+</div>
+{% endif %}
+
             <div class="price-row total">
               <span>Total Amount</span>
+              <p style="font-size:12px;color:#999;margin-top:10px;">
+                * Minimum payable amount is ₹1
+              </p>
+              
               <span>₹{{ total }}</span>
             </div>
           </div>

@@ -9,6 +9,7 @@ from cart.models import CartItem
 from user_profile.models import Profile
 import io
 from reportlab.pdfgen import canvas # type: ignore
+from coupons.models import CouponUsage
 
 
 
@@ -66,9 +67,7 @@ def order_detail(request, order_id):
 @login_required
 @transaction.atomic
 def cancel_order(request, order_id):
-    # Get user profile for sidebar
     profile, _ = Profile.objects.get_or_create(user=request.user)
-
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
 
     NON_CANCELLABLE_STATUSES = [
@@ -79,7 +78,6 @@ def cancel_order(request, order_id):
         'RETURNED',
     ]
 
-    # Check if order can be cancelled
     if order.status in NON_CANCELLABLE_STATUSES:
         messages.error(request, 'This order cannot be cancelled.')
         return redirect('orders:order_list')
@@ -98,7 +96,11 @@ def cancel_order(request, order_id):
         order.cancellation_reason = reason
         order.save()
 
-        # Return stock for all items
+        # 🟢 STEP 9 — Coupon reusable again
+        from coupons.models import CouponUsage
+        CouponUsage.objects.filter(order=order).delete()
+
+        # Restore stock
         for item in order.items.select_related('variant'):
             if item.variant:
                 item.variant.stock += item.quantity

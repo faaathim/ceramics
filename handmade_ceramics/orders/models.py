@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils.crypto import get_random_string
+from coupons.models import Coupon
 
 # Import Variant and Product to link order items to them
 from product_management.models import Variant, Product
@@ -89,6 +90,12 @@ class Order(models.Model):
     'CANCELLED': [],
 }
 
+    coupon = models.ForeignKey(
+    Coupon,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True
+)
 
     class Meta:
         ordering = ['-created_at']

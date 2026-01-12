@@ -234,8 +234,7 @@
         font-size: 0.85rem;
     }
 
-    .btn-apply-coupon,
-    .btn-update-cart {
+    .btn-apply-coupon {
         background-color: #2a2a2a;
         border: none;
         color: #ffffff;
@@ -249,11 +248,49 @@
         font-size: 0.85rem;
     }
 
-    .btn-apply-coupon:hover,
-    .btn-update-cart:hover {
+    .btn-apply-coupon:hover {
         background-color: #333333;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .coupon-status {
+        background-color: #1f1f1f;
+        border: 1px solid #28a745;
+        border-radius: 4px;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .coupon-status p {
+        margin: 0;
+        color: #28a745;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .btn-remove-coupon {
+        background-color: transparent;
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        padding: 6px 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-remove-coupon:hover {
+        background-color: #dc3545;
+        color: white;
     }
 
     .cart-totals-box {
@@ -278,6 +315,10 @@
         margin-bottom: 15px;
         font-size: 1rem;
         color: #ffffff;
+    }
+
+    .totals-line.discount {
+        color: #28a745;
     }
 
     .totals-line.final-total {
@@ -425,26 +466,43 @@
 
         <div class="cart-bottom-section">
             <div>
-                <div class="coupon-area">
-                    <input type="text" class="coupon-input" placeholder="Coupon Code">
-                    <button class="btn-apply-coupon">Apply Coupon</button>
+                <!-- Coupon Status Display -->
+                {% if coupon %}
+                <div class="coupon-status">
+                    <p>✓ Coupon Applied: {{ coupon.code }} ({{ discount|floatformat:0 }} OFF)</p>
+                    <a href="{% url 'coupons:remove_coupon' %}" class="btn-remove-coupon">Remove</a>
                 </div>
-                <button class="btn-update-cart" onclick="location.reload()">Update Cart</button>
+                {% endif %}
+
+                <!-- Coupon Application Form -->
+                {% if not coupon %}
+                <form method="post" action="{% url 'coupons:apply_coupon' %}" class="coupon-area">
+                    {% csrf_token %}
+                    <input type="text" name="coupon_code" class="coupon-input" placeholder="Enter coupon code" required>
+                    <button type="submit" class="btn-apply-coupon">Apply Coupon</button>
+                </form>
+                {% endif %}
             </div>
 
             <div class="cart-totals-box">
                 <h3 class="totals-title">Cart Totals</h3>
                 <div class="totals-line">
                     <span>Subtotal</span>
-                    <span id="cart-subtotal">Rs.{{ total_price }}</span>
+                    <span id="cart-subtotal">Rs.{{ subtotal }}</span>
                 </div>
+                {% if discount and discount > 0 %}
+                <div class="totals-line discount">
+                    <span>Discount</span>
+                    <span id="cart-discount">- Rs.{{ discount|floatformat:0 }}</span>
+                </div>
+                {% endif %}
                 <div class="totals-line">
                     <span>Shipping</span>
                     <span>Rs.0</span>
                 </div>
                 <div class="totals-line final-total">
                     <span>Total</span>
-                    <span id="cart-total">Rs.{{ total_price }}</span>
+                    <span id="cart-total">Rs.{{ total_price|floatformat:0 }}</span>
                 </div>
                 <a href="{% url 'checkout:checkout' %}" class="btn-proceed-checkout">
                     <span>Proceed to Checkout</span>
@@ -508,17 +566,24 @@
             // Update item subtotal
             const subtotalElement = document.querySelector(`.subtotal-column[data-item-id="${itemId}"]`);
             if (subtotalElement) {
-                subtotalElement.textContent = `RS.${data.item_total}`;
+                subtotalElement.textContent = `RS.${Math.round(data.item_total)}`;
             }
 
             // Update cart totals
             const cartSubtotal = document.getElementById('cart-subtotal');
             const cartTotal = document.getElementById('cart-total');
+            const cartDiscount = document.getElementById('cart-discount');
+            
             if (cartSubtotal) {
-                cartSubtotal.textContent = `Rs.${data.cart_total}`;
+                cartSubtotal.textContent = `Rs.${Math.round(data.cart_subtotal)}`;
             }
+            
+            if (cartDiscount && data.discount > 0) {
+                cartDiscount.textContent = `- Rs.${Math.round(data.discount)}`;
+            }
+            
             if (cartTotal) {
-                cartTotal.textContent = `Rs.${data.cart_total}`;
+                cartTotal.textContent = `Rs.${Math.round(data.cart_total)}`;
             }
 
             // Update cart item count in title

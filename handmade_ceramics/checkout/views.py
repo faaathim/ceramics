@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.contrib import messages
+
 from cart.models import CartItem
 from user_addresses.models import Address
 from orders.models import Order, OrderItem
-from django.contrib import messages
+from coupons.models import Coupon, CouponUsage
+from decimal import Decimal
+from coupons.models import Coupon, CouponUsage
+from django.db import transaction
 
 
 
@@ -12,7 +17,6 @@ from django.contrib import messages
 def checkout_page(request):
     user = request.user
 
-    # Only get cart items with valid variant and product
     cart_items = CartItem.objects.filter(
         cart__user=user,
         variant__isnull=False,
@@ -20,13 +24,29 @@ def checkout_page(request):
     ).select_related("variant", "variant__product")
 
     if not cart_items.exists():
-        return redirect("cart_app:cart")  # redirect if cart is empty
+        return redirect("cart:cart_page")
 
-    subtotal = sum(item.variant.product.price * item.quantity for item in cart_items)
+    subtotal = sum(
+        item.variant.product.price * item.quantity
+        for item in cart_items
+    )
+
     tax_amount = 0
     shipping_amount = 0
-    discount = 0
+
+    # ✅ READ FROM SESSION ONLY
+    discount = Decimal(str(request.session.get("discount_amount", 0)))
+    coupon_id = request.session.get("coupon_id")
+
+    coupon = None
+    if coupon_id:
+        coupon = Coupon.objects.filter(id=coupon_id).first()
+
     total = subtotal + tax_amount + shipping_amount - discount
+
+    # Safety: never allow negative total
+    if total < 1:
+        total = 1
 
     addresses = Address.objects.filter(user=user, is_deleted=False)
 
@@ -38,7 +58,7 @@ def checkout_page(request):
         "shipping_amount": shipping_amount,
         "discount": discount,
         "total": total,
-        "selected_address_id": request.GET.get("address_id"),
+        "coupon": coupon,
     }
 
     return render(request, "checkout/checkout.html", context)
@@ -52,16 +72,14 @@ def place_order(request):
 
     user = request.user
     address_id = request.POST.get("address_id")
+
     if not address_id:
         return redirect("checkout:checkout")
 
-    # Safely get the address
-    try:
-        address = Address.objects.get(id=address_id, user=user)
-    except Address.DoesNotExist:
-        return redirect("checkout:checkout")
+    # ✅ Get user address
+    address = get_object_or_404(Address, id=address_id, user=user)
 
-    # Get cart items with product & variant, lock rows for update to avoid race conditions
+    # ✅ Lock cart items to prevent overselling
     cart_items = (
         CartItem.objects
         .filter(
@@ -72,31 +90,72 @@ def place_order(request):
             variant__product__is_deleted=False,
         )
         .select_related("variant__product")
-        .select_for_update()  # locks the variants for this transaction
+        .select_for_update()
     )
 
     if not cart_items.exists():
         return redirect("checkout:checkout")
 
-    # -------- Stock validation --------
+    # ✅ Check stock
     for item in cart_items:
         if item.quantity > item.variant.stock:
             messages.error(
                 request,
-                f"Not enough stock for {item.variant.product.name} ({item.variant.color}). "
-                f"Available: {item.variant.stock}"
+                f"Not enough stock for {item.variant.product.name}"
             )
             return redirect("checkout:checkout")
-    # ---------------------------------
 
-    # Calculate totals
-    subtotal = sum(item.variant.product.price * item.quantity for item in cart_items)
+    # ✅ Calculate subtotal
+    subtotal = sum(
+        (item.variant.product.price * item.quantity)
+        for item in cart_items
+    ) or Decimal("0")
+
+
     tax_amount = 0
     shipping_amount = 0
-    discount = 0
-    total = subtotal + tax_amount + shipping_amount - discount
 
-    # Create order
+    # ✅ Fetch coupon safely from session
+    coupon_id = request.session.get('coupon_id')
+    coupon = None
+    discount = Decimal("0")
+
+    if coupon_id:
+        coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
+
+    # ✅ Re-validate coupon fully
+    if coupon:
+        # Expiry check
+        if not coupon.is_valid():
+            coupon = None
+        # Minimum order amount check
+        elif subtotal < coupon.min_order_amount:
+            coupon = None
+        # Check if user already used it
+        elif CouponUsage.objects.filter(user=user, coupon=coupon).exists():
+            coupon = None
+
+        # Remove invalid coupon from session
+        if not coupon:
+            request.session.pop('coupon_id', None)
+            request.session.pop('discount_amount', None)
+
+    # ✅ Recalculate discount safely
+    if coupon:
+        discount_percentage = Decimal(str(coupon.discount_percentage))
+        discount = (discount_percentage / Decimal("100")) * subtotal
+
+    # Ensure minimum ₹1 payable
+    if subtotal - discount < 1:
+        discount = subtotal - Decimal("1")
+
+
+    # ✅ Calculate final total
+    total = subtotal + tax_amount + shipping_amount - discount
+    if total < 1:
+        total = 1
+
+    # ✅ Create order atomically
     order = Order.objects.create(
         user=user,
         shipping_full_name=f"{address.first_name} {address.last_name}".strip(),
@@ -112,28 +171,36 @@ def place_order(request):
         discount_amount=discount,
         total_amount=total,
         payment_method="COD",
+        coupon=coupon if coupon else None,
     )
 
-    # Create order items & reduce stock
-    for item in cart_items:
-        variant = item.variant
-        product = variant.product
+    # ✅ Save coupon usage
+    if coupon:
+        CouponUsage.objects.create(
+            user=user,
+            coupon=coupon,
+            order=order
+        )
+        # Clear coupon session
+        request.session.pop('coupon_id', None)
+        request.session.pop('discount_amount', None)
 
+    # ✅ Reduce stock & create order items
+    for item in cart_items:
         OrderItem.objects.create(
             order=order,
-            product=product,
-            variant=variant,
-            product_name=product.name,
-            variant_color=variant.color,
-            unit_price=product.price,
-            quantity=item.quantity,
+            product=item.variant.product,
+            variant=item.variant,
+            product_name=item.variant.product.name,
+            variant_color=item.variant.color or "",
+            unit_price=item.variant.product.price,
+            quantity=item.quantity
         )
+        # Reduce stock safely
+        item.variant.stock -= item.quantity
+        item.variant.save()
 
-        # Reduce stock
-        variant.stock -= item.quantity
-        variant.save()
-
-    # Clear cart
+    # ✅ Clear cart
     CartItem.objects.filter(cart__user=user).delete()
 
     return redirect("checkout:success", order_id=order.order_id)
@@ -142,12 +209,9 @@ def place_order(request):
 
 @login_required
 def checkout_success(request, order_id):
-    # Correct: lookup by order_id (string)
     order = get_object_or_404(Order, order_id=order_id)
 
     return render(request, 'checkout/success.html', {
         'order': order,
-        'order_id': order.order_id  # pass the string to template
+        'order_id': order.order_id
     })
-
-

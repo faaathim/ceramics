@@ -24,4 +24,12 @@ urlpatterns = [
     #orders
     path('orders/', include('orders.admin_urls', namespace='orders_admin')),
 
+    # coupons
+path(
+    'coupons/',
+    include(('coupons.admin_urls', 'coupons'),
+    namespace='coupons')
+),
+
+
 ]

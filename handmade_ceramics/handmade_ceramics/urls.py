@@ -30,6 +30,8 @@ urlpatterns = [
     path('cart/', include('cart.urls', namespace='cart')),
     path('checkout/', include('checkout.urls')),
     path('orders/', include('orders.urls', namespace='orders')),
+    path('coupons/', include('coupons.urls')),
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,808 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Coupon</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            body {
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .form-content {
+                margin-left: 250px;
+                margin-top: 70px;
+                padding: 40px;
+                min-height: calc(100vh - 70px);
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            }
+
+            .form-container {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+                border-radius: 20px;
+                padding: 0;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+                max-width: 800px;
+                width: 100%;
+                border: 1px solid #333333;
+                overflow: hidden;
+                animation: formSlideIn 0.4s ease;
+            }
+
+            @keyframes formSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .form-header {
+                background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+                padding: 30px 40px;
+                border-bottom: 2px solid #404040;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .form-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #db8b4a, #cb7b3a);
+            }
+
+            .form-title {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #e8e8e8;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .form-icon {
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #3a2a2a, #4a3a2a);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: #db8b4a;
+            }
+
+            .messages-container {
+                padding: 20px 40px;
+                background: #1a1a1a;
+            }
+
+            .alert-message {
+                padding: 16px 20px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideInDown 0.4s ease;
+                transition: all 0.3s ease;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .alert-message:last-child {
+                margin-bottom: 0;
+            }
+
+            .alert-message:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .alert-success {
+                background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
+                border-left: 4px solid #70c090;
+                color: #70c090;
+            }
+
+            .alert-error {
+                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+                border-left: 4px solid #e07070;
+                color: #e07070;
+            }
+
+            .alert-warning {
+                background: linear-gradient(135deg, #4a4a2a, #3a3a2a);
+                border-left: 4px solid #e0c070;
+                color: #e0c070;
+            }
+
+            .alert-info {
+                background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+                border-left: 4px solid #70a0e0;
+                color: #70a0e0;
+            }
+
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .message-icon {
+                font-size: 1.2rem;
+                flex-shrink: 0;
+            }
+
+            .message-text {
+                flex: 1;
+            }
+
+            .message-close-btn {
+                background: transparent;
+                border: none;
+                color: inherit;
+                opacity: 0.7;
+                cursor: pointer;
+                padding: 5px;
+                font-size: 1.1rem;
+                transition: opacity 0.3s ease;
+                flex-shrink: 0;
+            }
+
+            .message-close-btn:hover {
+                opacity: 1;
+            }
+
+            .form-body {
+                padding: 40px;
+            }
+
+            .form-group {
+                margin-bottom: 30px;
+            }
+
+            .form-label {
+                display: block;
+                color: #b0b0b0;
+                font-weight: 600;
+                font-size: 0.95rem;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .form-label i {
+                color: #db8b4a;
+                margin-right: 8px;
+            }
+
+            .form-label .required {
+                color: #e07070;
+                margin-left: 4px;
+            }
+
+            .form-input,
+            .form-textarea,
+            .form-select {
+                width: 100%;
+                padding: 14px 20px;
+                border: 2px solid #404040;
+                border-radius: 12px;
+                background: #0f0f0f;
+                color: #e8e8e8;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .form-textarea {
+                resize: vertical;
+                min-height: 120px;
+            }
+
+            .form-input:focus,
+            .form-textarea:focus,
+            .form-select:focus {
+                outline: none;
+                border-color: #db8b4a;
+                background: #1a1a1a;
+                box-shadow: 0 0 0 4px rgba(219, 139, 74, 0.1);
+            }
+
+            .form-input::placeholder,
+            .form-textarea::placeholder {
+                color: #606060;
+            }
+
+            .input-with-prefix {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            .input-prefix {
+                position: absolute;
+                left: 20px;
+                color: #db8b4a;
+                font-size: 1.1rem;
+                font-weight: 600;
+                pointer-events: none;
+            }
+
+            .input-with-prefix .form-input {
+                padding-left: 45px;
+            }
+
+            .input-suffix {
+                position: absolute;
+                right: 20px;
+                color: #db8b4a;
+                font-size: 1rem;
+                font-weight: 600;
+                pointer-events: none;
+            }
+
+            .input-with-suffix .form-input {
+                padding-right: 50px;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .checkbox-container {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 15px 20px;
+                background: #0f0f0f;
+                border-radius: 12px;
+                border: 2px solid #404040;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .checkbox-container:hover {
+                border-color: #db8b4a;
+                background: #1a1a1a;
+            }
+
+            .checkbox-input {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                accent-color: #db8b4a;
+            }
+
+            .checkbox-label {
+                color: #e8e8e8;
+                font-size: 1rem;
+                cursor: pointer;
+                margin: 0;
+            }
+
+            .error-message {
+                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+                border-left: 4px solid #e07070;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: #e07070;
+                font-size: 0.9rem;
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .error-message i {
+                font-size: 1.1rem;
+            }
+
+            .non-field-errors {
+                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+                border-left: 4px solid #e07070;
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 25px;
+            }
+
+            .non-field-errors ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .non-field-errors li {
+                color: #e07070;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 5px;
+            }
+
+            .non-field-errors li:last-child {
+                margin-bottom: 0;
+            }
+
+            .form-hint {
+                color: #707070;
+                font-size: 0.85rem;
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .form-hint i {
+                color: #db8b4a;
+            }
+
+            .coupon-preview {
+                background: linear-gradient(135deg, #3a2a2a, #4a3a2a);
+                border: 2px dashed #db8b4a;
+                border-radius: 12px;
+                padding: 25px;
+                margin-top: 30px;
+                text-align: center;
+            }
+
+            .coupon-preview-title {
+                color: #b0b0b0;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .coupon-code-display {
+                font-family: 'Courier New', monospace;
+                font-size: 2rem;
+                font-weight: 700;
+                color: #db8b4a;
+                letter-spacing: 3px;
+                margin-bottom: 15px;
+                text-transform: uppercase;
+            }
+
+            .coupon-details-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .coupon-detail-item {
+                background: #0f0f0f;
+                border-radius: 8px;
+                padding: 15px;
+            }
+
+            .coupon-detail-label {
+                color: #707070;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 5px;
+            }
+
+            .coupon-detail-value {
+                color: #e8e8e8;
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .form-footer {
+                padding: 30px 40px;
+                background: #0f0f0f;
+                border-top: 1px solid #2a2a2a;
+                display: flex;
+                gap: 15px;
+                justify-content: flex-end;
+            }
+
+            .btn-submit, .btn-cancel {
+                padding: 14px 35px;
+                border: none;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                border: 2px solid transparent;
+            }
+
+            .btn-submit {
+                background: linear-gradient(135deg, #db8b4a, #cb7b3a);
+                color: #ffffff;
+            }
+
+            .btn-submit:hover {
+                background: linear-gradient(135deg, #eb9b5a, #db8b4a);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(219, 139, 74, 0.5);
+            }
+
+            .btn-submit:active {
+                transform: translateY(-1px);
+            }
+
+            .btn-cancel {
+                background: transparent;
+                color: #909090;
+                border-color: #404040;
+            }
+
+            .btn-cancel:hover {
+                background: #2a2a2a;
+                color: #e8e8e8;
+                border-color: #505050;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            }
+
+            .btn-cancel:active {
+                transform: translateY(-1px);
+            }
+
+            @media (max-width: 768px) {
+                .form-content {
+                    padding: 20px;
+                    margin-left: 0;
+                }
+                .form-header {
+                    padding: 25px 30px;
+                }
+                .form-body {
+                    padding: 25px;
+                }
+                .messages-container {
+                    padding: 15px 25px;
+                }
+                .form-footer {
+                    padding: 20px 25px;
+                    flex-direction: column-reverse;
+                }
+                .btn-submit, .btn-cancel {
+                    width: 100%;
+                    justify-content: center;
+                }
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+                .coupon-details-grid {
+                    grid-template-columns: 1fr;
+                }
+                .coupon-code-display {
+                    font-size: 1.5rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="form-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <div class="form-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        Edit Coupon: {{ coupon.code }}
+                    </h2>
+                </div>
+
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    <div class="alert-message alert-{{ message.tags }}">
+                        <i class="message-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <span class="message-text">{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="message-close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-body">
+                    <form method="post" id="couponForm">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="non-field-errors">
+                            <ul>
+                                {% for error in form.non_field_errors %}
+                                <li>
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-barcode"></i>
+                                Coupon Code
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.code }}
+                            <div class="form-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Use uppercase letters and numbers. Must be unique.
+                            </div>
+                            {% if form.code.errors %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ form.code.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-percentage"></i>
+                                    Discount Percentage
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="input-with-suffix">
+                                    {{ form.discount_percentage }}
+                                    <span class="input-suffix">%</span>
+                                </div>
+                                <div class="form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Value between 1% and 90%
+                                </div>
+                                {% if form.discount_percentage.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ form.discount_percentage.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Minimum Order Amount
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="input-with-prefix">
+                                    <span class="input-prefix">₹</span>
+                                    {{ form.min_order_amount }}
+                                </div>
+                                <div class="form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Minimum cart value to use this coupon
+                                </div>
+                                {% if form.min_order_amount.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ form.min_order_amount.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Expiry Date & Time
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.expiry_date }}
+                            <div class="form-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Coupon will expire at the specified date and time
+                            </div>
+                            {% if form.expiry_date.errors %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ form.expiry_date.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-toggle-on"></i>
+                                Status
+                            </label>
+                            <div class="checkbox-container">
+                                {{ form.is_active }}
+                                <label for="id_is_active" class="checkbox-label">
+                                    Activate this coupon
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Live Preview -->
+                        <div class="coupon-preview">
+                            <div class="coupon-preview-title">
+                                <i class="fas fa-eye"></i>
+                                Live Preview
+                            </div>
+                            <div class="coupon-code-display" id="previewCode">{{ coupon.code }}</div>
+                            <div class="coupon-details-grid">
+                                <div class="coupon-detail-item">
+                                    <div class="coupon-detail-label">Discount</div>
+                                    <div class="coupon-detail-value" id="previewDiscount">{{ coupon.discount_percentage }}%</div>
+                                </div>
+                                <div class="coupon-detail-item">
+                                    <div class="coupon-detail-label">Min Order</div>
+                                    <div class="coupon-detail-value" id="previewMinOrder">₹{{ coupon.min_order_amount }}</div>
+                                </div>
+                                <div class="coupon-detail-item">
+                                    <div class="coupon-detail-label">Expires On</div>
+                                    <div class="coupon-detail-value" id="previewExpiry">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" form="couponForm" class="btn-submit">
+                        <i class="fas fa-save"></i>
+                        Update Coupon
+                    </button>
+                    <a href="{% url 'custom_admin:coupons:coupon_list' %}" class="btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Auto-dismiss success messages after 5 seconds
+                const successMessages = document.querySelectorAll('.alert-success');
+                successMessages.forEach(function(message) {
+                    setTimeout(function() {
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateX(100%)';
+                        setTimeout(function() {
+                            message.remove();
+                        }, 300);
+                    }, 5000);
+                });
+
+                // Style form fields to match design
+                const codeField = document.querySelector('input[name="code"]');
+                const discountField = document.querySelector('input[name="discount_percentage"]');
+                const minOrderField = document.querySelector('input[name="min_order_amount"]');
+                const expiryField = document.querySelector('input[name="expiry_date"]');
+                const activeField = document.querySelector('input[name="is_active"]');
+
+                if (codeField) {
+                    codeField.className = 'form-input';
+                    codeField.placeholder = 'Enter unique coupon code (e.g., SAVE20)';
+                    codeField.id = 'couponCodeInput';
+                    codeField.style.textTransform = 'uppercase';
+                    codeField.style.fontFamily = "'Courier New', monospace";
+                    codeField.style.fontWeight = '600';
+                    
+                    // Auto-uppercase coupon code
+                    codeField.addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                        document.getElementById('previewCode').textContent = this.value || '{{ coupon.code }}';
+                    });
+                }
+
+                if (discountField) {
+                    discountField.className = 'form-input';
+                    discountField.placeholder = '0';
+                    discountField.min = '1';
+                    discountField.max = '90';
+                    discountField.id = 'discountInput';
+                    
+                    discountField.addEventListener('input', function() {
+                        document.getElementById('previewDiscount').textContent = this.value ? this.value + '%' : '0%';
+                    });
+                }
+
+                if (minOrderField) {
+                    minOrderField.className = 'form-input';
+                    minOrderField.placeholder = '0';
+                    minOrderField.min = '0';
+                    minOrderField.step = '0.01';
+                    minOrderField.id = 'minOrderInput';
+                    
+                    minOrderField.addEventListener('input', function() {
+                        document.getElementById('previewMinOrder').textContent = this.value ? '₹' + parseFloat(this.value).toFixed(2) : '₹0';
+                    });
+                }
+
+                if (expiryField) {
+                    expiryField.className = 'form-input';
+                    expiryField.id = 'expiryDateInput';
+                    expiryField.type = 'datetime-local';
+                    
+                    // Set minimum datetime to now
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                    expiryField.min = now.toISOString().slice(0, 16);
+                    
+                    expiryField.addEventListener('change', function() {
+                        if (this.value) {
+                            const date = new Date(this.value);
+                            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                            document.getElementById('previewExpiry').textContent = date.toLocaleDateString('en-US', options);
+                        } else {
+                            document.getElementById('previewExpiry').textContent = '-';
+                        }
+                    });
+                }
+
+                if (activeField) {
+                    activeField.className = 'checkbox-input';
+                    activeField.id = 'id_is_active';
+                }
+
+                // Initialize preview with existing values
+                if (codeField && codeField.value) {
+                    document.getElementById('previewCode').textContent = codeField.value.toUpperCase();
+                }
+                if (discountField && discountField.value) {
+                    document.getElementById('previewDiscount').textContent = discountField.value + '%';
+                }
+                if (minOrderField && minOrderField.value) {
+                    document.getElementById('previewMinOrder').textContent = '₹' + parseFloat(minOrderField.value).toFixed(2);
+                }
+                if (expiryField && expiryField.value) {
+                    const date = new Date(expiryField.value);
+                    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    document.getElementById('previewExpiry').textContent = date.toLocaleDateString('en-US', options);
+                }
+            });
+        </script>
+    </body>
+    </html>
+  </section>
+</div>
+{% endblock %}
