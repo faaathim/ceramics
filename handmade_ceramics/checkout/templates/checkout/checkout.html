@@ -135,23 +135,6 @@
       </form>
     </div>
 
-  {% else %}
-    <!-- Apply Coupon -->
-    <form method="post" action="{% url 'coupons:apply_coupon' %}">
-      {% csrf_token %}
-      <div style="display:flex;gap:10px;">
-        <input
-          type="text"
-          name="coupon_code"
-          placeholder="Enter coupon code"
-          required
-          style="flex:1;padding:10px;border-radius:6px;border:1px solid #3a3a3a;background:#1a1a1a;color:#fff;"
-        >
-        <button type="submit" class="btn-edit-address">
-          Apply
-        </button>
-      </div>
-    </form>
   {% endif %}
 
 </div>

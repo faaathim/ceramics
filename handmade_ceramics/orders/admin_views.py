@@ -93,6 +93,7 @@ def admin_order_list(request):
         'query_params': query_params.urlencode(),
         'q': q,
         'status': status,
+        'status_choices': Order._meta.get_field('status').choices,
         'date_from': date_from,
         'date_to': date_to,
         'sort': sort,

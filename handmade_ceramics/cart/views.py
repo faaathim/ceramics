@@ -9,10 +9,10 @@ from django.urls import reverse
 from .models import Cart, CartItem
 from product_management.models import Variant
 
-# Optional models (app may not exist yet)
+# Optional Wishlist model
 try:
-    from product_management.models import Wishlist
-except Exception:
+    from wishlist.models import Wishlist
+except ImportError:
     Wishlist = None
 
 try:
@@ -46,31 +46,16 @@ def _get_user_cart(user):
 # -------------------------------------------------------------------
 # Add to cart
 # -------------------------------------------------------------------
-
 @login_required
 def add_to_cart(request):
-    """
-    Add a product variant to the user's cart.
-
-    POST data:
-      - variant_id (required)
-      - qty (optional, defaults to 1)
-
-    Validations:
-      - Variant and product must be active
-      - Category must not be blocked
-      - Quantity must respect stock and site limit
-    """
     if request.method != 'POST':
         return HttpResponseBadRequest("Invalid request method.")
 
-    # Read variant id safely
     try:
         variant_id = int(request.POST.get('variant_id'))
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid variant id.")
 
-    # Read quantity (default = 1)
     try:
         qty_requested = int(request.POST.get('qty', 1))
     except (TypeError, ValueError):
@@ -79,10 +64,8 @@ def add_to_cart(request):
     if qty_requested < 1:
         qty_requested = 1
 
-    # Fetch variant
     variant = get_object_or_404(Variant, pk=variant_id)
 
-    # Validate variant and product
     if variant.is_deleted or not variant.is_listed:
         return HttpResponseBadRequest("This variant is not available.")
 
@@ -90,12 +73,10 @@ def add_to_cart(request):
     if product.is_deleted or not product.is_listed:
         return HttpResponseBadRequest("This product is not available.")
 
-    # Optional category block check
     category = getattr(product, 'category', None)
     if category and getattr(category, 'is_blocked', False):
         return HttpResponseBadRequest("This category is blocked.")
 
-    # Determine max quantity allowed
     site_max = _max_qty_limit()
     allowed_max = min(site_max, variant.stock or 0)
 
@@ -104,10 +85,8 @@ def add_to_cart(request):
 
     qty_to_add = min(qty_requested, allowed_max)
 
-    # Get user's cart
     cart = _get_user_cart(request.user)
 
-    # Add or update cart item
     cart_item, created = CartItem.objects.get_or_create(
         cart=cart,
         variant=variant
@@ -120,9 +99,12 @@ def add_to_cart(request):
 
     cart_item.save()
 
-    # Remove item from wishlist if it exists
+    # ✅ REMOVE FROM WISHLIST AFTER ADDING TO CART
     if Wishlist:
-        Wishlist.objects.filter(user=request.user, variant=variant).delete()
+        Wishlist.objects.filter(
+            user=request.user,
+            variant=variant
+        ).delete()
 
     return redirect(reverse('cart:cart_page'))
 

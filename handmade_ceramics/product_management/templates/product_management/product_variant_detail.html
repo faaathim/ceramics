@@ -25,6 +25,9 @@
     padding: 20px 60px;
     margin-top: 80px;
     border-bottom: 1px solid #2a2a2a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .back-to-shop-btn {
@@ -57,6 +60,33 @@
 
   .back-to-shop-btn:hover .back-arrow {
     transform: translateX(-3px);
+  }
+
+  /* View Wishlist Link */
+  .view-wishlist-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 2px solid #2a2a2a;
+    transition: all 0.3s ease;
+  }
+
+  .view-wishlist-link:hover {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #000000;
+  }
+
+  .wishlist-icon {
+    font-size: 1.1rem;
   }
 
   /* MAIN CONTAINER */
@@ -384,7 +414,7 @@
     transform: none;
   }
 
-  /* New Wishlist Button */
+  /* Wishlist Button Styles */
   .wishlist-btn-new {
     min-width: 66px;
     width: 66px;
@@ -530,6 +560,14 @@
     .back-to-shop-container {
       padding: 15px 25px;
       margin-top: 60px;
+      flex-direction: column;
+      gap: 15px;
+      align-items: stretch;
+    }
+
+    .view-wishlist-link {
+      width: 100%;
+      justify-content: center;
     }
 
     .product-detail-container {
@@ -588,6 +626,13 @@
     <span class="back-arrow">←</span>
     <span>Back to Shop</span>
   </a>
+  
+  {% if user.is_authenticated %}
+    <a href="{% url 'wishlist:wishlist_page' %}" class="view-wishlist-link">
+      <span class="wishlist-icon">❤️</span>
+      <span>View Wishlist</span>
+    </a>
+  {% endif %}
 </div>
 
 <div class="product-detail-container">
@@ -667,32 +712,47 @@
         <p class="description-text">{{ product.description }}</p>
       </div>
 
-      <!-- ADD TO CART -->
+      <!-- ADD TO CART & WISHLIST -->
       <div class="cart-section">
-        {% if variant.stock > 0 %}
-        <form method="POST" action="{% url 'cart:add_to_cart' %}">
-            {% csrf_token %}
-            <input type="hidden" name="variant_id" value="{{ variant.id }}">
-        
-            
-        
-            <div class="cart-wishlist-container">
-                <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </form>
-        
-        {% else %}
-          <div class="cart-wishlist-container">
-            <button class="add-to-cart-btn" disabled>Out of Stock</button>
-            <button type="button" id="wishlist-btn-new" class="wishlist-btn-new {% if user.is_authenticated and variant.in_user_wishlist %}active{% endif %}" data-variant="{{ variant.id }}">
-              {% if user.is_authenticated and variant.in_user_wishlist %}
-                ❤️
-              {% else %}
-                🤍
-              {% endif %}
-            </button>
-          </div>
-        {% endif %}
+        <div class="cart-wishlist-container">
+          <!-- Add to Cart Form -->
+          {% if variant.stock > 0 %}
+            <form method="POST" action="{% url 'cart:add_to_cart' %}" style="flex: 1;">
+              {% csrf_token %}
+              <input type="hidden" name="variant_id" value="{{ variant.id }}">
+              <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+            </form>
+          {% else %}
+            <button class="add-to-cart-btn" disabled style="flex: 1;">Out of Stock</button>
+          {% endif %}
+
+          <!-- Wishlist Form -->
+          {% if user.is_authenticated %}
+            {% if variant.id in wishlist_variant_ids %}
+              <!-- Remove from Wishlist -->
+              <form method="POST" action="{% url 'wishlist:remove' variant.id %}">
+                {% csrf_token %}
+                <button type="submit" class="wishlist-btn-new active" title="Remove from Wishlist">
+                  ❤️
+                </button>
+              </form>
+            {% else %}
+              <!-- Add to Wishlist -->
+              <form method="POST" action="{% url 'wishlist:add' %}">
+                {% csrf_token %}
+                <input type="hidden" name="variant_id" value="{{ variant.id }}">
+                <button type="submit" class="wishlist-btn-new" title="Add to Wishlist">
+                  🤍
+                </button>
+              </form>
+            {% endif %}
+          {% else %}
+            <!-- Guest User - Redirect to Login -->
+            <a href="{% url 'user_auth:login' %}?next={{ request.path }}" class="wishlist-btn-new" title="Login to add to wishlist" style="text-decoration: none;">
+              🤍
+            </a>
+          {% endif %}
+        </div>
       </div>
 
     </div>
@@ -743,56 +803,6 @@ document.querySelectorAll('.thumb').forEach(thumb => {
     document.getElementById('main-image').src = this.dataset.src;
   });
 });
-
-// Wishlist Toggle
-document.getElementById('wishlist-btn-new')?.addEventListener('click', function() {
-  const isActive = this.classList.contains('active');
-  
-  if (isActive) {
-    this.innerHTML = '🤍';
-    this.classList.remove('active');
-  } else {
-    this.innerHTML = '❤️';
-    this.classList.add('active');
-  }
-  
-  // Add your AJAX call here to update wishlist on server
-  // Example:
-  // fetch('/wishlist/toggle/', {
-  //   method: 'POST',
-  //   headers: {
-  //     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-  //     'Content-Type': 'application/json'
-  //   },
-  //   body: JSON.stringify({ variant_id: this.dataset.variant })
-  // })
-  // .then(response => response.json())
-  // .then(data => {
-  //   console.log('Wishlist updated:', data);
-  // })
-  // .catch(error => {
-  //   console.error('Error:', error);
-  // });
-});
-
-// Quantity Controls
-function incrementQty() {
-  const input = document.getElementById('qty-input');
-  const max = parseInt(input.max);
-  const current = parseInt(input.value);
-  if (current < max) {
-    input.value = current + 1;
-  }
-}
-
-function decrementQty() {
-  const input = document.getElementById('qty-input');
-  const min = parseInt(input.min);
-  const current = parseInt(input.value);
-  if (current > min) {
-    input.value = current - 1;
-  }
-}
 </script>
 
 {% endblock %}
