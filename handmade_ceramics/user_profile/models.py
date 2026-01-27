@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 import random
 from django.contrib.auth import get_user_model
+from cloudinary.models import CloudinaryField
 
 from .validators import (
     validate_profile_image,
@@ -36,11 +37,8 @@ class Profile(models.Model):
         related_name='profile'
     )
 
-    profile_image = models.ImageField(
-        upload_to=profile_image_upload_path,
-        blank=True,
-        null=True
-    )
+    
+    profile_image = CloudinaryField('profile_image', blank=True, null=True)
 
     mobile = models.CharField(
         max_length=20,

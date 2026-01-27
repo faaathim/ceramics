@@ -72,23 +72,18 @@ def place_order(request):
 
     user = request.user
     address_id = request.POST.get("address_id")
+    payment_method = request.POST.get("payment_method", "COD")
 
     if not address_id:
         return redirect("checkout:checkout")
 
-    # ✅ Get user address
     address = get_object_or_404(Address, id=address_id, user=user)
 
-    # ✅ Lock cart items to prevent overselling
+    # Lock cart items
     cart_items = (
         CartItem.objects
-        .filter(
-            cart__user=user,
-            variant__isnull=False,
-            variant__is_deleted=False,
-            variant__product__isnull=False,
-            variant__product__is_deleted=False,
-        )
+        .filter(cart__user=user, variant__isnull=False, variant__is_deleted=False,
+                variant__product__isnull=False, variant__product__is_deleted=False)
         .select_related("variant__product")
         .select_for_update()
     )
@@ -96,66 +91,34 @@ def place_order(request):
     if not cart_items.exists():
         return redirect("checkout:checkout")
 
-    # ✅ Check stock
+    # Check stock (for info only, we will reduce later if payment succeeds)
     for item in cart_items:
         if item.quantity > item.variant.stock:
-            messages.error(
-                request,
-                f"Not enough stock for {item.variant.product.name}"
-            )
+            messages.error(request, f"Not enough stock for {item.variant.product.name}")
             return redirect("checkout:checkout")
 
-    # ✅ Calculate subtotal
-    subtotal = sum(
-        (item.variant.product.price * item.quantity)
-        for item in cart_items
-    ) or Decimal("0")
-
-
+    # Calculate amounts
+    subtotal = sum(item.variant.product.price * item.quantity for item in cart_items)
     tax_amount = 0
     shipping_amount = 0
 
-    # ✅ Fetch coupon safely from session
-    coupon_id = request.session.get('coupon_id')
+    discount = Decimal(str(request.session.get("discount_amount", 0)))
+    coupon_id = request.session.get("coupon_id")
     coupon = None
-    discount = Decimal("0")
-
     if coupon_id:
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
-
-    # ✅ Re-validate coupon fully
-    if coupon:
-        # Expiry check
-        if not coupon.is_valid():
-            coupon = None
-        # Minimum order amount check
-        elif subtotal < coupon.min_order_amount:
-            coupon = None
-        # Check if user already used it
-        elif CouponUsage.objects.filter(user=user, coupon=coupon).exists():
-            coupon = None
-
-        # Remove invalid coupon from session
-        if not coupon:
-            request.session.pop('coupon_id', None)
-            request.session.pop('discount_amount', None)
-
-    # ✅ Recalculate discount safely
-    if coupon:
-        discount_percentage = Decimal(str(coupon.discount_percentage))
-        discount = (discount_percentage / Decimal("100")) * subtotal
-
-    # Ensure minimum ₹1 payable
-    if subtotal - discount < 1:
-        discount = subtotal - Decimal("1")
-
-
-    # ✅ Calculate final total
     total = subtotal + tax_amount + shipping_amount - discount
     if total < 1:
         total = 1
 
-    # ✅ Create order atomically
+    # ✅ Create order (PENDING if Razorpay, CONFIRMED if COD)
+    if payment_method == "COD":
+        order_status = "CONFIRMED"
+        is_paid = True
+    else:
+        order_status = "PENDING"
+        is_paid = False
+
     order = Order.objects.create(
         user=user,
         shipping_full_name=f"{address.first_name} {address.last_name}".strip(),
@@ -170,22 +133,19 @@ def place_order(request):
         shipping_charge=shipping_amount,
         discount_amount=discount,
         total_amount=total,
-        payment_method="COD",
+        payment_method=payment_method,
+        status=order_status,
+        is_paid=is_paid,
         coupon=coupon if coupon else None,
     )
 
-    # ✅ Save coupon usage
+    # Save coupon usage
     if coupon:
-        CouponUsage.objects.create(
-            user=user,
-            coupon=coupon,
-            order=order
-        )
-        # Clear coupon session
+        CouponUsage.objects.create(user=user, coupon=coupon, order=order)
         request.session.pop('coupon_id', None)
         request.session.pop('discount_amount', None)
 
-    # ✅ Reduce stock & create order items
+    # Create order items
     for item in cart_items:
         OrderItem.objects.create(
             order=order,
@@ -196,14 +156,24 @@ def place_order(request):
             unit_price=item.variant.product.price,
             quantity=item.quantity
         )
-        # Reduce stock safely
-        item.variant.stock -= item.quantity
-        item.variant.save()
 
-    # ✅ Clear cart
-    CartItem.objects.filter(cart__user=user).delete()
+    # ✅ COD flow: reduce stock & clear cart immediately
+    if payment_method == "COD":
+        for item in cart_items:
+            item.variant.stock -= item.quantity
+            item.variant.save()
 
-    return redirect("checkout:success", order_id=order.order_id)
+        CartItem.objects.filter(cart__user=user).delete()
+        return redirect("checkout:success", order_id=order.order_id)
+
+    # ✅ WALLET flow
+    elif payment_method == "WALLET":
+        return redirect("wallet:wallet_payment", order_id=order.order_id)
+
+    # ✅ Razorpay flow
+    else:
+        return redirect("payments:start", order_id=order.order_id)
+
 
 
 

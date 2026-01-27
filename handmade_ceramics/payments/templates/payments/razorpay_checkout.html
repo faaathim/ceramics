@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="payment-container">
+  <div class="payment-content">
+    
+    <!-- Payment Card -->
+    <div class="payment-card">
+      <div class="card-header">
+        <div class="header-icon">💳</div>
+        <h3>Complete Your Payment</h3>
+      </div>
+
+      <div class="card-body">
+        <!-- Order Info -->
+        <div class="order-info">
+          <div class="info-item">
+            <span class="label">Order ID</span>
+            <span class="value">{{ order.order_id }}</span>
+          </div>
+
+          <div class="info-item total">
+            <span class="label">Total Amount</span>
+            <span class="value amount">₹{{ order.total_amount }}</span>
+          </div>
+        </div>
+
+        <!-- Pay Button -->
+        <button id="rzp-button" class="btn-pay">
+          <span>💳</span>
+          Pay with Razorpay
+        </button>
+
+        <!-- Security Badge -->
+        <div class="security-badge">
+          <span>🔒</span> Secure Payment Gateway
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+      <div class="info-card">
+        <div class="card-icon">✓</div>
+        <p>Secure & Encrypted</p>
+      </div>
+      <div class="info-card">
+        <div class="card-icon">⚡</div>
+        <p>Instant Confirmation</p>
+      </div>
+      <div class="info-card">
+        <div class="card-icon">🛡️</div>
+        <p>Safe Transaction</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  body {
+    background: #0a0a0a;
+  }
+
+  .payment-container {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .payment-content {
+    max-width: 500px;
+    width: 100%;
+  }
+
+  /* Payment Card */
+  .payment-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .card-header {
+    background: #2a2a2a;
+    padding: 30px;
+    text-align: center;
+    border-bottom: 1px solid #3a3a3a;
+  }
+
+  .header-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+
+  .card-header h3 {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .card-body {
+    padding: 40px 30px;
+  }
+
+  /* Order Info */
+  .order-info {
+    margin-bottom: 30px;
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #3a3a3a;
+  }
+
+  .info-item.total {
+    background: rgba(76, 175, 80, 0.05);
+    border-color: rgba(76, 175, 80, 0.2);
+    padding: 22px 20px;
+  }
+
+  .info-item .label {
+    color: #999;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .info-item .value {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: monospace;
+  }
+
+  .info-item.total .label,
+  .info-item.total .value {
+    font-size: 18px;
+  }
+
+  .info-item .amount {
+    color: #4caf50;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  /* Pay Button */
+  .btn-pay {
+    width: 100%;
+    background: #4caf50;
+    color: #000;
+    border: none;
+    padding: 18px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .btn-pay:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+  }
+
+  .btn-pay:active {
+    transform: translateY(0);
+  }
+
+  .btn-pay span {
+    font-size: 24px;
+  }
+
+  /* Security Badge */
+  .security-badge {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Info Section */
+  .info-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    animation: fadeIn 0.5s ease-out 0.2s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .info-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 20px 15px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .info-card:hover {
+    background: #2a2a2a;
+    border-color: #4caf50;
+    transform: translateY(-3px);
+  }
+
+  .info-card .card-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #4caf50;
+  }
+
+  .info-card p {
+    color: #ddd;
+    font-size: 13px;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .payment-container {
+      padding: 20px 15px;
+    }
+
+    .payment-content {
+      max-width: 100%;
+    }
+
+    .card-header {
+      padding: 25px 20px;
+    }
+
+    .header-icon {
+      font-size: 40px;
+    }
+
+    .card-header h3 {
+      font-size: 20px;
+    }
+
+    .card-body {
+      padding: 30px 20px;
+    }
+
+    .info-item {
+      padding: 15px;
+    }
+
+    .info-item.total {
+      padding: 18px 15px;
+    }
+
+    .info-item .amount {
+      font-size: 24px;
+    }
+
+    .btn-pay {
+      padding: 16px;
+      font-size: 16px;
+    }
+
+    .info-section {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .info-item {
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+    }
+  }
+</style>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    var options = {
+        key: "{{ razorpay_key }}",
+        amount: {{ amount }},
+        currency: "INR",
+        order_id: "{{ razorpay_order_id }}",
+        callback_url: "http://127.0.0.1:8000/payments/verify/",
+    };
+    
+
+    var rzp = new Razorpay(options);
+
+    document.getElementById("rzp-button").onclick = function(e){
+        rzp.open();
+        e.preventDefault();
+    }
+</script>
+
+{% endblock %}

@@ -1,12 +1,8 @@
-
-import os
-from io import BytesIO
-from django.core.files.base import ContentFile
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from PIL import Image
 from product_management.models import Product
+from cloudinary.models import CloudinaryField
 
 def category_image_path(instance, filename):
     return f"categories/{instance.id or 'new'}/{filename}"
@@ -25,7 +21,7 @@ class CategoryManager(models.Manager):
 class Category(models.Model):
     name = models.CharField(max_length=150)                   
     description = models.TextField(blank=True)                
-    image = models.ImageField(upload_to=category_image_path, blank=True, null=True) 
+    image = CloudinaryField('category_image', blank=True, null=True)
 
     is_listed = models.BooleanField(default=True)
 
@@ -57,24 +53,6 @@ class Category(models.Model):
             self.full_clean()
 
         super().save(*args, **kwargs)
-
-        if self.image:
-            try:
-                img_path = self.image.path  
-                img = Image.open(img_path)
-                img = img.convert('RGB')  
-                width, height = img.size
-                new_edge = min(width, height)
-                left = (width - new_edge) / 2
-                top = (height - new_edge) / 2
-                right = (width + new_edge) / 2
-                bottom = (height + new_edge) / 2
-                img = img.crop((left, top, right, bottom))
-                img = img.resize((800, 800), Image.LANCZOS)
-                img.save(img_path, format='JPEG', quality=85)
-            except Exception:
-                pass
-
 
         if not self.is_listed:
             self.products.update(is_listed=False)

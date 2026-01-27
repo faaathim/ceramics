@@ -11,6 +11,8 @@ from .models import Order, OrderItem
 from product_management.models import Variant
 from django.db import transaction
 
+from wallet.models import Wallet, WalletTransaction
+
 # Simple superuser check reused in your custom_admin
 def superuser_check(user):
     return user.is_active and user.is_superuser
@@ -188,6 +190,21 @@ def admin_verify_return(request, order_id):
 
         if action == 'approve':
             order.status = 'RETURN_PROCESSING'
+            with transaction.atomic():
+                if order.is_paid:
+                    wallet, _ = Wallet.objects.select_for_update().get_or_create(
+                        user=order.user
+                    )
+
+                    wallet.balance += order.total_amount
+                    wallet.save()
+
+                    WalletTransaction.objects.create(
+                        wallet=wallet,
+                        transaction_type=WalletTransaction.CREDIT,
+                        amount=order.total_amount,
+                        description=f"Refund for returned order {order.order_id}"
+                    )
             messages.success(request, "Return approved.")
 
         elif action == 'reject':
@@ -198,6 +215,8 @@ def admin_verify_return(request, order_id):
         order.save()
 
     return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+
+
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
@@ -215,9 +234,21 @@ def admin_complete_return(request, order_id):
             item.variant.stock += item.quantity
             item.variant.save()
 
+    # Refund to wallet
+    wallet = Wallet.objects.select_for_update().get(user=order.user)
+    wallet.balance += order.total_amount
+    wallet.save()
+
+    WalletTransaction.objects.create(
+        wallet=wallet,
+        transaction_type='CREDIT',
+        amount=order.total_amount,
+        description=f"Refund for returned order {order.order_id}"
+    )
+
     order.status = 'RETURNED'
     order.save()
 
-    messages.success(request, "Return completed and stock updated.")
+    messages.success(request, "Return completed and wallet refunded.")
     return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
 

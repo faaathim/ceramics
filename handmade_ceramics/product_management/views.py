@@ -119,21 +119,16 @@ def product_create(request):
                 product.save()
 
                 # Process main image
-                main_filename = f'{product.id}_main.jpg'
-                abs_main = os.path.join(settings.MEDIA_ROOT, 'products', 'main', main_filename)
-                rel_main = os.path.join('products', 'main', main_filename)
-                process_and_save_image(main_file, abs_main, size=(800, 800))
-                product.main_image = rel_main
-                product.save()
+                product.main_image = main_file
+                product.save(update_fields=['main_image'])
 
                 # Process gallery images
                 for idx, uploaded in enumerate(gallery_files):
-                    fname = f'{idx}_{uploaded.name}'
-                    rel_dir = os.path.join('products', str(product.id))
-                    abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
-                    rel_path = os.path.join(rel_dir, fname)
-                    process_and_save_image(uploaded, abs_path, size=(1024, 1024))
-                    ProductImage.objects.create(product=product, image=rel_path, order=idx)
+                    ProductImage.objects.create(
+                        product=product,
+                        image=uploaded,
+                        order=idx
+    )
 
                 messages.success(request, f'Product "{product.name}" created successfully! Now add variants to list it for sale.')
                 return redirect(reverse('custom_admin:product_management:variant_list', args=[product.id]))

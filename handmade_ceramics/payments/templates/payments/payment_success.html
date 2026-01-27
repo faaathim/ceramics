@@ -1,0 +1,705 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="payment-success-container">
+  
+  <!-- Messages Display -->
+  {% if messages %}
+  <div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      <span class="alert-icon">
+        {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✓{% else %}ℹ️{% endif %}
+      </span>
+      <span class="alert-text">{{ message }}</span>
+      <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="success-content">
+    
+    <!-- Success Animation -->
+    <div class="success-animation">
+      <div class="checkmark-circle">
+        <div class="checkmark"></div>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message">
+      <h1>Payment Successful! 🎉</h1>
+      <p class="lead">Your payment has been processed successfully. Thank you for your purchase!</p>
+    </div>
+
+    <!-- Payment Info Card -->
+    <div class="payment-info-card">
+      <div class="info-header">
+        <span class="header-icon">💳</span>
+        <h2>Payment Details</h2>
+      </div>
+
+      <div class="info-content">
+        {% if order %}
+        <div class="info-row">
+          <span class="label">Order ID</span>
+          <span class="value order-id">#{{ order.order_id }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Payment Date</span>
+          <span class="value">{{ order.updated_at|date:"F d, Y • h:i A" }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Payment Method</span>
+          <span class="value payment-method">
+            <span class="method-badge">💳 Razorpay</span>
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Payment Status</span>
+          <span class="value">
+            <span class="status-success">✓ Confirmed</span>
+          </span>
+        </div>
+
+        <div class="info-row total">
+          <span class="label">Amount Paid</span>
+          <span class="value amount">₹{{ order.total_amount }}</span>
+        </div>
+        {% else %}
+        <div class="info-row">
+          <span class="label">Status</span>
+          <span class="value">
+            <span class="status-success">✓ Payment Verified</span>
+          </span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      {% if order %}
+      <a href="{% url 'orders:order_detail' order.order_id %}" class="btn-primary">
+        <span>📋</span> View Order Details
+      </a>
+      {% endif %}
+      <a href="{% url 'user_side:shop' %}" class="btn-secondary">
+        <span>🛍️</span> Continue Shopping
+      </a>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="card-icon">📧</div>
+        <div class="card-content">
+          <h4>Confirmation Email</h4>
+          <p>Order confirmation has been sent to your registered email address</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+          <h4>Order Processing</h4>
+          <p>Your order is now being prepared for shipment</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon">🔒</div>
+        <div class="card-content">
+          <h4>Secure Payment</h4>
+          <p>Your transaction was encrypted and secured by Razorpay</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  body {
+    background: #0a0a0a;
+  }
+
+  .payment-success-container {
+    min-height: calc(100vh - 80px);
+    padding: 60px 20px;
+    background: #0a0a0a;
+  }
+
+  .success-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* Messages */
+  .messages-container {
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+  }
+
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .alert-error {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #f44336;
+  }
+
+  .alert-success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+  }
+
+  .alert-info, .alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+  }
+
+  .alert-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .alert-text {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  /* Success Animation */
+  .success-animation {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: scaleIn 0.6s ease-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .checkmark-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(76, 175, 80, 0.1);
+    border: 4px solid #4caf50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 25px rgba(76, 175, 80, 0);
+    }
+  }
+
+  .checkmark {
+    width: 70px;
+    height: 70px;
+    position: relative;
+  }
+
+  .checkmark::before {
+    content: '✓';
+    font-size: 90px;
+    color: #4caf50;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: checkmarkAppear 0.4s ease-out 0.3s both;
+  }
+
+  @keyframes checkmarkAppear {
+    from {
+      transform: translate(-50%, -50%) scale(0) rotate(-45deg);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  /* Success Message */
+  .success-message {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .success-message h1 {
+    color: #fff;
+    font-size: 40px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+  }
+
+  .success-message .lead {
+    color: #ddd;
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Payment Info Card */
+  .payment-info-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.6s ease-out 0.5s both;
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 25px 30px;
+    border-bottom: 1px solid #2a2a2a;
+    background: #2a2a2a;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header-icon {
+    font-size: 32px;
+  }
+
+  .info-header h2 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .info-content {
+    padding: 30px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-row .label {
+    color: #999;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .info-row .value {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .order-id {
+    background: #2a2a2a;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 15px !important;
+    border: 1px solid #3a3a3a;
+  }
+
+  .method-badge {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .info-row.total {
+    padding-top: 25px;
+    margin-top: 15px;
+    border-top: 2px solid #3a3a3a;
+  }
+
+  .info-row.total .label,
+  .info-row.total .value {
+    font-size: 20px;
+  }
+
+  .info-row .amount {
+    color: #4caf50;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .status-success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 50px;
+    animation: fadeInUp 0.6s ease-out 0.6s both;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 2px solid;
+  }
+
+  .btn-primary span,
+  .btn-secondary span {
+    font-size: 20px;
+  }
+
+  .btn-primary {
+    background: #4caf50;
+    color: #000;
+    border-color: #4caf50;
+  }
+
+  .btn-primary:hover {
+    background: #45a049;
+    border-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border-color: #3a3a3a;
+  }
+
+  .btn-secondary:hover {
+    background: #2a2a2a;
+    border-color: #4caf50;
+    color: #4caf50;
+    transform: translateY(-2px);
+  }
+
+  /* Info Cards */
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+    animation: fadeInUp 0.6s ease-out 0.7s both;
+  }
+
+  .info-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .info-card:hover {
+    background: #2a2a2a;
+    border-color: #4caf50;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+  }
+
+  .card-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+
+  .card-content h4 {
+    color: #fff;
+    font-size: 17px;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+  }
+
+  .card-content p {
+    color: #999;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* What's Next Section */
+  .whats-next-section {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 30px;
+    animation: fadeInUp 0.6s ease-out 0.8s both;
+  }
+
+  .whats-next-section .section-header h3 {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 30px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .whats-next-section .section-header h3 span {
+    font-size: 28px;
+  }
+
+  .next-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    border: 1px solid #3a3a3a;
+    transition: all 0.3s;
+  }
+
+  .step-item:hover {
+    background: #333;
+    border-color: #4caf50;
+  }
+
+  .step-number {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #4caf50;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .step-content h4 {
+    color: #fff;
+    font-size: 17px;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+
+  .step-content p {
+    color: #999;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .payment-success-container {
+      padding: 30px 15px;
+    }
+
+    .success-content {
+      max-width: 100%;
+    }
+
+    .success-message h1 {
+      font-size: 30px;
+    }
+
+    .success-message .lead {
+      font-size: 16px;
+    }
+
+    .checkmark-circle {
+      width: 130px;
+      height: 130px;
+    }
+
+    .checkmark::before {
+      font-size: 70px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .info-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .info-header {
+      padding: 20px;
+    }
+
+    .info-content {
+      padding: 20px;
+    }
+
+    .whats-next-section {
+      padding: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .info-row {
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+      padding: 15px 0;
+    }
+
+    .info-header {
+      justify-content: center;
+    }
+
+    .info-row .amount {
+      font-size: 24px;
+    }
+
+    .step-item {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+    }
+  }
+</style>
+
+<script>
+  // Auto-scroll to top
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+  // Auto-remove messages after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          alert.remove();
+        }, 300);
+      }, 5000);
+    });
+  });
+</script>
+
+{% endblock %}

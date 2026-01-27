@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>MY WALLET</h1>
+    </div>
+
+    <!-- Wallet Balance Card -->
+    <div class="wallet-balance-card">
+      <div class="balance-label">Current Balance</div>
+      <div class="balance-amount">₹{{ wallet.balance|floatformat:2 }}</div>
+    </div>
+
+    <!-- Transaction History Section -->
+    <div class="transactions-section">
+      <h2 class="section-title">Transaction History</h2>
+
+      {% if transactions %}
+      <!-- Transactions Table -->
+      <div class="transactions-table-wrapper">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in transactions %}
+            <tr>
+              <td>{{ t.created_at|date:"d M Y H:i" }}</td>
+              <td>
+                <span class="transaction-type type-{{ t.transaction_type|lower }}">
+                  {{ t.transaction_type }}
+                </span>
+              </td>
+              <td class="transaction-amount {% if t.transaction_type == 'DEBIT' %}amount-debit{% else %}amount-credit{% endif %}">
+                {% if t.transaction_type == "DEBIT" %}
+                  -₹{{ t.amount|floatformat:2 }}
+                {% else %}
+                  +₹{{ t.amount|floatformat:2 }}
+                {% endif %}
+              </td>
+              <td class="transaction-description">{{ t.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="no-transactions">
+          <p>No transactions yet.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-header-section h1 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 30px;
+    font-weight: 600;
+  }
+
+  /* Wallet Balance Card */
+  .wallet-balance-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .balance-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .balance-amount {
+    color: #fff;
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+
+  /* Transactions Section */
+  .transactions-section {
+    margin-top: 20px;
+  }
+
+  .section-title {
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  /* Transactions Table */
+  .transactions-table-wrapper {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .transactions-table thead {
+    background: #f5f5f5;
+  }
+
+  .transactions-table th {
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .transactions-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+    transition: background 0.2s;
+  }
+
+  .transactions-table tbody tr:hover {
+    background: #f9f9f9;
+  }
+
+  .transactions-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .transactions-table td {
+    color: #666;
+    font-size: 15px;
+    padding: 20px;
+  }
+
+  /* Transaction Type Badge */
+  .transaction-type {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .type-credit {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+  }
+
+  .type-debit {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+  }
+
+  /* Transaction Amount */
+  .transaction-amount {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .amount-credit {
+    color: #4caf50;
+  }
+
+  .amount-debit {
+    color: #f44336;
+  }
+
+  .transaction-description {
+    color: #666;
+  }
+
+  /* No Transactions */
+  .no-transactions {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 60px 40px;
+    text-align: center;
+  }
+
+  .no-transactions p {
+    color: #999;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .transactions-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .transactions-table {
+      min-width: 700px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .profile-header-section h1 {
+      font-size: 24px;
+    }
+
+    .wallet-balance-card {
+      padding: 30px;
+    }
+
+    .balance-amount {
+      font-size: 36px;
+    }
+
+    .section-title {
+      font-size: 20px;
+    }
+  }
+</style>
+
+{% endblock %}

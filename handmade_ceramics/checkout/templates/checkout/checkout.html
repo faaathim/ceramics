@@ -23,7 +23,7 @@
         <span>Review</span>
       </div>
       <div class="step-line"></div>
-      <div class="step">
+      <div class="step active">
         <div class="step-number">3</div>
         <span>Payment</span>
       </div>
@@ -50,8 +50,9 @@
     
     <div class="checkout-grid">
       
-      <!-- LEFT: ADDRESSES -->
+      <!-- LEFT: ADDRESSES & PAYMENT -->
       <div class="checkout-section">
+        <!-- Shipping Address Section -->
         <div class="section-header">
           <h2>
             <span class="section-icon">📍</span>
@@ -100,6 +101,78 @@
             </a>
           </div>
         {% endif %}
+
+        <!-- Payment Method Section -->
+        <div class="section-header" style="margin-top: 40px;">
+          <h2>
+            <span class="section-icon">💳</span>
+            Payment Method
+          </h2>
+        </div>
+
+        <div class="payment-methods-container">
+          <!-- Wallet Payment -->
+          {% if wallet.balance >= total %}
+          <div class="payment-method-card">
+            <input type="radio" name="payment_method" value="WALLET" id="payment_wallet">
+            <label for="payment_wallet">
+              <div class="payment-method-content">
+                <div class="payment-method-icon">👛</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">Pay with Wallet</div>
+                  <div class="payment-method-desc">
+                    Available: ₹<span id="wallet-balance">{{ wallet.balance|floatformat:2 }}</span>
+                  </div>
+                </div>
+                <div class="payment-method-check">✓</div>
+              </div>
+            </label>
+          </div>
+          {% else %}
+          <div class="payment-method-card wallet-insufficient">
+            <div class="wallet-insufficient-content">
+              <div class="payment-method-icon">👛</div>
+              <div class="payment-method-details">
+                <div class="payment-method-title">Wallet</div>
+                <div class="wallet-insufficient-message">
+                  <span class="insufficient-icon">⚠️</span>
+                  Insufficient balance (Available: ₹{{ wallet.balance|floatformat:2 }}, Need: ₹{{ total|floatformat:2 }})
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Cash on Delivery -->
+          <div class="payment-method-card">
+            <input type="radio" name="payment_method" value="COD" id="payment_cod" checked>
+            <label for="payment_cod">
+              <div class="payment-method-content">
+                <div class="payment-method-icon">💵</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">Cash on Delivery</div>
+                  <div class="payment-method-desc">Pay when you receive your order</div>
+                </div>
+                <div class="payment-method-check">✓</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Razorpay / UPI -->
+          <div class="payment-method-card">
+            <input type="radio" name="payment_method" value="RAZORPAY" id="payment_razorpay">
+            <label for="payment_razorpay">
+              <div class="payment-method-content">
+                <div class="payment-method-icon">💳</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">Razorpay / UPI</div>
+                  <div class="payment-method-desc">Pay online via UPI, Cards, Wallet</div>
+                </div>
+                <div class="payment-method-check">✓</div>
+              </div>
+            </label>
+          </div>
+        </div>
       </div>
 
       <!-- RIGHT: ORDER SUMMARY -->
@@ -114,31 +187,6 @@
         <div class="order-summary-card">
           
           <!-- Cart Items -->
-           <!-- Coupon Section -->
-<div class="coupon-section" style="margin-bottom: 20px;">
-
-  {% if coupon %}
-    <!-- Applied Coupon -->
-    <div class="applied-coupon" style="background:#1a1a1a;padding:15px;border-radius:8px;border:1px solid #3a3a3a;">
-      <p style="color:#4caf50;font-weight:600;margin-bottom:10px;">
-        Coupon Applied: {{ coupon.code }}
-      </p>
-      <p style="color:#ddd;margin-bottom:10px;">
-        You saved ₹{{ discount }}
-      </p>
-
-      <form method="post" action="{% url 'coupons:remove_coupon' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn-edit-address">
-          Remove Coupon
-        </button>
-      </form>
-    </div>
-
-  {% endif %}
-
-</div>
-
           <div class="cart-items-list">
             {% for item in cart_items %}
             <div class="cart-item">
@@ -184,25 +232,24 @@
               </span>
             </div>
             {% if discount and discount > 0 %}
-<div class="price-row discount">
-  <span>Discount</span>
-  <span>- ₹{{ discount }}</span>
-</div>
-{% endif %}
+            <div class="price-row discount">
+              <span>Discount</span>
+              <span>- ₹{{ discount }}</span>
+            </div>
+            {% endif %}
 
             <div class="price-row total">
               <span>Total Amount</span>
-              <p style="font-size:12px;color:#999;margin-top:10px;">
-                * Minimum payable amount is ₹1
-              </p>
-              
               <span>₹{{ total }}</span>
             </div>
+            <p style="font-size:12px;color:#999;margin-top:10px;">
+              * Minimum payable amount is ₹1
+            </p>
           </div>
 
-          <!-- Payment Method Info -->
-          <div class="payment-info">
-            <div class="payment-icon">💳</div>
+          <!-- Selected Payment Info (Dynamic) -->
+          <div class="payment-info" id="selected-payment-info">
+            <div class="payment-icon">💵</div>
             <div class="payment-text">
               <strong>Cash on Delivery</strong>
               <p>Pay when you receive your order</p>
@@ -211,7 +258,7 @@
 
           <!-- Place Order Button -->
           {% if addresses %}
-          <button type="submit" class="btn-place-order">
+          <button type="submit" class="btn-place-order" id="place-order-btn">
             <span>✓</span> Place Order
           </button>
           {% else %}
@@ -616,6 +663,114 @@
     transform: translateY(-2px);
   }
 
+  /* Payment Method Cards */
+  .payment-methods-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .payment-method-card {
+    position: relative;
+  }
+
+  .payment-method-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+  }
+
+  .payment-method-card label {
+    display: block;
+    background: #2a2a2a;
+    border: 2px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .payment-method-card input[type="radio"]:checked + label {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.05);
+  }
+
+  .payment-method-card label:hover {
+    border-color: #666;
+  }
+
+  .payment-method-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .payment-method-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  .payment-method-details {
+    flex: 1;
+  }
+
+  .payment-method-title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .payment-method-desc {
+    color: #999;
+    font-size: 13px;
+  }
+
+  .wallet-warning {
+    color: #ff9800;
+    font-size: 12px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .payment-method-check {
+    font-size: 20px;
+    color: #4caf50;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .payment-method-card input[type="radio"]:checked + label .payment-method-check {
+    opacity: 1;
+  }
+
+  /* Wallet Insufficient Balance State */
+  .wallet-insufficient {
+    background: #2a2a2a;
+    border: 2px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 20px;
+    opacity: 0.6;
+  }
+
+  .wallet-insufficient-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .wallet-insufficient-message {
+    color: #ff9800;
+    font-size: 13px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .insufficient-icon {
+    font-size: 14px;
+  }
+
   /* Order Summary */
   .order-summary-card {
     background: #2a2a2a;
@@ -894,5 +1049,45 @@
     }
   }
 </style>
+
+<script>
+  // Dynamic Payment Info Update
+  document.addEventListener('DOMContentLoaded', function() {
+    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    const paymentInfo = document.getElementById('selected-payment-info');
+    const walletBalanceEl = document.getElementById('wallet-balance');
+    
+    paymentRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'WALLET') {
+          const walletBalance = walletBalanceEl ? walletBalanceEl.textContent : '0.00';
+          paymentInfo.innerHTML = `
+            <div class="payment-icon">👛</div>
+            <div class="payment-text">
+              <strong>Pay with Wallet</strong>
+              <p>₹${walletBalance} will be deducted from your wallet</p>
+            </div>
+          `;
+        } else if (this.value === 'COD') {
+          paymentInfo.innerHTML = `
+            <div class="payment-icon">💵</div>
+            <div class="payment-text">
+              <strong>Cash on Delivery</strong>
+              <p>Pay when you receive your order</p>
+            </div>
+          `;
+        } else if (this.value === 'RAZORPAY') {
+          paymentInfo.innerHTML = `
+            <div class="payment-icon">💳</div>
+            <div class="payment-text">
+              <strong>Razorpay / UPI</strong>
+              <p>Pay online via UPI, Cards, Wallet</p>
+            </div>
+          `;
+        }
+      });
+    });
+  });
+</script>
 
 {% endblock %}

@@ -10,6 +10,8 @@ from user_profile.models import Profile
 import io
 from reportlab.pdfgen import canvas # type: ignore
 from coupons.models import CouponUsage
+from wallet.models import Wallet, WalletTransaction
+from django.db import transaction
 
 
 
@@ -67,55 +69,31 @@ def order_detail(request, order_id):
 @login_required
 @transaction.atomic
 def cancel_order(request, order_id):
-    profile, _ = Profile.objects.get_or_create(user=request.user)
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
 
-    NON_CANCELLABLE_STATUSES = [
-        'OUT_FOR_DELIVERY',
-        'DELIVERED',
-        'RETURN_REQUESTED',
-        'RETURN_PROCESSING',
-        'RETURNED',
-    ]
+    if order.status not in ['PENDING', 'CONFIRMED']:
+        messages.error(request, "Order cannot be cancelled.")
+        return redirect(order.get_absolute_url())
 
-    if order.status in NON_CANCELLABLE_STATUSES:
-        messages.error(request, 'This order cannot be cancelled.')
-        return redirect('orders:order_list')
+    order.status = 'CANCELLED'
+    order.save()
 
-    if request.method == 'POST':
-        reason = request.POST.get('reason', '')
+    # Refund to wallet if paid
+    if order.is_paid:
+        wallet = Wallet.objects.select_for_update().get(user=request.user)
 
-        if not reason:
-            messages.error(request, 'Please provide a cancellation reason.')
-            return render(request, 'orders/order_cancel_form.html', {
-                'order': order,
-                'profile': profile
-            })
+        wallet.balance += order.total_amount
+        wallet.save()
 
-        order.status = 'CANCELLED'
-        order.cancellation_reason = reason
-        order.save()
-
-        # 🟢 STEP 9 — Coupon reusable again
-        from coupons.models import CouponUsage
-        CouponUsage.objects.filter(order=order).delete()
-
-        # Restore stock
-        for item in order.items.select_related('variant'):
-            if item.variant:
-                item.variant.stock += item.quantity
-                item.variant.save()
-
-        messages.success(
-            request,
-            f'Order {order.order_id} has been cancelled successfully.'
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type='CREDIT',
+            amount=order.total_amount,
+            description=f"Refund for cancelled order {order.order_id}"
         )
-        return redirect('orders:order_list')
 
-    return render(request, 'orders/order_cancel_form.html', {
-        'order': order,
-        'profile': profile
-    })
+    messages.success(request, "Order cancelled and amount refunded to wallet.")
+    return redirect(order.get_absolute_url())
 
 
 
