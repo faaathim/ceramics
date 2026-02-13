@@ -1,18 +1,14 @@
 # product_management/views.py
-import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib import messages
 from django.db import transaction
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404, JsonResponse
 
 from .models import Product, ProductImage, Variant, VariantImage, product_average_rating, get_related_products
 from .forms import ProductForm, ProductSearchForm, VariantForm
-
-from PIL import Image
 
 # permission decorator: allow only active superusers
 def superuser_check(user):
@@ -20,24 +16,6 @@ def superuser_check(user):
 
 def admin_required(view_func):
     return login_required(user_passes_test(superuser_check, login_url='custom_admin:login')(view_func), login_url='custom_admin:login')
-
-# helper: process and save an uploaded image to an absolute path
-def process_and_save_image(uploaded_file, abs_save_path, size=(1024,1024)):
-    """
-    Crop center square and resize to `size`, save as JPEG with quality 85.
-    abs_save_path: absolute filesystem path (including filename).
-    """
-    img = Image.open(uploaded_file)
-    img = img.convert('RGB')
-    w, h = img.size
-    edge = min(w, h)
-    left = (w - edge) / 2
-    top = (h - edge) / 2
-    img = img.crop((left, top, left + edge, top + edge))
-    img = img.resize(size, Image.LANCZOS)
-    os.makedirs(os.path.dirname(abs_save_path), exist_ok=True)
-    img.save(abs_save_path, 'JPEG', quality=85)
-
 
 # =============================================
 # PRODUCT VIEWS
@@ -336,62 +314,60 @@ def variant_list(request, product_pk):
 @transaction.atomic
 def variant_create(request, product_pk):
     product = get_object_or_404(Product.all_objects, pk=product_pk)
+
     if request.method == 'POST':
         form = VariantForm(request.POST, request.FILES)
         main_file = request.FILES.get('main_image')
         gallery_files = request.FILES.getlist('images')
 
         total_images = (1 if main_file else 0) + len(gallery_files)
+
         if total_images < 3:
-            messages.error(request, "Please provide at least 3 images in total (including main image).")
+            messages.error(request, "Please upload at least 3 images.")
         elif total_images > 7:
-            messages.error(request, "You can upload at most 7 images in total (including main image).")
-        else:
-            if form.is_valid():
-                variant = form.save(commit=False)
-                variant.product = product
-                
-                # If stock is 0, force unlist
-                if variant.stock == 0:
-                    variant.is_listed = False
-                
-                variant.save()
+            messages.error(request, "You can upload at most 7 images.")
+        elif form.is_valid():
+            variant = form.save(commit=False)
+            variant.product = product
 
-                # process main image
-                if main_file:
-                    main_filename = f'{variant.id}_main.jpg'
-                    abs_main = os.path.join(settings.MEDIA_ROOT, 'products', str(product.id), 'variants', f'{variant.id}', main_filename)
-                    rel_main = os.path.join('products', str(product.id), 'variants', f'{variant.id}', main_filename)
-                    process_and_save_image(main_file, abs_main, size=(800,800))
-                    variant.main_image = rel_main
-                    variant.save()
+            if variant.stock == 0:
+                variant.is_listed = False
 
-                # gallery images
-                for idx, uploaded in enumerate(gallery_files):
-                    fname = f'{idx}_{uploaded.name}'
-                    rel_dir = os.path.join('products', str(product.id), 'variants', str(variant.id))
-                    abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
-                    rel_path = os.path.join(rel_dir, fname)
-                    process_and_save_image(uploaded, abs_path, size=(1024,1024))
-                    VariantImage.objects.create(variant=variant, image=rel_path, order=idx)
+            variant.save()
 
-                # if main_image not provided but gallery present -> set first as main
-                if not variant.main_image and variant.images.exists():
-                    first = variant.images.first()
-                    variant.main_image = first.image.name
-                    variant.save()
+            # MAIN IMAGE
+            if main_file:
+                variant.main_image = main_file
+                variant.save(update_fields=["main_image"])
 
-                # Update product stock
-                product.update_stock()
+            # GALLERY IMAGES
+            for idx, img in enumerate(gallery_files):
+                VariantImage.objects.create(
+                    variant=variant,
+                    image=img,
+                    order=idx
+                )
 
-                messages.success(request, f'Variant created successfully for "{product.name}".')
-                return redirect(reverse('custom_admin:product_management:variant_list', args=[product.id]))
+            # AUTO MAIN IMAGE
+            if not variant.main_image and variant.images.exists():
+                variant.main_image = variant.images.first().image
+                variant.save(update_fields=["main_image"])
+
+            product.update_stock()
+            messages.success(request, "Variant created successfully.")
+            return redirect(
+                reverse('custom_admin:product_management:variant_list', args=[product.id])
+            )
     else:
         form = VariantForm()
 
     return render(request, 'product_management/variant_form.html', {
-        'form': form, 'action': 'Create', 'product': product, 'variant': None
+        'form': form,
+        'action': 'Create',
+        'product': product
     })
+
+
 @admin_required
 @transaction.atomic
 def variant_edit(request, product_pk, pk):
@@ -408,7 +384,7 @@ def variant_edit(request, product_pk, pk):
         remove_gallery = request.POST.get("remove_gallery_images") == "1"
 
         # -------------------------
-        # STEP 1: Validate form FIRST
+        # STEP 1: Validate form
         # -------------------------
         if not form.is_valid():
             messages.error(request, "Please correct the errors below.")
@@ -419,7 +395,7 @@ def variant_edit(request, product_pk, pk):
             )
 
         # -------------------------
-        # STEP 2: Calculate final image count
+        # STEP 2: Image count validation
         # -------------------------
         current_gallery_count = variant.images.count()
 
@@ -464,66 +440,52 @@ def variant_edit(request, product_pk, pk):
             )
 
         # -------------------------
-        # STEP 3: Save variant data
+        # STEP 3: Save variant (no commit)
         # -------------------------
         variant = form.save(commit=False)
 
         if variant.stock == 0:
             variant.is_listed = False
 
-        # -------------------------
-        # STEP 4: Handle main image
-        # -------------------------
+        # =========================
+        # IMAGE HANDLING (FINAL)
+        # =========================
+
+        # MAIN IMAGE
         if remove_main and variant.main_image:
-            variant.main_image.delete(save=False)
+            variant.main_image.delete()
             variant.main_image = None
 
         if main_file:
             if variant.main_image:
-                variant.main_image.delete(save=False)
+                variant.main_image.delete()
+            variant.main_image = main_file
 
-            main_name = f"{variant.id}_main.jpg"
-            rel_path = os.path.join(
-                "products", str(product.id), "variants", str(variant.id), main_name
-            )
-            abs_path = os.path.join(settings.MEDIA_ROOT, rel_path)
-
-            process_and_save_image(main_file, abs_path, size=(800, 800))
-            variant.main_image = rel_path
-
-        # -------------------------
-        # STEP 5: Handle gallery images
-        # -------------------------
+        # GALLERY IMAGES
         if gallery_files:
-            # replace gallery
             for img in variant.images.all():
-                img.image.delete(save=False)
+                img.image.delete()
             variant.images.all().delete()
 
             for idx, img in enumerate(gallery_files):
-                fname = f"{idx}_{img.name}"
-                rel_dir = os.path.join(
-                    "products", str(product.id), "variants", str(variant.id)
-                )
-                abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
-                rel_path = os.path.join(rel_dir, fname)
-
-                process_and_save_image(img, abs_path, size=(1024, 1024))
                 VariantImage.objects.create(
-                    variant=variant, image=rel_path, order=idx
+                    variant=variant,
+                    image=img,
+                    order=idx
                 )
 
         elif remove_gallery:
             for img in variant.images.all():
-                img.image.delete(save=False)
+                img.image.delete()
             variant.images.all().delete()
 
-        # -------------------------
-        # STEP 6: Auto-assign main image if missing
-        # -------------------------
+        # AUTO MAIN IMAGE
         if not variant.main_image and variant.images.exists():
-            variant.main_image = variant.images.first().image.name
+            variant.main_image = variant.images.first().image
 
+        # -------------------------
+        # STEP 4: Final save
+        # -------------------------
         variant.save()
         product.update_stock()
 
@@ -571,7 +533,7 @@ def variant_toggle_listing(request, product_pk, pk):
         raise Http404
     
     if request.method == 'POST':
-        if variant.can_be_listed():
+        if variant.stock > 0:
             variant.is_listed = not variant.is_listed
             variant.save()
             status = "listed" if variant.is_listed else "unlisted"

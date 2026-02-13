@@ -67,6 +67,12 @@ def shop(request):
 
     form = ShopFilterForm(request.GET or None)
 
+    # Only valid, visible variants (same as home)
+    listed_variants_qs = Variant.objects.filter(
+        is_listed=True,
+        is_deleted=False
+    ).order_by('-created_at')
+
     # Base queryset (same rules as home)
     products_qs = Product.objects.filter(
         is_listed=True,
@@ -75,12 +81,7 @@ def shop(request):
         variants__is_deleted=False
     ).distinct()
 
-    # Prefetch only valid variants
-    listed_variants_qs = Variant.objects.filter(
-        is_listed=True,
-        is_deleted=False
-    ).order_by('-created_at')
-
+    # Prefetch only valid variants BEFORE filtering
     products_qs = products_qs.prefetch_related(
         Prefetch(
             'variants',

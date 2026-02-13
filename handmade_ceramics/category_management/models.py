@@ -4,9 +4,6 @@ from django.core.exceptions import ValidationError
 from product_management.models import Product
 from cloudinary.models import CloudinaryField
 
-def category_image_path(instance, filename):
-    return f"categories/{instance.id or 'new'}/{filename}"
-
 
 class CategoryQuerySet(models.QuerySet):
     def active(self):
@@ -51,16 +48,8 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         if not self.is_deleted:
             self.full_clean()
-
         super().save(*args, **kwargs)
 
-        if not self.is_listed:
-            self.products.update(is_listed=False)
-        else:
-            for product in self.products.all():
-                if hasattr(product, 'can_be_listed') and product.can_be_listed():
-                    product.is_listed = True
-                    product.save(update_fields=['is_listed'])
 
     def soft_delete(self):
 

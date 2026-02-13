@@ -3,7 +3,11 @@
 {% block top %}{% include "user_navbar.html" %}{% endblock %}
 
 {% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
 <style>
+  /* ===== BASE ===== */
   * {
     margin: 0;
     padding: 0;
@@ -11,76 +15,251 @@
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #ffffff;
-    color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #e8e8e8;
   }
 
+  /* ===== MESSAGES ===== */
+  .messages-container {
+    position: fixed;
+    top: 90px;
+    right: 30px;
+    z-index: 9999;
+    max-width: 450px;
+    pointer-events: none;
+  }
+
+  .alert {
+    pointer-events: all;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .alert::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: currentColor;
+  }
+
+  .alert.hiding {
+    animation: slideOutRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+
+  .alert-success {
+    background: linear-gradient(135deg, rgba(42, 74, 58, 0.95), rgba(58, 90, 74, 0.95));
+    border-color: #4a6a5a;
+    color: #70c090;
+  }
+
+  .alert-error,
+  .alert-danger {
+    background: linear-gradient(135deg, rgba(74, 42, 42, 0.95), rgba(90, 58, 58, 0.95));
+    border-color: #6a4a4a;
+    color: #e07070;
+  }
+
+  .alert-warning {
+    background: linear-gradient(135deg, rgba(74, 74, 42, 0.95), rgba(90, 90, 58, 0.95));
+    border-color: #6a6a4a;
+    color: #d0c070;
+  }
+
+  .alert-info {
+    background: linear-gradient(135deg, rgba(42, 58, 74, 0.95), rgba(58, 74, 90, 0.95));
+    border-color: #4a5a6a;
+    color: #70a0c0;
+  }
+
+  .alert-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .alert-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .alert-message {
+    display: block;
+    color: inherit;
+    font-weight: 500;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+
+  .alert-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    margin-top: 2px;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .alert-close:active {
+    transform: scale(0.9);
+  }
+
+  .alert-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: currentColor;
+    opacity: 0.4;
+    animation: progressShrink 5s linear forwards;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(120%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(120%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes progressShrink {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+
+  /* ===== LAYOUT ===== */
   .shop-container {
     display: flex;
     min-height: 100vh;
-    margin-top: 80px;
+    margin-top: 0;
   }
 
-  /* FIXED SIDEBAR */
+  /* ===== SIDEBAR ===== */
   .filter-sidebar {
-    width: 320px;
-    background: #000000;
+    width: 280px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
     position: fixed;
     left: 0;
     top: 80px;
     height: calc(100vh - 80px);
     overflow-y: auto;
-    padding: 40px 30px;
+    padding: 40px 25px;
     z-index: 100;
+    border-right: 1px solid #333;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
+
+  .filter-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .filter-sidebar::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+
+  .filter-sidebar::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 3px;
+  }
+
+  .filter-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #505050;
   }
 
   .sidebar-brand {
-    margin-bottom: 40px;
+    margin-bottom: 35px;
     padding-bottom: 20px;
-    border-bottom: 2px solid #333;
+    border-bottom: 1px solid #404040;
   }
 
   .sidebar-brand h1 {
-    color: #ffffff;
-    font-size: 1.5rem;
+    color: #e8e8e8;
+    font-size: 1.3rem;
     font-weight: 900;
     letter-spacing: 4px;
     text-transform: uppercase;
   }
 
   .filter-group {
-    margin-bottom: 35px;
+    margin-bottom: 30px;
   }
 
   .filter-label {
     display: block;
-    color: #888;
+    color: #b0b0b0;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .filter-sidebar input[type="text"],
   .filter-sidebar input[type="number"],
   .filter-sidebar select {
     width: 100%;
-    padding: 14px 16px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #ffffff;
-    font-size: 0.95rem;
+    padding: 12px 14px;
+    background: #0f0f0f;
+    border: 2px solid #404040;
+    color: #e8e8e8;
+    font-size: 0.9rem;
     outline: none;
     transition: all 0.3s ease;
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   .filter-sidebar input:focus,
   .filter-sidebar select:focus {
-    border-color: #ffffff;
-    background: #2a2a2a;
+    border-color: #e8e8e8;
+    background: #1a1a1a;
+  }
+
+  .filter-sidebar input::placeholder {
+    color: #606060;
   }
 
   .filter-sidebar select {
@@ -88,27 +267,27 @@
   }
 
   .filter-sidebar option {
-    background: #1a1a1a;
-    color: #ffffff;
+    background: #0f0f0f;
+    color: #e8e8e8;
   }
 
   .price-range {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .btn-group {
-    margin-top: 50px;
+    margin-top: 40px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .btn {
     width: 100%;
-    padding: 16px;
-    font-size: 0.75rem;
+    padding: 14px;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -118,80 +297,87 @@
     text-decoration: none;
     text-align: center;
     display: block;
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   .btn-submit {
-    background: #ffffff;
-    color: #000000;
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+    color: #0a0a0a;
   }
 
   .btn-submit:hover {
-    background: #e0e0e0;
+    background: linear-gradient(135deg, #fff, #e8e8e8);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(232, 232, 232, 0.3);
   }
 
   .btn-reset {
     background: transparent;
-    color: #ffffff;
-    border: 2px solid #ffffff;
+    color: #e8e8e8;
+    border: 2px solid #404040;
   }
 
   .btn-reset:hover {
-    background: #ffffff;
-    color: #000000;
+    background: #2a2a2a;
+    color: #fff;
+    border-color: #e8e8e8;
+    transform: translateY(-2px);
   }
 
-  /* MAIN CONTENT */
+  /* ===== MAIN CONTENT ===== */
   .main-content {
     flex: 1;
-    margin-left: 320px;
-    padding: 30px 60px;
-    background: #fafafa;
+    margin-left: 280px;
+    padding: 40px 50px;
     min-height: 100vh;
   }
 
   .content-header {
     margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #404040;
   }
 
   .content-header h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 900;
-    color: #000;
-    letter-spacing: 6px;
+    color: #e8e8e8;
+    letter-spacing: 4px;
     text-transform: uppercase;
   }
 
   .error-box {
-    background: #000;
-    color: #fff;
-    padding: 20px 25px;
+    background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+    color: #e07070;
+    padding: 18px 22px;
     margin-bottom: 25px;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-weight: 500;
+    border: 1px solid #6a4a4a;
   }
 
-  /* PRODUCTS GRID */
+  /* ===== PRODUCTS GRID ===== */
   .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
+    gap: 24px;
     margin-bottom: 60px;
   }
 
   .product-card {
-    background: #ffffff;
-    border: 1px solid #e5e5e5;
-    border-radius: 16px;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 1px solid #333;
+    border-radius: 15px;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s ease;
     cursor: pointer;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
   }
 
   .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-    border-color: #000;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+    border-color: #e8e8e8;
   }
 
   .product-card a {
@@ -201,22 +387,22 @@
   }
 
   .product-image-wrapper {
+    position: relative;
     width: 100%;
     height: 280px;
     overflow: hidden;
-    background: #f5f5f5;
-    border-radius: 16px 16px 0 0;
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
   }
 
   .product-image-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s ease;
+    transition: transform 0.3s ease;
   }
 
   .product-card:hover .product-image-wrapper img {
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
 
   .no-image {
@@ -225,8 +411,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #aaa;
-    font-size: 0.9rem;
+    color: #606060;
+    font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -236,10 +422,25 @@
     padding: 20px;
   }
 
-  .product-name {
-    font-size: 0.95rem;
+  .product-category {
+    font-size: 0.65rem;
+    color: #909090;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
     font-weight: 700;
-    color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232, 232, 232, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .product-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e8e8e8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 10px;
@@ -247,109 +448,170 @@
   }
 
   .product-price {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 900;
-    color: #000;
-    margin-bottom: 8px;
-  }
-
-  .product-color {
-    font-size: 0.8rem;
-    color: #666;
+    color: #fff;
+    letter-spacing: 0.5px;
     margin-bottom: 15px;
   }
 
+  .product-price-original {
+    font-size: 0.85rem;
+    color: #606060;
+    text-decoration: line-through;
+    margin-left: 8px;
+    font-weight: 600;
+  }
+
+  .product-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+  }
+
   .add-to-cart-btn {
-    width: 100%;
-    padding: 12px;
-    background: #000;
-    color: #fff;
+    flex: 1;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+    color: #0a0a0a;
     border: none;
     font-size: 0.7rem;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     cursor: pointer;
     transition: all 0.3s ease;
     border-radius: 8px;
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  .product-card:hover .add-to-cart-btn {
-    opacity: 1;
-    transform: translateY(0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   .add-to-cart-btn:hover {
-    background: #333;
+    background: linear-gradient(135deg, #fff, #e8e8e8);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(232, 232, 232, 0.3);
   }
 
-  /* PAGINATION */
-  .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding: 40px 0;
-  }
-
-  .pagination a,
-  .pagination span {
-    padding: 12px 20px;
-    background: #000;
-    color: #fff;
-    border: 2px solid #000;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
+  .wishlist-btn {
+    width: 44px;
+    height: 44px;
+    background: #2a2a2a;
+    border: 1px solid #404040;
     border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
   }
 
-  .pagination a:hover {
-    background: #fff;
-    color: #000;
-    transform: translateY(-3px);
+  .wishlist-btn:hover {
+    background: #3a3a3a;
+    border-color: #e8e8e8;
+    transform: scale(1.05);
   }
 
-  .pagination span {
-    background: #f5f5f5;
-    color: #000;
-    border-color: #ddd;
+  .wishlist-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: #e8e8e8;
+    fill: none;
+    stroke-width: 2;
+    transition: all 0.3s ease;
+  }
+
+  .wishlist-btn:hover svg {
+    stroke: #fff;
+  }
+
+  .wishlist-btn.active {
+    background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+    border-color: #6a4a4a;
+  }
+
+  .wishlist-btn.active svg {
+    fill: #e07070;
+    stroke: #e07070;
+  }
+
+  /* ===== PAGINATION ===== */
+  .pagination-container {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #333;
+  }
+
+  .pagination-info {
+    color: #b0b0b0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+
+  .pagination-links {
+    display: flex;
+    gap: 8px;
+  }
+
+  .pagination-links a,
+  .pagination-links span {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+    color: #e8e8e8;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid #404040;
+    font-size: 0.8rem;
+  }
+
+  .pagination-links a:hover {
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+    color: #0a0a0a;
+    transform: translateY(-2px);
+    border-color: #e8e8e8;
+  }
+
+  .pagination-links span {
+    background: transparent;
+    color: #b0b0b0;
+    border-color: #222;
   }
 
   .no-products {
     text-align: center;
-    padding: 100px 30px;
-    font-size: 1.3rem;
-    color: #999;
-    font-weight: 300;
+    padding: 80px 30px;
+    color: #606060;
   }
 
-  /* SCROLLBAR */
-  .filter-sidebar::-webkit-scrollbar {
-    width: 8px;
+  .no-products i {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    opacity: 0.3;
   }
 
-  .filter-sidebar::-webkit-scrollbar-track {
-    background: #1a1a1a;
+  .no-products p {
+    font-size: 1.1rem;
+    font-weight: 600;
   }
 
-  .filter-sidebar::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
-  }
-
-  .filter-sidebar::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-
-  /* RESPONSIVE */
+  /* ===== RESPONSIVE ===== */
   @media (max-width: 1200px) {
     .products-grid {
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 25px;
+      gap: 20px;
     }
   }
 
@@ -359,6 +621,7 @@
       width: 100%;
       height: auto;
       padding: 30px 20px;
+      border-radius: 0;
     }
 
     .main-content {
@@ -368,11 +631,20 @@
 
     .products-grid {
       grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 20px;
     }
   }
 
   @media (max-width: 768px) {
+    .messages-container {
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+
+    .alert {
+      padding: 12px 16px;
+    }
+
     .main-content {
       padding: 30px 20px;
     }
@@ -384,7 +656,6 @@
 
     .products-grid {
       grid-template-columns: 1fr;
-      gap: 20px;
     }
 
     .product-image-wrapper {
@@ -394,7 +665,25 @@
 </style>
 
 <div class="shop-container">
-  <!-- FIXED SIDEBAR -->
+  <!-- Messages Display -->
+  <div class="messages-container" id="messagesContainer">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
+          <i class="alert-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+          <div class="alert-content">
+            <span class="alert-message">{{ message }}</span>
+          </div>
+          <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="alert-progress"></div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Sidebar -->
   <aside class="filter-sidebar">
     <div class="sidebar-brand">
       <h1>SHOP</h1>
@@ -425,72 +714,248 @@
       </div>
 
       <div class="btn-group">
-        <button type="submit" class="btn btn-submit">Apply</button>
-        <a href="{% url 'user_side:shop' %}" class="btn btn-reset">Clear</a>
+        <button type="submit" class="btn btn-submit">Apply Filters</button>
+        <a href="{% url 'user_side:shop' %}" class="btn btn-reset">Clear All</a>
       </div>
     </form>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- Main Content -->
   <main class="main-content">
     <div class="content-header">
       <h2>PRODUCTS</h2>
     </div>
 
     {% if error %}
-      <div class="error-box">{{ error }}</div>
+      <div class="error-box">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+      </div>
     {% endif %}
 
     {% if products_page and products_page.object_list %}
       <div class="products-grid">
-        {% for p in products_page.object_list %}
-          {% with v=p.get_default_variant %}
+        {% for product in products_page.object_list %}
+          {% with v=product.listed_variants.0 %}
             {% if v %}
               <article class="product-card">
-                <a href="{% url 'custom_admin:product_management:product_detail' p.id %}?variant={{ v.id }}">
+                <a href="{% url 'custom_admin:product_management:product_detail' product.id %}?variant={{ v.id }}">
                   <div class="product-image-wrapper">
                     {% if v.main_image %}
-                      <img src="{{ v.main_image.url }}" alt="{{ p.name }}">
+                      <img src="{{ v.main_image.url }}" alt="{{ product.name }}">
                     {% elif v.images.first %}
-                      <img src="{{ v.images.first.image.url }}" alt="{{ p.name }}">
-                    {% elif p.main_image %}
-                      <img src="{{ p.main_image.url }}" alt="{{ p.name }}">
+                      <img src="{{ v.images.first.image.url }}" alt="{{ product.name }}">
+                    {% elif product.images.first %}
+                      <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
                     {% else %}
-                      <div class="no-image">No Image</div>
+                      <div class="no-image">
+                        <i class="fas fa-image"></i> No Image
+                      </div>
                     {% endif %}
                   </div>
 
                   <div class="product-details">
-                    <h3 class="product-name">{{ p.name }}</h3>
-                    <div class="product-price">RS. {{ p.price }}</div>
-                    <p class="product-color">Color: {{ v.color|default:"N/A" }}</p>
-                    <button class="add-to-cart-btn">Add to Cart</button>
+                    <div class="product-category">
+                      <i class="fas fa-tag"></i>
+                      {{ product.category.name|default:"Ceramics" }}
+                    </div>
+
+                    <h3 class="product-name">{{ product.name }}</h3>
+
+                    <div class="product-price">
+                      {% if product.selling_price %}
+                        ₹{{ product.selling_price }}
+                        {% if product.original_price and product.original_price > product.selling_price %}
+                          <span class="product-price-original">₹{{ product.original_price }}</span>
+                        {% endif %}
+                      {% else %}
+                        ₹{{ product.price }}
+                      {% endif %}
+                    </div>
                   </div>
                 </a>
+
+                <div class="product-details" style="padding-top: 0;">
+                  <div class="product-actions">
+                    <button class="add-to-cart-btn" onclick="addToCart({{ product.id }}, {{ v.id }})">
+                      <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                    <button class="wishlist-btn" onclick="toggleWishlist({{ product.id }}, {{ v.id }}, this)">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </article>
             {% endif %}
           {% endwith %}
         {% endfor %}
       </div>
 
-      <!-- PAGINATION -->
-      <div class="pagination">
-        {% if products_page.has_previous %}
-          <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">First</a>
-          <a href="?page={{ products_page.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Prev</a>
-        {% endif %}
+      <!-- Pagination -->
+      {% if products_page.paginator.num_pages > 1 %}
+        <div class="pagination-container">
+          <div class="pagination-info">
+            <i class="fas fa-file-alt"></i>
+            <span>Page {{ products_page.number }} of {{ products_page.paginator.num_pages }}</span>
+          </div>
+          <div class="pagination-links">
+            {% if products_page.has_previous %}
+              <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">
+                <i class="fas fa-angle-double-left"></i> First
+              </a>
+              <a href="?page={{ products_page.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                <i class="fas fa-angle-left"></i> Previous
+              </a>
+            {% endif %}
 
-        <span>{{ products_page.number }} / {{ products_page.paginator.num_pages }}</span>
+            <span>{{ products_page.number }} / {{ products_page.paginator.num_pages }}</span>
 
-        {% if products_page.has_next %}
-          <a href="?page={{ products_page.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Next</a>
-          <a href="?page={{ products_page.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">Last</a>
-        {% endif %}
-      </div>
+            {% if products_page.has_next %}
+              <a href="?page={{ products_page.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Next <i class="fas fa-angle-right"></i>
+              </a>
+              <a href="?page={{ products_page.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Last <i class="fas fa-angle-double-right"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
 
     {% else %}
-      <p class="no-products">No products found</p>
+      <div class="no-products">
+        <i class="fas fa-box-open"></i>
+        <p>No products found</p>
+        {% if query %}
+          <small style="color: #909090;">Try adjusting your search terms.</small>
+        {% endif %}
+      </div>
     {% endif %}
   </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Message Handler
+  const MessageHandler = {
+    alerts: new Map(),
+    autoDismissDelay: 5000,
+
+    init() {
+      this.setupAlerts();
+    },
+
+    setupAlerts() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        const alertId = alert.getAttribute('data-alert-id');
+        const timeoutId = setTimeout(() => {
+          this.dismissAlert(alert);
+        }, this.autoDismissDelay);
+        
+        this.alerts.set(alertId, timeoutId);
+      });
+    },
+
+    dismissAlert(alertElement) {
+      if (!alertElement || !alertElement.parentElement) return;
+      
+      alertElement.classList.add('hiding');
+      
+      setTimeout(() => {
+        if (alertElement.parentElement) {
+          alertElement.remove();
+        }
+      }, 400);
+    },
+
+    clearTimeout(alertElement) {
+      const alertId = alertElement.getAttribute('data-alert-id');
+      if (this.alerts.has(alertId)) {
+        clearTimeout(this.alerts.get(alertId));
+        this.alerts.delete(alertId);
+      }
+    }
+  };
+
+  function dismissAlert(button) {
+    const alert = button.closest('.alert');
+    MessageHandler.clearTimeout(alert);
+    MessageHandler.dismissAlert(alert);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    MessageHandler.init();
+  });
+
+  // Product Actions
+  function addToCart(productId, variantId) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    console.log('Adding to cart:', { productId, variantId });
+    showMessage('Product added to cart!', 'success');
+  }
+
+  function toggleWishlist(productId, variantId, button) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    button.classList.toggle('active');
+    
+    const isActive = button.classList.contains('active');
+    const message = isActive ? 'Added to wishlist!' : 'Removed from wishlist!';
+    
+    console.log('Toggling wishlist:', { productId, variantId });
+    showMessage(message, isActive ? 'success' : 'info');
+  }
+
+  function showMessage(message, type = 'info') {
+    const container = document.getElementById('messagesContainer');
+    if (!container) return;
+
+    const alertId = Date.now();
+    const iconClass = type === 'success' ? 'fa-check-circle' : 
+                      type === 'error' || type === 'danger' ? 'fa-exclamation-circle' : 
+                      type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.setAttribute('data-alert-id', alertId);
+    alertDiv.innerHTML = `
+      <i class="alert-icon fas ${iconClass}"></i>
+      <div class="alert-content">
+        <span class="alert-message">${message}</span>
+      </div>
+      <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="alert-progress"></div>
+    `;
+
+    container.appendChild(alertDiv);
+
+    const timeoutId = setTimeout(() => {
+      MessageHandler.dismissAlert(alertDiv);
+    }, 1000);
+
+    MessageHandler.alerts.set(alertId.toString(), timeoutId);
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
 {% endblock %}

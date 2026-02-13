@@ -442,7 +442,6 @@
                 color: #e8e8e8;
             }
 
-            /* NEW: Image Preview for cropped images */
             .image-preview-container {
                 margin-top: 20px;
                 padding: 20px;
@@ -791,7 +790,8 @@
                                 </div>
                                 <input type="file" name="temp_image" class="file-input" id="imageInput" accept="image/*">
                             </div>
-                            <input type="hidden" name="{{ form.image.name }}" id="croppedImageData">
+                            <!-- FIXED: Changed to use 'image_cropped' to match the view's POST parameter -->
+                            <input type="hidden" name="image_cropped" id="croppedImageData">
                             
                             {% if form.image.errors %}
                                 <div class="error-message">
@@ -800,7 +800,7 @@
                                 </div>
                             {% endif %}
 
-                            <!-- NEW: Image Preview for newly cropped images -->
+                            <!-- Image Preview for newly cropped images -->
                             <div class="image-preview-container" id="imagePreviewContainer">
                                 <div class="preview-header">
                                     <span class="preview-label">

@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'payments',
     'wallet',
+    'offers',
 ]
 
 MIDDLEWARE = [
@@ -170,6 +171,7 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 SOCIALACCOUNT_ADAPTER = "user_authentication.adapters.MySocialAccountAdapter"
 

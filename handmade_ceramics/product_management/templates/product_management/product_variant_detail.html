@@ -2,11 +2,12 @@
 {% load static %}
 
 {% block top %}
-    {% include "user_navbar.html" %}
+{% include "user_navbar.html" %}
 {% endblock %}
 
 {% block content %}
 <style>
+  /* ===== BASE ===== */
   * {
     margin: 0;
     padding: 0;
@@ -14,124 +15,85 @@
   }
 
   body {
-    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #1a1a1a;
-    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #e8e8e8;
   }
 
-  /* BACK TO SHOP */
-  .back-to-shop-container {
-    background: #0a0a0a;
-    padding: 20px 60px;
-    margin-top: 80px;
-    border-bottom: 1px solid #2a2a2a;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  /* ===== HEADER ===== */
+  .page-header {
+    display: none;
   }
 
-  .back-to-shop-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    padding: 12px 24px;
-    background: #2a2a2a;
-    border: 2px solid #2a2a2a;
-    transition: all 0.3s ease;
-  }
-
-  .back-to-shop-btn:hover {
-    background: #ffffff;
-    border-color: #ffffff;
-    color: #000000;
-    transform: translateX(-5px);
-  }
-
-  .back-arrow {
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-  }
-
-  .back-to-shop-btn:hover .back-arrow {
-    transform: translateX(-3px);
-  }
-
-  /* View Wishlist Link */
-  .view-wishlist-link {
+  .back-link {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: #ffffff;
+    color: #e8e8e8;
     text-decoration: none;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
-    padding: 10px 20px;
+    padding: 12px 24px;
     background: transparent;
-    border: 2px solid #2a2a2a;
+    border: 2px solid #404040;
+    border-radius: 12px;
     transition: all 0.3s ease;
+    white-space: nowrap;
   }
 
-  .view-wishlist-link:hover {
-    background: #ffffff;
-    border-color: #ffffff;
-    color: #000000;
+  .back-link:hover {
+    background: #e8e8e8;
+    border-color: #e8e8e8;
+    color: #0a0a0a;
   }
 
-  .wishlist-icon {
-    font-size: 1.1rem;
+  .wishlist-link {
+    display: none;
   }
 
-  /* MAIN CONTAINER */
-  .product-detail-container {
+  /* ===== CONTAINER ===== */
+  .container {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 0 60px 100px;
-    background: #1a1a1a;
+    padding: 40px 40px 100px 40px;
   }
 
-  /* PRODUCT MAIN SECTION */
-  .product-main {
+  /* ===== PRODUCT LAYOUT ===== */
+  .product-grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 100px;
-    padding: 60px 0;
+    grid-template-columns: auto 600px 1fr;
+    gap: 40px;
+    margin-bottom: 80px;
+    align-items: start;
   }
 
-  /* LEFT: GALLERY */
-  .gallery-section {
+  .back-column {
+    display: flex;
+    align-items: flex-start;
+    padding-top: 0;
+  }
+
+  /* ===== GALLERY ===== */
+  .gallery {
     position: sticky;
     top: 100px;
     height: fit-content;
+    width: 600px;
   }
 
-  .main-image-wrapper {
+  .main-image {
     width: 100%;
-    height: 700px;
-    background: #0a0a0a;
-    border-radius: 0;
+    height: 600px;
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+    border-radius: 15px;
     overflow: hidden;
-    margin-bottom: 25px;
-    border: 1px solid #2a2a2a;
-    position: relative;
+    margin-bottom: 20px;
+    border: 1px solid #333;
   }
 
-  .main-image-wrapper::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
-    pointer-events: none;
-  }
-
-  .main-image-wrapper img {
+  .main-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -139,8 +101,8 @@
 
   .thumbnails {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
   }
 
   .thumb {
@@ -148,77 +110,47 @@
     aspect-ratio: 1;
     object-fit: cover;
     cursor: pointer;
-    border-radius: 0;
-    border: 2px solid #2a2a2a;
+    border-radius: 12px;
+    border: 2px solid #404040;
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
     transition: all 0.3s ease;
-    background: #0a0a0a;
   }
 
-  .thumb:hover {
-    border-color: #ffffff;
-    transform: scale(1.05);
-  }
-
+  .thumb:hover,
   .thumb.active {
-    border-color: #ffffff;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    border-color: #e8e8e8;
   }
 
-  /* RIGHT: DETAILS */
-  .details-section {
-    padding-top: 40px;
+  /* ===== DETAILS ===== */
+  .details {
+    padding-top: 0;
+    max-width: 600px;
   }
 
-  .product-header {
-    margin-bottom: 40px;
-    padding-bottom: 30px;
-    border-bottom: 1px solid #2a2a2a;
-  }
-
-  .title-wishlist {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .product-title {
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    line-height: 1.1;
-    flex: 1;
-  }
-
-  /* Hide old wishlist button in header */
-  .title-wishlist .wishlist-btn {
-    display: none;
-  }
-
-  .product-meta {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    margin-bottom: 25px;
-  }
-
-  .product-price {
+  .product-name {
     font-size: 2.5rem;
+    font-weight: 900;
+    color: #e8e8e8;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    line-height: 1.2;
+  }
+
+  .price {
+    font-size: 2rem;
     font-weight: 900;
     color: #ffffff;
     margin-bottom: 25px;
-    letter-spacing: 2px;
   }
 
-  .stock-info {
+  .stock {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    border-radius: 0;
-    font-size: 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -226,429 +158,337 @@
     border: 2px solid;
   }
 
-  .in-stock {
-    background: rgba(76, 175, 80, 0.1);
-    color: #4caf50;
-    border-color: #4caf50;
+  .stock.in-stock {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+    color: #70c090;
+    border-color: #4a6a5a;
   }
 
-  .out-of-stock {
-    background: rgba(244, 67, 54, 0.1);
-    color: #f44336;
-    border-color: #f44336;
+  .stock.out-of-stock {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(244, 67, 54, 0.1));
+    color: #e07070;
+    border-color: #6a4a4a;
   }
 
-  /* COLOR SELECTION */
-  .color-section {
-    margin-bottom: 45px;
-    padding-bottom: 45px;
-    border-bottom: 1px solid #2a2a2a;
+  /* ===== SECTIONS ===== */
+  .section {
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #404040;
   }
 
-  .section-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    color: #888;
-    margin-bottom: 20px;
-  }
-
-  .color-value {
-    color: #ffffff;
-    font-size: 0.9rem;
-  }
-
-  .color-options {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-
-  .color-option-link {
-    text-decoration: none;
-  }
-
-  .color-option {
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 3px solid #2a2a2a;
-    transition: all 0.3s ease;
-    position: relative;
-  }
-
-  .color-option.active {
-    border-color: #ffffff;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-    transform: scale(1.15);
-  }
-
-  .color-option:hover {
-    transform: scale(1.2);
-    border-color: #ffffff;
-  }
-
-  /* DESCRIPTION */
-  .description-section {
-    margin-bottom: 45px;
-    padding-bottom: 45px;
-    border-bottom: 1px solid #2a2a2a;
-  }
-
-  .description-text {
-    color: #ccc;
-    line-height: 1.9;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-  }
-
-  /* ADD TO CART SECTION */
-  .cart-section {
-    margin-bottom: 45px;
-  }
-
-  .quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    margin-bottom: 25px;
-  }
-
-  .quantity-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    color: #888;
-    min-width: 100px;
-  }
-
-  .quantity-input-wrapper {
-    display: flex;
-    align-items: center;
-    border: 2px solid #2a2a2a;
-    border-radius: 0;
-    overflow: hidden;
-    background: #0a0a0a;
-  }
-
-  .quantity-btn {
-    width: 50px;
-    height: 50px;
-    border: none;
-    background: #2a2a2a;
-    color: #fff;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 300;
-  }
-
-  .quantity-btn:hover {
-    background: #ffffff;
-    color: #000;
-  }
-
-  .quantity-input {
-    width: 80px;
-    height: 50px;
-    border: none;
-    text-align: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    background: #0a0a0a;
-    color: #fff;
-  }
-
-  /* Cart and Wishlist Button Container */
-  .cart-wishlist-container {
-    display: flex;
-    gap: 15px;
-    align-items: stretch;
-  }
-
-  .add-to-cart-btn {
-    flex: 1;
-    padding: 22px;
-    background: #ffffff;
-    color: #000;
-    border: none;
-    font-size: 0.75rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 0;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .add-to-cart-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
-    transition: left 0.5s;
-  }
-
-  .add-to-cart-btn:hover::before {
-    left: 100%;
-  }
-
-  .add-to-cart-btn:hover {
-    background: #e0e0e0;
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
-  }
-
-  .add-to-cart-btn:disabled {
-    background: #333;
-    color: #666;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  /* Wishlist Button Styles */
-  .wishlist-btn-new {
-    min-width: 66px;
-    width: 66px;
-    height: auto;
-    border: 2px solid #2a2a2a;
-    background: #0a0a0a;
-    font-size: 28px;
-    cursor: pointer;
-    padding: 0;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0;
-  }
-
-  .wishlist-btn-new:hover {
-    background: #ffffff;
-    border-color: #ffffff;
-    transform: scale(1.05);
-  }
-
-  .wishlist-btn-new.active {
-    background: #ffffff;
-    border-color: #ffffff;
-  }
-
-  /* SIMILAR ITEMS */
-  .similar-items-section {
-    margin-top: 100px;
-    padding-top: 60px;
-    border-top: 2px solid #ffffff;
+  .section:last-of-type {
+    border-bottom: none;
   }
 
   .section-title {
-    font-size: 2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #b0b0b0;
+    margin-bottom: 15px;
+  }
+
+  .section-content {
+    color: #e8e8e8;
+    line-height: 1.8;
+  }
+
+  /* ===== COLORS ===== */
+  .colors {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .color {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #404040;
+    transition: all 0.3s ease;
+  }
+
+  .color:hover,
+  .color.active {
+    border-color: #e8e8e8;
+    transform: scale(1.1);
+  }
+
+  /* ===== ACTIONS ===== */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .btn {
+    padding: 18px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    flex: 1;
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+    color: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ffffff, #e8e8e8);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(232, 232, 232, 0.3);
+  }
+
+  .btn-primary:disabled {
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+    color: #606060;
+    cursor: not-allowed;
+  }
+
+  .btn-icon {
+    flex: 0 0 auto;
+    width: 60px;
+    height: 60px;
+    background: #2a2a2a;
+    border: 1px solid #404040;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .btn-icon:hover {
+    background: #3a3a3a;
+    border-color: #e8e8e8;
+    transform: scale(1.05);
+  }
+
+  .btn-icon.active {
+    background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
+    border-color: #6a4a4a;
+  }
+
+  .btn-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: #e8e8e8;
+    fill: none;
+    stroke-width: 2;
+    transition: all 0.3s ease;
+  }
+
+  .btn-icon:hover svg {
+    stroke: #fff;
+  }
+
+  .btn-icon.active svg {
+    fill: #e07070;
+    stroke: #e07070;
+  }
+
+  .btn-icon.active:hover svg {
+    fill: #e07070;
+    stroke: #e07070;
+  }
+
+  a.btn-icon {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== SIMILAR PRODUCTS ===== */
+  .similar {
+    padding-top: 60px;
+    border-top: 2px solid #404040;
+  }
+
+  .similar-title {
+    font-size: 1.5rem;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 6px;
-    margin-bottom: 50px;
-    color: #ffffff;
-    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    color: #e8e8e8;
   }
 
   .similar-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
+    gap: 24px;
   }
 
-  .similar-card {
+  .card {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 1px solid #333;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
     display: block;
   }
 
-  .similar-card-inner {
-    background: #0a0a0a;
-    border: 1px solid #2a2a2a;
-    border-radius: 0;
-    overflow: hidden;
-    transition: all 0.4s ease;
-    height: 100%;
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+    border-color: #e8e8e8;
   }
 
-  .similar-card:hover .similar-card-inner {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
-    border-color: #ffffff;
-  }
-
-  .similar-image-wrapper {
+  .card-image {
     width: 100%;
-    height: 300px;
+    height: 280px;
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
     overflow: hidden;
-    background: #1a1a1a;
-    position: relative;
   }
 
-  .similar-image-wrapper::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(10,10,10,0.8) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .similar-card:hover .similar-image-wrapper::after {
-    opacity: 1;
-  }
-
-  .similar-image-wrapper img {
+  .card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s ease;
+    transition: transform 0.3s ease;
   }
 
-  .similar-card:hover .similar-image-wrapper img {
-    transform: scale(1.15);
+  .card:hover .card-image img {
+    transform: scale(1.05);
   }
 
-  .similar-details {
-    padding: 25px;
+  .card-body {
+    padding: 20px;
   }
 
-  .similar-name {
+  .card-name {
     font-size: 0.85rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
-    color: #ffffff;
-    line-height: 1.4;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: #e8e8e8;
   }
 
-  .similar-price {
-    font-size: 1.3rem;
+  .card-price {
+    font-size: 1.2rem;
     font-weight: 900;
     color: #ffffff;
-    letter-spacing: 1px;
   }
 
-  /* RESPONSIVE */
-  @media (max-width: 1200px) {
-    .product-main {
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .product-grid {
       grid-template-columns: 1fr;
-      gap: 60px;
+      gap: 50px;
     }
 
-    .gallery-section {
+    .back-column {
+      display: none;
+    }
+
+    .gallery {
       position: relative;
       top: 0;
     }
 
-    .main-image-wrapper {
-      height: 600px;
+    .page-header {
+      display: flex;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+      padding: 20px 60px;
+      margin-top: 0;
+      border-bottom: 1px solid #333;
+      justify-content: flex-start;
+      align-items: center;
     }
   }
 
   @media (max-width: 768px) {
-    .back-to-shop-container {
+    .page-header {
       padding: 15px 25px;
-      margin-top: 60px;
-      flex-direction: column;
-      gap: 15px;
-      align-items: stretch;
+      margin-top: 0;
+      flex-direction: row;
+      gap: 12px;
+      align-items: center;
     }
 
-    .view-wishlist-link {
-      width: 100%;
-      justify-content: center;
+    .container {
+      padding: 40px 25px 60px;
     }
 
-    .product-detail-container {
-      padding: 30px 25px 60px;
-    }
-
-    .product-main {
-      gap: 40px;
-      padding: 40px 0;
-    }
-
-    .product-title {
+    .product-name {
       font-size: 1.8rem;
       letter-spacing: 2px;
     }
 
-    .main-image-wrapper {
+    .main-image {
       height: 400px;
-    }
-
-    .thumbnails {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
     }
 
     .similar-grid {
       grid-template-columns: 1fr;
     }
 
-    .quantity-controls {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 15px;
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      letter-spacing: 3px;
-    }
-
-    .cart-wishlist-container {
+    .actions {
       flex-direction: column;
     }
 
-    .wishlist-btn-new {
+    .btn-icon {
       width: 100%;
-      min-width: 100%;
-      padding: 22px;
+      height: 60px;
     }
   }
 </style>
 
-<!-- BACK TO SHOP -->
-<div class="back-to-shop-container">
-  <a href="{% url 'user_side:shop' %}" class="back-to-shop-btn">
-    <span class="back-arrow">←</span>
+<!-- HEADER -->
+<div class="page-header">
+  <a href="{% url 'user_side:shop' %}" class="back-link">
+    <span>←</span>
     <span>Back to Shop</span>
   </a>
   
   {% if user.is_authenticated %}
-    <a href="{% url 'wishlist:wishlist_page' %}" class="view-wishlist-link">
-      <span class="wishlist-icon">❤️</span>
+    <a href="{% url 'wishlist:wishlist_page' %}" class="wishlist-link">
+      <span>❤️</span>
       <span>View Wishlist</span>
     </a>
   {% endif %}
 </div>
 
-<div class="product-detail-container">
-
-  <!-- PRODUCT MAIN SECTION -->
-  <div class="product-main">
-
-    <!-- LEFT: GALLERY -->
-    <div class="gallery-section">
-      <div class="main-image-wrapper">
+<!-- MAIN CONTENT -->
+<div class="container">
+  
+  <!-- PRODUCT GRID -->
+  <div class="product-grid">
+    
+    <!-- BACK BUTTON COLUMN -->
+    <div class="back-column">
+      <a href="{% url 'user_side:shop' %}" class="back-link">
+        <span>←</span>
+        <span>Back to Shop</span>
+      </a>
+    </div>
+    
+    <!-- GALLERY -->
+    <div class="gallery">
+      <div class="main-image">
         {% if variant.main_image %}
-          <img id="main-image" src="{{ variant.main_image.url }}" alt="{{ product.name }}">
+          <img id="mainImage" src="{{ variant.main_image.url }}" alt="{{ product.name }}">
         {% elif variant.images.first %}
-          <img id="main-image" src="{{ variant.images.first.image.url }}" alt="{{ product.name }}">
+          <img id="mainImage" src="{{ variant.images.first.image.url }}" alt="{{ product.name }}">
         {% else %}
-          <img id="main-image" src="https://via.placeholder.com/700x700/1a1a1a/666666?text=No+Image" alt="No Image">
+          <img id="mainImage" src="https://via.placeholder.com/650x650/2a2a2a/606060?text=No+Image" alt="No Image">
         {% endif %}
       </div>
 
@@ -656,151 +496,134 @@
         {% if variant.main_image %}
           <img class="thumb active" src="{{ variant.main_image.url }}" data-src="{{ variant.main_image.url }}" alt="Thumbnail">
         {% endif %}
-
         {% for img in variant.images.all %}
           <img class="thumb" src="{{ img.image.url }}" data-src="{{ img.image.url }}" alt="Thumbnail">
         {% endfor %}
       </div>
     </div>
 
-    <!-- RIGHT: DETAILS -->
-    <div class="details-section">
+    <!-- DETAILS -->
+    <div class="details">
       
-      <!-- TITLE -->
-      <div class="product-header">
-        <div class="title-wishlist">
-          <h1 class="product-title">{{ product.name }}</h1>
-        </div>
+      <h1 class="product-name">{{ product.name }}</h1>
+      
+      <div class="price">₹{{ product.price }}</div>
+
+      <div class="stock {% if variant.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+        <span>●</span>
+        <span>{% if variant.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}</span>
       </div>
 
-      <!-- PRICE -->
-      <div class="product-price">RS : {{ product.price }}</div>
-
-      <!-- STOCK -->
-      <div id="stock-box">
-        {% if variant.stock > 0 %}
-          <span class="stock-info in-stock">
-            <span>●</span> IN STOCK
-          </span>
-        {% else %}
-          <span class="stock-info out-of-stock">
-            <span>●</span> OUT OF STOCK
-          </span>
-        {% endif %}
-      </div>
-
-      <!-- COLORS -->
-      <div class="color-section">
-        <h4 class="section-label">
-          Color : <span class="color-value">{{ variant.color|upper }}</span>
-        </h4>
-        <div class="color-options">
+      <!-- COLOR -->
+      <div class="section">
+        <div class="section-title">Color: {{ variant.color|upper }}</div>
+        <div class="colors">
           {% for v in variants %}
-            <a href="?variant={{ v.id }}" class="color-option-link">
-              <div class="color-option {% if v.id == variant.id %}active{% endif %}" 
+            <a href="?variant={{ v.id }}" style="text-decoration: none;">
+              <div class="color {% if v.id == variant.id %}active{% endif %}" 
                    style="background: {{ v.color }};" 
-                   title="{{ v.color }}">
-              </div>
+                   title="{{ v.color }}"></div>
             </a>
           {% endfor %}
         </div>
       </div>
 
       <!-- DESCRIPTION -->
-      <div class="description-section">
-        <h4 class="section-label">Description</h4>
-        <p class="description-text">{{ product.description }}</p>
+      <div class="section">
+        <div class="section-title">Description</div>
+        <div class="section-content">{{ product.description }}</div>
       </div>
 
-      <!-- ADD TO CART & WISHLIST -->
-      <div class="cart-section">
-        <div class="cart-wishlist-container">
-          <!-- Add to Cart Form -->
-          {% if variant.stock > 0 %}
-            <form method="POST" action="{% url 'cart:add_to_cart' %}" style="flex: 1;">
+      <!-- ACTIONS -->
+      <div class="actions">
+        {% if variant.stock > 0 %}
+          <form method="POST" action="{% url 'cart:add_to_cart' %}" style="flex: 1;">
+            {% csrf_token %}
+            <input type="hidden" name="variant_id" value="{{ variant.id }}">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-shopping-cart"></i>
+              Add to Cart
+            </button>
+          </form>
+        {% else %}
+          <button class="btn btn-primary" disabled>
+            <i class="fas fa-shopping-cart"></i>
+            Out of Stock
+          </button>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+          {% if variant.id in wishlist_variant_ids %}
+            <form method="POST" action="{% url 'wishlist:remove' variant.id %}">
               {% csrf_token %}
-              <input type="hidden" name="variant_id" value="{{ variant.id }}">
-              <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+              <button type="submit" class="btn btn-icon active" title="Remove from Wishlist">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </button>
             </form>
           {% else %}
-            <button class="add-to-cart-btn" disabled style="flex: 1;">Out of Stock</button>
+            <form method="POST" action="{% url 'wishlist:add' %}">
+              {% csrf_token %}
+              <input type="hidden" name="variant_id" value="{{ variant.id }}">
+              <button type="submit" class="btn btn-icon" title="Add to Wishlist">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </button>
+            </form>
           {% endif %}
-
-          <!-- Wishlist Form -->
-          {% if user.is_authenticated %}
-            {% if variant.id in wishlist_variant_ids %}
-              <!-- Remove from Wishlist -->
-              <form method="POST" action="{% url 'wishlist:remove' variant.id %}">
-                {% csrf_token %}
-                <button type="submit" class="wishlist-btn-new active" title="Remove from Wishlist">
-                  ❤️
-                </button>
-              </form>
-            {% else %}
-              <!-- Add to Wishlist -->
-              <form method="POST" action="{% url 'wishlist:add' %}">
-                {% csrf_token %}
-                <input type="hidden" name="variant_id" value="{{ variant.id }}">
-                <button type="submit" class="wishlist-btn-new" title="Add to Wishlist">
-                  🤍
-                </button>
-              </form>
-            {% endif %}
-          {% else %}
-            <!-- Guest User - Redirect to Login -->
-            <a href="{% url 'user_auth:login' %}?next={{ request.path }}" class="wishlist-btn-new" title="Login to add to wishlist" style="text-decoration: none;">
-              🤍
-            </a>
-          {% endif %}
-        </div>
+        {% else %}
+          <a href="{% url 'user_auth:login' %}?next={{ request.path }}" class="btn btn-icon" title="Login to add to wishlist">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </a>
+        {% endif %}
       </div>
 
     </div>
 
   </div>
 
-  <!-- SIMILAR ITEMS -->
-  <div class="similar-items-section">
-    <h2 class="section-title">Similar Items</h2>
-
+  <!-- SIMILAR PRODUCTS -->
+  <div class="similar">
+    <h2 class="similar-title">Similar Items</h2>
+    
     <div class="similar-grid">
       {% for p in related_products %}
         {% with v=p.variants.first %}
-        <a href="{% url 'custom_admin:product_management:product_detail' p.id %}?variant={{ v.id }}" class="similar-card">
-          <div class="similar-card-inner">
-            <div class="similar-image-wrapper">
+          <a href="{% url 'custom_admin:product_management:product_detail' p.id %}?variant={{ v.id }}" class="card">
+            <div class="card-image">
               {% if v and v.main_image %}
                 <img src="{{ v.main_image.url }}" alt="{{ p.name }}">
               {% elif v and v.images.first %}
                 <img src="{{ v.images.first.image.url }}" alt="{{ p.name }}">
               {% else %}
-                <img src="https://via.placeholder.com/300x300/1a1a1a/666666?text=No+Image" alt="No Image">
+                <img src="https://via.placeholder.com/280x280/2a2a2a/606060?text=No+Image" alt="No Image">
               {% endif %}
             </div>
-
-            <div class="similar-details">
-              <h3 class="similar-name">{{ p.name }}</h3>
-              <div class="similar-price">RS. {{ p.price }}</div>
+            <div class="card-body">
+              <h3 class="card-name">{{ p.name }}</h3>
+              <div class="card-price">₹{{ p.price }}</div>
             </div>
-          </div>
-        </a>
+          </a>
         {% endwith %}
       {% empty %}
-        <p style="grid-column: 1/-1; text-align: center; color: #666; padding: 60px 0;">No similar items found.</p>
+        <p style="grid-column: 1/-1; text-align: center; color: #606060; padding: 40px 0;">No similar items found.</p>
       {% endfor %}
     </div>
   </div>
 
 </div>
 
-<!-- SCRIPTS -->
+<!-- SCRIPT -->
 <script>
-// Thumbnail Image Switch
 document.querySelectorAll('.thumb').forEach(thumb => {
   thumb.addEventListener('click', function() {
     document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
     this.classList.add('active');
-    document.getElementById('main-image').src = this.dataset.src;
+    document.getElementById('mainImage').src = this.dataset.src;
   });
 });
 </script>
