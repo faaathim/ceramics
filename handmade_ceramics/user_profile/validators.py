@@ -3,7 +3,9 @@
 import imghdr
 import re
 from django.core.exceptions import ValidationError
-
+import imghdr
+from django.core.files.uploadedfile import UploadedFile
+from cloudinary.models import CloudinaryResource
 
 def validate_indian_mobile(value):
     """
@@ -82,30 +84,32 @@ def validate_state(value):
 # -----------------------------------------------------
 def validate_profile_image(file_obj):
     """
-    Validates uploaded profile image:
-      - Maximum size: 2 MB
-      - Allowed formats: JPEG, PNG
+    Validates profile image:
+      - Max 2 MB for uploaded files
+      - Only JPEG and PNG
+    Works safely with CloudinaryField.
     """
     if not file_obj:
         return  # Image is optional
 
-    # Max allowed size: 2MB
-    max_size = 2 * 1024 * 1024
-    if file_obj.size > max_size:
-        raise ValidationError("Image too large. Maximum allowed size is 2 MB.")
+    # Only check size for freshly uploaded files
+    if isinstance(file_obj, UploadedFile):
+        max_size = 2 * 1024 * 1024  # 2 MB
+        if file_obj.size > max_size:
+            raise ValidationError("Image too large. Maximum allowed size is 2 MB.")
 
-    # Check image format safely using imghdr
+    # Only check format for files that have file content
     try:
-        file_obj.seek(0)
-        file_type = imghdr.what(file_obj)
+        # For UploadedFile, we can read content
+        if isinstance(file_obj, UploadedFile):
+            file_obj.seek(0)
+            file_type = imghdr.what(file_obj)
+            file_obj.seek(0)
+        else:
+            # For CloudinaryResource, skip format check
+            file_type = None
     except Exception:
         file_type = None
-    finally:
-        # Always reset pointer
-        try:
-            file_obj.seek(0)
-        except Exception:
-            pass
 
-    if file_type not in ("jpeg", "png"):
+    if file_type and file_type not in ("jpeg", "png"):
         raise ValidationError("Invalid image format. Only JPEG and PNG are allowed.")

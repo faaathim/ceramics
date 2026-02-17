@@ -34,18 +34,18 @@
   {% if messages %}
   <div class="messages-container">
     {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
+    <div class="alert alert-{{ message.tags }}" role="alert">
       <span class="alert-icon">
         {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✓{% else %}ℹ️{% endif %}
       </span>
       <span class="alert-text">{{ message }}</span>
-      <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+      <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">×</button>
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  <form method="POST" action="{% url 'checkout:place_order' %}">
+  <form method="POST" action="{% url 'checkout:place_order' %}" id="checkout-form">
     {% csrf_token %}
     
     <div class="checkout-grid">
@@ -112,7 +112,7 @@
 
         <div class="payment-methods-container">
           <!-- Wallet Payment -->
-          {% if wallet.balance >= total %}
+          {% if user.wallet.balance >= total %}
           <div class="payment-method-card">
             <input type="radio" name="payment_method" value="WALLET" id="payment_wallet">
             <label for="payment_wallet">
@@ -121,7 +121,7 @@
                 <div class="payment-method-details">
                   <div class="payment-method-title">Pay with Wallet</div>
                   <div class="payment-method-desc">
-                    Available: ₹<span id="wallet-balance">{{ wallet.balance|floatformat:2 }}</span>
+                    Available: ₹<span id="wallet-balance">{{ user.wallet.balance|floatformat:2 }}</span>
                   </div>
                 </div>
                 <div class="payment-method-check">✓</div>
@@ -129,14 +129,14 @@
             </label>
           </div>
           {% else %}
-          <div class="payment-method-card wallet-insufficient">
+          <div class="payment-method-card wallet-insufficient" title="Insufficient wallet balance">
             <div class="wallet-insufficient-content">
               <div class="payment-method-icon">👛</div>
               <div class="payment-method-details">
                 <div class="payment-method-title">Wallet</div>
                 <div class="wallet-insufficient-message">
                   <span class="insufficient-icon">⚠️</span>
-                  Insufficient balance (Available: ₹{{ wallet.balance|floatformat:2 }}, Need: ₹{{ total|floatformat:2 }})
+                  Insufficient balance (Available: ₹{{ user.wallet.balance|floatformat:2 }}, Need: ₹{{ total|floatformat:2 }})
                 </div>
               </div>
             </div>
@@ -215,17 +215,17 @@
           <div class="price-breakdown">
             <div class="price-row">
               <span>Subtotal</span>
-              <span>₹{{ subtotal }}</span>
+              <span>₹{{ subtotal|floatformat:2 }}</span>
             </div>
             <div class="price-row">
               <span>Tax</span>
-              <span>₹{{ tax_amount }}</span>
+              <span>₹{{ tax_amount|floatformat:2 }}</span>
             </div>
             <div class="price-row">
               <span>Shipping</span>
               <span>
                 {% if shipping_amount > 0 %}
-                  ₹{{ shipping_amount }}
+                  ₹{{ shipping_amount|floatformat:2 }}
                 {% else %}
                   <span class="free-badge">Free</span>
                 {% endif %}
@@ -233,14 +233,14 @@
             </div>
             {% if discount and discount > 0 %}
             <div class="price-row discount">
-              <span>Discount</span>
-              <span>- ₹{{ discount }}</span>
+              <span>Discount{% if coupon %} ({{ coupon.code }}){% endif %}</span>
+              <span>- ₹{{ discount|floatformat:2 }}</span>
             </div>
             {% endif %}
 
             <div class="price-row total">
               <span>Total Amount</span>
-              <span>₹{{ total }}</span>
+              <span>₹{{ total|floatformat:2 }}</span>
             </div>
             <p style="font-size:12px;color:#999;margin-top:10px;">
               * Minimum payable amount is ₹1
@@ -337,6 +337,8 @@
   /* Messages */
   .messages-container {
     margin-bottom: 30px;
+    position: relative;
+    z-index: 100;
   }
 
   .alert {
@@ -347,6 +349,7 @@
     border-radius: 10px;
     margin-bottom: 15px;
     animation: slideIn 0.3s ease-out;
+    position: relative;
   }
 
   @keyframes slideIn {
@@ -361,21 +364,21 @@
   }
 
   .alert-error {
-    background: rgba(244, 67, 54, 0.1);
-    border: 1px solid rgba(244, 67, 54, 0.3);
-    color: #f44336;
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+    color: #ff5252;
   }
 
   .alert-success {
-    background: rgba(76, 175, 80, 0.1);
-    border: 1px solid rgba(76, 175, 80, 0.3);
-    color: #4caf50;
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    color: #69f0ae;
   }
 
   .alert-info, .alert-warning {
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    color: #ffc107;
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    color: #ffd740;
   }
 
   .alert-icon {
@@ -750,6 +753,7 @@
     border-radius: 12px;
     padding: 20px;
     opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .wallet-insufficient-content {
@@ -1056,7 +1060,10 @@
     const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
     const paymentInfo = document.getElementById('selected-payment-info');
     const walletBalanceEl = document.getElementById('wallet-balance');
+    const checkoutForm = document.getElementById('checkout-form');
+    const placeOrderBtn = document.getElementById('place-order-btn');
     
+    // Update payment info display based on selected method
     paymentRadios.forEach(radio => {
       radio.addEventListener('change', function() {
         if (this.value === 'WALLET') {
@@ -1086,6 +1093,27 @@
           `;
         }
       });
+    });
+
+    // Form submission handler - prevent double submission
+    if (checkoutForm && placeOrderBtn) {
+      checkoutForm.addEventListener('submit', function(e) {
+        // Disable the button to prevent double submission
+        placeOrderBtn.disabled = true;
+        placeOrderBtn.innerHTML = '<span>⏳</span> Processing...';
+        placeOrderBtn.style.opacity = '0.7';
+        placeOrderBtn.style.cursor = 'not-allowed';
+      });
+    }
+
+    // Auto-dismiss messages after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-10px)';
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
     });
   });
 </script>

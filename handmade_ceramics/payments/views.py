@@ -23,28 +23,11 @@ from .services import get_razorpay_client
 
 @login_required
 def start_payment(request, order_id):
-    """
-    Step 1:
-    - Get order
-    - Create payment entry
-    - Create Razorpay order
-    - Show payment page
-    """
-
     order = get_object_or_404(
         Order,
         order_id=order_id,
         user=request.user,
         is_paid=False,
-        status="PENDING"
-    )
-
-    # Create Payment record (local DB)
-    payment = Payment.objects.create(
-        order=order,
-        gateway="RAZORPAY",
-        amount=order.total_amount,
-        currency="INR",
         status="PENDING"
     )
 
@@ -54,18 +37,21 @@ def start_payment(request, order_id):
     razorpay_client = get_razorpay_client()
 
     razorpay_order = razorpay_client.order.create({
-    "amount": amount_in_paise,
-    "currency": "INR",
-    "receipt": order.order_id,
-    "payment_capture": 1,
-    "notes": {
-        "order_id": order.order_id
-    }
-})
+        "amount": amount_in_paise,
+        "currency": "INR",
+        "receipt": order.order_id,
+        "payment_capture": 1,
+    })
 
-    # Save Razorpay order id
-    payment.razorpay_order_id = razorpay_order["id"]
-    payment.save()
+    # Save Razorpay order id in Payment table
+    payment = Payment.objects.create(
+        order=order,
+        gateway="RAZORPAY",
+        amount=order.total_amount,
+        currency="INR",
+        status="PENDING",
+        razorpay_order_id=razorpay_order["id"]
+    )
 
     context = {
         "order": order,
@@ -78,7 +64,7 @@ def start_payment(request, order_id):
 
     return render(request, "payments/razorpay_checkout.html", context)
 
-# payments/views.py
+
 
 
 @csrf_exempt
@@ -131,15 +117,15 @@ def verify_payment(request):
         return render(request, "payments/payment_success.html", {"order": order})
 
     except Exception as e:
-        Payment.objects.filter(
-            razorpay_order_id=razorpay_order_id
-        ).update(status="FAILED")
+        # Mark payment failed
+        Payment.objects.filter(razorpay_order_id=razorpay_order_id).update(status="FAILED")
 
-        return render(
-            request,
-            "payments/payment_failed.html",
-            {"error": str(e)}
-        )
+        # Optionally delete the order if unpaid
+        order = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first().order
+        if order and not order.is_paid:
+            order.delete()
+
+        return render(request, "payments/payment_failed.html", {"error": str(e)})
 
 
 def payment_success(request):

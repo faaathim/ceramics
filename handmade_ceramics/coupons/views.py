@@ -62,7 +62,7 @@ def apply_coupon(request):
 
     # Calculate subtotal (price × quantity)
     subtotal = sum(
-        Decimal(item.variant.product.price) * item.quantity
+        Decimal(item.variant.product.get_discounted_price()) * item.quantity
         for item in cart_items
     )
 

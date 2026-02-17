@@ -21,9 +21,7 @@
   }
 
   /* ===== HEADER ===== */
-  .page-header {
-    display: none;
-  }
+  .page-header { display: none; }
 
   .back-link {
     display: inline-flex;
@@ -49,9 +47,7 @@
     color: #0a0a0a;
   }
 
-  .wishlist-link {
-    display: none;
-  }
+  .wishlist-link { display: none; }
 
   /* ===== CONTAINER ===== */
   .container {
@@ -117,9 +113,7 @@
   }
 
   .thumb:hover,
-  .thumb.active {
-    border-color: #e8e8e8;
-  }
+  .thumb.active { border-color: #e8e8e8; }
 
   /* ===== DETAILS ===== */
   .details {
@@ -137,11 +131,34 @@
     line-height: 1.2;
   }
 
+  /* ===== PRICE STYLES ===== */
   .price {
     font-size: 2rem;
     font-weight: 900;
     color: #ffffff;
     margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .price-original {
+    font-size: 1.1rem;
+    color: #606060;
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+
+  .price-discount-badge {
+    font-size: 0.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #70c090, #4a8a6a);
+    color: #0a0a0a;
+    padding: 5px 12px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(112, 192, 144, 0.4);
   }
 
   .stock {
@@ -177,9 +194,7 @@
     border-bottom: 1px solid #404040;
   }
 
-  .section:last-of-type {
-    border-bottom: none;
-  }
+  .section:last-of-type { border-bottom: none; }
 
   .section-title {
     font-size: 0.7rem;
@@ -291,9 +306,7 @@
     transition: all 0.3s ease;
   }
 
-  .btn-icon:hover svg {
-    stroke: #fff;
-  }
+  .btn-icon:hover svg { stroke: #fff; }
 
   .btn-icon.active svg {
     fill: #e07070;
@@ -351,6 +364,7 @@
   }
 
   .card-image {
+    position: relative;
     width: 100%;
     height: 280px;
     background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
@@ -364,13 +378,26 @@
     transition: transform 0.3s ease;
   }
 
-  .card:hover .card-image img {
-    transform: scale(1.05);
+  .card:hover .card-image img { transform: scale(1.05); }
+
+  /* ===== DISCOUNT BADGE FOR SIMILAR CARDS ===== */
+  .card-discount-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #70c090, #4a8a6a);
+    color: #0a0a0a;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 4px 9px;
+    border-radius: 7px;
+    letter-spacing: 1.5px;
+    z-index: 2;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(112, 192, 144, 0.4);
   }
 
-  .card-body {
-    padding: 20px;
-  }
+  .card-body { padding: 20px; }
 
   .card-name {
     font-size: 0.85rem;
@@ -381,10 +408,22 @@
     color: #e8e8e8;
   }
 
+  /* ===== CARD PRICE STYLES ===== */
   .card-price {
     font-size: 1.2rem;
     font-weight: 900;
     color: #ffffff;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .card-price-original {
+    font-size: 0.8rem;
+    color: #606060;
+    text-decoration: line-through;
+    font-weight: 600;
   }
 
   /* ===== RESPONSIVE ===== */
@@ -394,9 +433,7 @@
       gap: 50px;
     }
 
-    .back-column {
-      display: none;
-    }
+    .back-column { display: none; }
 
     .gallery {
       position: relative;
@@ -423,26 +460,18 @@
       align-items: center;
     }
 
-    .container {
-      padding: 40px 25px 60px;
-    }
+    .container { padding: 40px 25px 60px; }
 
     .product-name {
       font-size: 1.8rem;
       letter-spacing: 2px;
     }
 
-    .main-image {
-      height: 400px;
-    }
+    .main-image { height: 400px; }
 
-    .similar-grid {
-      grid-template-columns: 1fr;
-    }
+    .similar-grid { grid-template-columns: 1fr; }
 
-    .actions {
-      flex-direction: column;
-    }
+    .actions { flex-direction: column; }
 
     .btn-icon {
       width: 100%;
@@ -457,7 +486,7 @@
     <span>←</span>
     <span>Back to Shop</span>
   </a>
-  
+
   {% if user.is_authenticated %}
     <a href="{% url 'wishlist:wishlist_page' %}" class="wishlist-link">
       <span>❤️</span>
@@ -468,10 +497,10 @@
 
 <!-- MAIN CONTENT -->
 <div class="container">
-  
+
   <!-- PRODUCT GRID -->
   <div class="product-grid">
-    
+
     <!-- BACK BUTTON COLUMN -->
     <div class="back-column">
       <a href="{% url 'user_side:shop' %}" class="back-link">
@@ -479,7 +508,7 @@
         <span>Back to Shop</span>
       </a>
     </div>
-    
+
     <!-- GALLERY -->
     <div class="gallery">
       <div class="main-image">
@@ -504,10 +533,21 @@
 
     <!-- DETAILS -->
     <div class="details">
-      
+
       <h1 class="product-name">{{ product.name }}</h1>
-      
-      <div class="price">₹{{ product.price }}</div>
+
+      {# ===== UPDATED MAIN PRICE BLOCK ===== #}
+      <div class="price">
+        {% with best_discount=product.get_best_discount_percentage %}
+          {% if best_discount > 0 %}
+            ₹{{ product.get_discounted_price }}
+            <span class="price-original">₹{{ product.price }}</span>
+            <span class="price-discount-badge">-{{ best_discount }}% OFF</span>
+          {% else %}
+            ₹{{ product.price }}
+          {% endif %}
+        {% endwith %}
+      </div>
 
       <div class="stock {% if variant.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
         <span>●</span>
@@ -520,8 +560,8 @@
         <div class="colors">
           {% for v in variants %}
             <a href="?variant={{ v.id }}" style="text-decoration: none;">
-              <div class="color {% if v.id == variant.id %}active{% endif %}" 
-                   style="background: {{ v.color }};" 
+              <div class="color {% if v.id == variant.id %}active{% endif %}"
+                   style="background: {{ v.color }};"
                    title="{{ v.color }}"></div>
             </a>
           {% endfor %}
@@ -589,7 +629,7 @@
   <!-- SIMILAR PRODUCTS -->
   <div class="similar">
     <h2 class="similar-title">Similar Items</h2>
-    
+
     <div class="similar-grid">
       {% for p in related_products %}
         {% with v=p.variants.first %}
@@ -602,10 +642,26 @@
               {% else %}
                 <img src="https://via.placeholder.com/280x280/2a2a2a/606060?text=No+Image" alt="No Image">
               {% endif %}
+
+              {# ===== DISCOUNT BADGE ON SIMILAR CARD IMAGE ===== #}
+              {% if p.get_best_discount_percentage > 0 %}
+                <div class="card-discount-badge">-{{ p.get_best_discount_percentage }}%</div>
+              {% endif %}
             </div>
             <div class="card-body">
               <h3 class="card-name">{{ p.name }}</h3>
-              <div class="card-price">₹{{ p.price }}</div>
+
+              {# ===== UPDATED SIMILAR ITEM PRICE BLOCK ===== #}
+              <div class="card-price">
+                {% with best_discount=p.get_best_discount_percentage %}
+                  {% if best_discount > 0 %}
+                    ₹{{ p.get_discounted_price }}
+                    <span class="card-price-original">₹{{ p.price }}</span>
+                  {% else %}
+                    ₹{{ p.price }}
+                  {% endif %}
+                {% endwith %}
+              </div>
             </div>
           </a>
         {% endwith %}

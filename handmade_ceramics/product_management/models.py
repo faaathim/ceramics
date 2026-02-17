@@ -1,9 +1,11 @@
 from django.db import models
 from django.utils import timezone
 from django.db.models import Avg, Count, Sum
+from decimal import Decimal
 
 from cloudinary.models import CloudinaryField
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -99,6 +101,46 @@ class Product(models.Model):
                 stock=0,
                 is_listed=False
             )
+    
+    def get_active_product_offer(self):
+        now = timezone.now()
+        offer = self.product_offers.filter(
+            is_active=True, start_date__lte=now, end_date__gte=now
+            ).order_by('-discount_percentage').first()
+
+        return offer
+    
+    def get_active_category_offer(self):
+        now = timezone.now()
+        offer = self.category.category_offers.filter(
+            is_active=True,
+            start_date__lte=now,
+            end_date__gte=now
+        ).order_by('-discount_percentage').first()
+
+        return offer
+
+    def get_best_discount_percentage(self):
+        product_offer = self.get_active_product_offer()
+        category_offer = self.get_active_category_offer()
+
+        product_discount = product_offer.discount_percentage if product_offer else 0 
+        category_discount = category_offer.discount_percentage if category_offer else 0
+
+        return max(product_discount, category_discount)
+    
+    def get_discounted_price(self):
+        discount_percentage = self.get_best_discount_percentage()
+
+        if discount_percentage == 0:
+            return self.price
+
+        discount_percentage = Decimal(discount_percentage)
+        discount_amount = (discount_percentage / Decimal('100')) * self.price
+
+        final_price = self.price - discount_amount
+
+        return final_price.quantize(Decimal('0.01'))
 
 
 class ProductImage(models.Model):

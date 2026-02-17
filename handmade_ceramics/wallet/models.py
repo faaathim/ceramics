@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from orders.models import Order
 
 User = get_user_model()
 
@@ -28,6 +29,7 @@ class WalletTransaction(models.Model):
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     description = models.TextField()
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)  # <-- add this
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

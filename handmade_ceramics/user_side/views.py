@@ -8,6 +8,7 @@ from user_side.forms import ShopFilterForm
 
 from product_management.models import Product, Variant
 from category_management.models import Category
+from wishlist.models import Wishlist  # Add this import
 
 
 # ======================================================
@@ -54,9 +55,18 @@ def home(request):
         is_listed=True
     ).order_by('-created_at')[:12]
 
+    # Get wishlist variant IDs for authenticated users
+    wishlist_variant_ids = []
+    if request.user.is_authenticated:
+        wishlist_variant_ids = list(
+            Wishlist.objects.filter(user=request.user)
+            .values_list('variant_id', flat=True)
+        )
+
     return render(request, 'user_side/home.html', {
         'products_page': products_page,
-        'categories': categories
+        'categories': categories,
+        'wishlist_variant_ids': wishlist_variant_ids,  # Add this
     })
 
 
@@ -140,8 +150,17 @@ def shop(request):
     query_params = request.GET.copy()
     query_params.pop('page', None)
 
+    # Get wishlist variant IDs for authenticated users
+    wishlist_variant_ids = []
+    if request.user.is_authenticated:
+        wishlist_variant_ids = list(
+            Wishlist.objects.filter(user=request.user)
+            .values_list('variant_id', flat=True)
+        )
+
     return render(request, 'user_side/shop.html', {
         'form': form,
         'products_page': products_page,
-        'query_string': query_params.urlencode()
+        'query_string': query_params.urlencode(),
+        'wishlist_variant_ids': wishlist_variant_ids,  # Add this
     })

@@ -11,7 +11,8 @@ from decimal import Decimal
 from coupons.models import Coupon, CouponUsage
 from django.db import transaction
 
-
+from wallet.services import debit_wallet
+from wallet.models import Wallet
 
 @login_required
 def checkout_page(request):
@@ -27,7 +28,7 @@ def checkout_page(request):
         return redirect("cart:cart_page")
 
     subtotal = sum(
-        item.variant.product.price * item.quantity
+        item.variant.product.get_discounted_price() * item.quantity
         for item in cart_items
     )
 
@@ -98,7 +99,10 @@ def place_order(request):
             return redirect("checkout:checkout")
 
     # Calculate amounts
-    subtotal = sum(item.variant.product.price * item.quantity for item in cart_items)
+    subtotal = sum(
+        item.variant.product.get_discounted_price() * item.quantity
+        for item in cart_items
+    )
     tax_amount = 0
     shipping_amount = 0
 
@@ -153,7 +157,7 @@ def place_order(request):
             variant=item.variant,
             product_name=item.variant.product.name,
             variant_color=item.variant.color or "",
-            unit_price=item.variant.product.price,
+            unit_price=item.variant.product.get_discounted_price(),
             quantity=item.quantity
         )
 
@@ -168,7 +172,33 @@ def place_order(request):
 
     # ✅ WALLET flow
     elif payment_method == "WALLET":
-        return redirect("wallet:wallet_payment", order_id=order.order_id)
+        wallet = Wallet.objects.select_for_update().get(user=request.user)
+        
+        # Check if user has enough balance
+        if wallet.balance < order.total_amount:
+            messages.error(request, "Insufficient wallet balance")
+            return redirect("checkout:checkout")
+        
+        # Deduct from wallet
+        debit_wallet(wallet, order.total_amount, f"Payment for order {order.order_id}", order=order)
+
+        # Mark order as paid
+        order.is_paid = True
+        order.payment_method = "WALLET"
+        order.status = "CONFIRMED"
+        order.save()
+
+        # Reduce stock
+        for item in cart_items:
+            item.variant.stock -= item.quantity
+            item.variant.save()
+
+        # Clear cart
+        CartItem.objects.filter(cart__user=request.user).delete()
+
+        messages.success(request, "Order paid using wallet.")
+        return redirect("checkout:success", order_id=order.order_id)
+
 
     # ✅ Razorpay flow
     else:

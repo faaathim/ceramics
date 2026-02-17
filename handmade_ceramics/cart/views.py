@@ -122,10 +122,13 @@ def cart_page(request):
     items = cart.items.select_related('variant__product')
 
     # Calculate subtotal (price × quantity)
-    subtotal = sum(
-        Decimal(item.variant.product.price) * item.quantity
-        for item in items
-    )
+    subtotal = Decimal('0')
+
+    for item in items:
+        discounted_price = item.variant.product.get_discounted_price()
+        item.item_total = discounted_price * item.quantity
+        subtotal += item.item_total
+
 
     # Coupon handling
     coupon_id = request.session.get('coupon_id')
@@ -236,7 +239,7 @@ def update_quantity(request, item_id):
     # Recalculate totals
     items = cart.items.select_related('variant__product')
     subtotal = sum(
-        Decimal(i.variant.product.price) * i.quantity
+        i.variant.product.get_discounted_price() * i.quantity
         for i in items
     )
 
@@ -255,7 +258,7 @@ def update_quantity(request, item_id):
     return JsonResponse({
         'item_id': item.id,
         'quantity': item.quantity,
-        'item_total': float(Decimal(item.variant.product.price) * item.quantity),
+        'item_total': float(Decimal(item.variant.product.get_discounted_price()) * item.quantity),
         'cart_subtotal': float(subtotal),
         'discount': float(discount),
         'cart_total': float(total),

@@ -80,16 +80,120 @@
     flex: 0 0 280px;
   }
 
+  .profile-sidebar {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    color: #fff;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 10px 0 5px;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #3a3a3a;
+  }
+
+  .nav-item.active {
+    background: #3a3a3a;
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  .nav-badge {
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
   .profile-content {
     flex: 1;
-    background: #fff;
+    background: #1a1a1a;
     border-radius: 12px;
     padding: 40px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .profile-header-section h1 {
-    color: #333;
+    color: #fff;
     font-size: 32px;
     margin-bottom: 30px;
     font-weight: 600;
@@ -125,17 +229,19 @@
     margin-top: 20px;
   }
 
-  .section-title {
-    color: #333;
+  .transactions-section .section-title {
+    color: #fff;
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 20px;
+    text-transform: none;
+    letter-spacing: normal;
   }
 
   /* Transactions Table */
   .transactions-table-wrapper {
-    background: #fff;
-    border: 1px solid #e0e0e0;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
     border-radius: 12px;
     overflow: hidden;
   }
@@ -146,25 +252,25 @@
   }
 
   .transactions-table thead {
-    background: #f5f5f5;
+    background: #1a1a1a;
   }
 
   .transactions-table th {
-    color: #333;
+    color: #fff;
     font-size: 16px;
     font-weight: 600;
     padding: 20px;
     text-align: left;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #3a3a3a;
   }
 
   .transactions-table tbody tr {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #3a3a3a;
     transition: background 0.2s;
   }
 
   .transactions-table tbody tr:hover {
-    background: #f9f9f9;
+    background: #333;
   }
 
   .transactions-table tbody tr:last-child {
@@ -172,7 +278,7 @@
   }
 
   .transactions-table td {
-    color: #666;
+    color: #ddd;
     font-size: 15px;
     padding: 20px;
   }
@@ -188,12 +294,12 @@
   }
 
   .type-credit {
-    background: rgba(76, 175, 80, 0.15);
+    background: rgba(76, 175, 80, 0.2);
     color: #4caf50;
   }
 
   .type-debit {
-    background: rgba(244, 67, 54, 0.15);
+    background: rgba(244, 67, 54, 0.2);
     color: #f44336;
   }
 
@@ -212,20 +318,20 @@
   }
 
   .transaction-description {
-    color: #666;
+    color: #ddd;
   }
 
   /* No Transactions */
   .no-transactions {
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
     border-radius: 12px;
     padding: 60px 40px;
     text-align: center;
   }
 
   .no-transactions p {
-    color: #999;
+    color: #888;
     font-size: 18px;
     margin: 0;
   }
@@ -266,7 +372,7 @@
       font-size: 36px;
     }
 
-    .section-title {
+    .transactions-section .section-title {
       font-size: 20px;
     }
   }

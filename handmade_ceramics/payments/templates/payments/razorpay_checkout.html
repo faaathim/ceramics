@@ -60,6 +60,14 @@
   </div>
 </div>
 
+<!-- Hidden form for payment verification -->
+<form id="razorpay-form" method="POST" action="{% url 'payments:verify' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+</form>
+
 <style>
   body {
     background: #0a0a0a;
@@ -314,18 +322,40 @@
     }
   }
 </style>
-
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
     var options = {
-        key: "{{ razorpay_key }}",
-        amount: {{ amount }},
-        currency: "INR",
-        order_id: "{{ razorpay_order_id }}",
-        callback_url: "http://127.0.0.1:8000/payments/verify/",
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}", // in paise
+        "currency": "{{ currency }}",
+        "name": "Handmade Ceramics",
+        "description": "Order #{{ order.order_id }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            // Submit the payment info to your verify view
+            document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+            document.getElementById('razorpay_signature').value = response.razorpay_signature;
+            document.getElementById('razorpay-form').submit();
+        },
+        "theme": {
+            "color": "#4caf50"
+        },
+        "modal": {
+            "ondismiss": function(){
+                alert("Payment cancelled. You can try again when ready.");
+            }
+        },
+        // ⚡ Filter payment methods
+        "method": {
+            "card": true,
+            "netbanking": true,
+            "wallet": true,
+            "upi": false,        // hide UPI
+            "paylater": true
+        }
     };
-    
 
     var rzp = new Razorpay(options);
 

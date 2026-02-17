@@ -117,6 +117,125 @@
         50% { transform: scale(1.2); }
     }
 
+    /* Submenu Styles */
+    .has-submenu {
+        position: relative;
+    }
+
+    .submenu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px 20px;
+        color: #909090;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: transparent;
+        width: 100%;
+    }
+
+    .submenu-toggle:hover {
+        background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+        color: #e8e8e8;
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        border-color: #3a3a3a;
+    }
+
+    .submenu-toggle.active {
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        color: #e8e8e8;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        border-color: #404040;
+    }
+
+    .submenu-toggle .sidebar-icon {
+        width: 22px;
+        text-align: center;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .submenu-arrow {
+        font-size: 0.8rem;
+        transition: transform 0.3s ease;
+        margin-left: auto;
+    }
+
+    .submenu-toggle.active .submenu-arrow {
+        transform: rotate(180deg);
+    }
+
+    .submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        margin-top: 5px;
+    }
+
+    .submenu.show {
+        max-height: 500px;
+    }
+
+    .submenu-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px 12px 50px;
+        color: #808080;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 400;
+        margin: 3px 0;
+        border: 1px solid transparent;
+        position: relative;
+    }
+
+    .submenu-link::before {
+        content: '';
+        position: absolute;
+        left: 25px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        background: #505050;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .submenu-link:hover {
+        background: linear-gradient(135deg, #252525, #1a1a1a);
+        color: #d8d8d8;
+        transform: translateX(5px);
+        border-color: #2a2a2a;
+    }
+
+    .submenu-link:hover::before {
+        background: #8b7bcb;
+        transform: translateY(-50%) scale(1.3);
+    }
+
+    .submenu-link.active {
+        background: linear-gradient(135deg, #252525, #2a2a2a);
+        color: #e8e8e8;
+        border-color: #303030;
+    }
+
+    .submenu-link.active::before {
+        background: #9b8bdb;
+        transform: translateY(-50%) scale(1.5);
+        box-shadow: 0 0 8px rgba(155, 139, 219, 0.5);
+    }
+
     /* Logout button styling */
     .logout-link {
         display: flex;
@@ -214,15 +333,43 @@
                 <span>Coupons</span>
             </a>
         </li>
+        
+        <!-- Offers with Submenu -->
+        <li class="sidebar-menu-item has-submenu">
+            <div class="submenu-toggle" data-page="Offers" data-icon="fa-gift">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <i class="fa-solid fa-gift sidebar-icon"></i>
+                    <span>Offers</span>
+                </div>
+                <i class="fa-solid fa-chevron-down submenu-arrow"></i>
+            </div>
+            <div class="submenu">
+                <a href="{% url 'custom_admin:offers:product_offer_list' %}" 
+                   class="submenu-link"
+                   data-page="Product Offers"
+                   data-icon="fa-gift">
+                    <span>Product Offers</span>
+                </a>
+                <a href="{% url 'custom_admin:offers:category_offer_list' %}" 
+                   class="submenu-link"
+                   data-page="Category Offers"
+                   data-icon="fa-gift">
+                    <span>Category Offers</span>
+                </a>
+            </div>
+        </li>
+
+        <!-- Sales Report -->
         <li class="sidebar-menu-item">
-            <a href="#offers" 
+            <a href="{% url 'sales_report' %}" 
                class="sidebar-link" 
-               data-page="Offers" 
-               data-icon="fa-gift">
-                <i class="fa-solid fa-gift sidebar-icon"></i>
-                <span>Offers</span>
+               data-page="Sales Report" 
+               data-icon="fa-chart-line">
+                <i class="fa-solid fa-chart-line sidebar-icon"></i>
+                <span>Sales Report</span>
             </a>
         </li>
+
         <li class="sidebar-menu-item">
             <a href="{% url 'custom_admin:logout' %}" class="logout-link">
                 <i class="fa-solid fa-right-from-bracket sidebar-icon"></i>
@@ -236,23 +383,64 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Get all sidebar links (except logout)
         const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const submenuLinks = document.querySelectorAll('.submenu-link');
+        const submenuToggles = document.querySelectorAll('.submenu-toggle');
         const pageTitle = document.getElementById('pageTitle');
 
         // Function to update active state and navbar title
-        function updateActivePage(clickedLink) {
-            // Remove active class from all links
+        function updateActivePage(clickedElement, isSubmenuLink = false) {
+            // Remove active class from all links and toggles
             sidebarLinks.forEach(link => link.classList.remove('active'));
+            submenuLinks.forEach(link => link.classList.remove('active'));
+            submenuToggles.forEach(toggle => toggle.classList.remove('active'));
             
-            // Add active class to clicked link
-            clickedLink.classList.add('active');
+            // Add active class to clicked element
+            clickedElement.classList.add('active');
+            
+            // If it's a submenu link, also activate the parent toggle
+            if (isSubmenuLink) {
+                const parentToggle = clickedElement.closest('.has-submenu').querySelector('.submenu-toggle');
+                parentToggle.classList.add('active');
+            }
             
             // Update navbar title if pageTitle element exists
             if (pageTitle) {
-                const pageName = clickedLink.getAttribute('data-page');
-                const iconClass = clickedLink.getAttribute('data-icon');
-                pageTitle.innerHTML = `<i class="fas ${iconClass}"></i>${pageName}`;
+                const pageName = clickedElement.getAttribute('data-page');
+                const iconClass = clickedElement.getAttribute('data-icon');
+                if (pageName && iconClass) {
+                    pageTitle.innerHTML = `<i class="fas ${iconClass}"></i>${pageName}`;
+                }
             }
         }
+
+        // Submenu toggle functionality
+        submenuToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const submenu = this.nextElementSibling;
+                const isOpen = submenu.classList.contains('show');
+                
+                // Close all other submenus
+                document.querySelectorAll('.submenu').forEach(s => {
+                    s.classList.remove('show');
+                });
+                
+                document.querySelectorAll('.submenu-toggle').forEach(t => {
+                    if (t !== this) {
+                        t.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current submenu
+                if (!isOpen) {
+                    submenu.classList.add('show');
+                    this.classList.add('active');
+                } else {
+                    submenu.classList.remove('show');
+                    this.classList.remove('active');
+                }
+            });
+        });
 
         // Function to check if link matches current path
         function isCurrentPage(link) {
@@ -261,45 +449,82 @@
             
             // Check if it's the exact current page or contains the path
             return currentPath === linkPath || 
-                   (linkPath !== '#' && currentPath.includes(linkPath.replace('#', '')));
+                   (linkPath && linkPath !== '#' && currentPath.includes(linkPath.replace('#', '')));
         }
 
         // Set initial active state based on current URL
         let foundActive = false;
-        sidebarLinks.forEach(link => {
+        
+        // Check submenu links first
+        submenuLinks.forEach(link => {
             if (isCurrentPage(link)) {
-                updateActivePage(link);
+                updateActivePage(link, true);
+                // Open the parent submenu
+                const submenu = link.closest('.submenu');
+                submenu.classList.add('show');
                 foundActive = true;
             }
         });
+
+        // Then check main sidebar links
+        if (!foundActive) {
+            sidebarLinks.forEach(link => {
+                if (isCurrentPage(link)) {
+                    updateActivePage(link);
+                    foundActive = true;
+                }
+            });
+        }
 
         // If no match found, check for keyword matches in URL
         if (!foundActive) {
             const currentPath = window.location.pathname.toLowerCase();
             
-            sidebarLinks.forEach(link => {
-                const pageName = link.getAttribute('data-page').toLowerCase();
-                
-                if (currentPath.includes('user') && pageName.includes('user')) {
-                    updateActivePage(link);
-                    foundActive = true;
-                } else if (currentPath.includes('product') && pageName.includes('product')) {
-                    updateActivePage(link);
-                    foundActive = true;
-                } else if (currentPath.includes('order') && pageName.includes('order')) {
-                    updateActivePage(link);
-                    foundActive = true;
-                } else if (currentPath.includes('category') && pageName.includes('categor')) {
-                    updateActivePage(link);
-                    foundActive = true;
-                } else if (currentPath.includes('coupon') && pageName.includes('coupon')) {
-                    updateActivePage(link);
-                    foundActive = true;
-                } else if (currentPath.includes('offer') && pageName.includes('offer')) {
-                    updateActivePage(link);
-                    foundActive = true;
+            // Check if we're in offers section
+            if (currentPath.includes('offer')) {
+                const offersToggle = document.querySelector('[data-page="Offers"]');
+                if (offersToggle) {
+                    offersToggle.classList.add('active');
+                    offersToggle.nextElementSibling.classList.add('show');
+                    
+                    // Check which specific offer page
+                    submenuLinks.forEach(link => {
+                        const pageName = link.getAttribute('data-page').toLowerCase();
+                        if (currentPath.includes('product') && pageName.includes('product')) {
+                            updateActivePage(link, true);
+                            foundActive = true;
+                        } else if (currentPath.includes('category') && pageName.includes('category')) {
+                            updateActivePage(link, true);
+                            foundActive = true;
+                        }
+                    });
                 }
-            });
+            } else {
+                // Check other pages
+                sidebarLinks.forEach(link => {
+                    const pageName = link.getAttribute('data-page').toLowerCase();
+                    
+                    if (currentPath.includes('user') && pageName.includes('user')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    } else if (currentPath.includes('product') && pageName.includes('product')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    } else if (currentPath.includes('order') && pageName.includes('order')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    } else if (currentPath.includes('category') && pageName.includes('categor')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    } else if (currentPath.includes('coupon') && pageName.includes('coupon')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    } else if (currentPath.includes('sales') && pageName.includes('sales')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    }
+                });
+            }
         }
 
         // If still no match, default to Dashboard
@@ -315,6 +540,17 @@
                     e.preventDefault();
                 }
                 updateActivePage(this);
+            });
+        });
+
+        // Add click event to all submenu links
+        submenuLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Only prevent default for hash links
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                }
+                updateActivePage(this, true);
             });
         });
     });

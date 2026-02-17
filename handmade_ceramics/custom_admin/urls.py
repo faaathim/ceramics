@@ -31,5 +31,13 @@ path(
     namespace='coupons')
 ),
 
+    # offers 
+    # ✅ CORRECT
+path(
+    'offers/',
+    include(('offers.admin_urls', 'offers'), namespace='offers')
+),
+
+
 
 ]

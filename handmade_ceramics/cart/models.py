@@ -23,12 +23,12 @@ class Cart(models.Model):
         return sum(item.quantity for item in self.items.all())
 
     def total_price(self):
-        """Return subtotal: sum(product.price * quantity) for each item."""
         total = 0
         for item in self.items.select_related('variant__product'):
-            price = getattr(item.variant.product, 'price', 0)
+            price = item.variant.product.get_discounted_price()
             total += price * item.quantity
         return total
+
 
 
 class CartItem(models.Model):
