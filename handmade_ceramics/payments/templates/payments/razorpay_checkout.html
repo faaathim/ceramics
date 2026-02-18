@@ -337,7 +337,8 @@
             document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
             document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
             document.getElementById('razorpay_signature').value = response.razorpay_signature;
-            document.getElementById('razorpay-form').submit();
+
+            document.getElementById("razorpay-form").submit();
         },
         "theme": {
             "color": "#4caf50"
@@ -348,13 +349,7 @@
             }
         },
         // ⚡ Filter payment methods
-        "method": {
-            "card": true,
-            "netbanking": true,
-            "wallet": true,
-            "upi": false,        // hide UPI
-            "paylater": true
-        }
+
     };
 
     var rzp = new Razorpay(options);

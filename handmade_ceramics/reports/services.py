@@ -1,6 +1,6 @@
 # reports/services.py
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from orders.models import Order
@@ -13,8 +13,24 @@ class SalesReportService:
 
     def __init__(self, report_type=None, start_date=None, end_date=None):
         self.report_type = report_type
-        self.start_date = start_date
-        self.end_date = end_date
+
+        # Convert string dates to Python date objects
+        if start_date:
+            try:
+                self.start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+            except ValueError:
+                self.start_date = None
+        else:
+            self.start_date = None
+
+        if end_date:
+            try:
+                self.end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            except ValueError:
+                self.end_date = None
+        else:
+            self.end_date = None
+
         self._set_date_range()
 
     # -----------------------------
@@ -23,28 +39,30 @@ class SalesReportService:
     def _set_date_range(self):
         today = date.today()
 
-        if self.report_type == "daily":
-            self.start_date = today
-            self.end_date = today
+        # Only apply report_type if custom dates are NOT provided
+        if not self.start_date and not self.end_date:
 
-        elif self.report_type == "weekly":
-            self.start_date = today - timedelta(days=7)
-            self.end_date = today
+            if self.report_type == "daily":
+                self.start_date = today
+                self.end_date = today
 
-        elif self.report_type == "monthly":
-            self.start_date = today.replace(day=1)
-            self.end_date = today
+            elif self.report_type == "weekly":
+                self.start_date = today - timedelta(days=7)
+                self.end_date = today
 
-        elif self.report_type == "yearly":
-            self.start_date = today.replace(month=1, day=1)
-            self.end_date = today
+            elif self.report_type == "monthly":
+                self.start_date = today.replace(day=1)
+                self.end_date = today
+
+            elif self.report_type == "yearly":
+                self.start_date = today.replace(month=1, day=1)
+                self.end_date = today
 
     # -----------------------------
     # BASE QUERYSET
     # -----------------------------
     def get_queryset(self):
-        queryset = Order.objects.filter(status="DELIVERED")
-
+        queryset = Order.objects.all()
         if self.start_date and self.end_date:
             queryset = queryset.filter(
                 created_at__date__range=[self.start_date, self.end_date]

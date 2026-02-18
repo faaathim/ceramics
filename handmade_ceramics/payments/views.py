@@ -36,12 +36,17 @@ def start_payment(request, order_id):
 
     razorpay_client = get_razorpay_client()
 
-    razorpay_order = razorpay_client.order.create({
-        "amount": amount_in_paise,
-        "currency": "INR",
-        "receipt": order.order_id,
-        "payment_capture": 1,
-    })
+    try:
+        razorpay_order = razorpay_client.order.create({
+            "amount": amount_in_paise,
+            "currency": "INR",
+            "receipt": order.order_id,
+            "payment_capture": 1,
+        })
+    except Exception as e:
+        # Log the real error
+        print(f"Razorpay order creation failed: {str(e)}")
+        return redirect('some_order_detail_or_cart_page', order_id=order.order_id)
 
     # Save Razorpay order id in Payment table
     payment = Payment.objects.create(
@@ -61,6 +66,7 @@ def start_payment(request, order_id):
         "amount": amount_in_paise,
         "currency": "INR",
     }
+    print(f'context: {context}')
 
     return render(request, "payments/razorpay_checkout.html", context)
 
