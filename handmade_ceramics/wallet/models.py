@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from orders.models import Order
+import uuid
 
 User = get_user_model()
 
@@ -17,6 +18,7 @@ class Wallet(models.Model):
 
 
 class WalletTransaction(models.Model):
+
     CREDIT = 'CREDIT'
     DEBIT = 'DEBIT'
 
@@ -25,12 +27,47 @@ class WalletTransaction(models.Model):
         (DEBIT, 'Debit'),
     ]
 
+    SOURCE_CHOICES = [
+        ('ORDER_PAYMENT', 'Order Payment'),
+        ('CANCEL_REFUND', 'Cancel Refund'),
+        ('RETURN_REFUND', 'Return Refund'),
+        ('MANUAL', 'Manual Adjustment'),
+    ]
+
+    transaction_id = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True
+    )
+
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions')
-    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
+
+    transaction_type = models.CharField(
+        max_length=10,
+        choices=TRANSACTION_TYPE_CHOICES
+    )
+
+    source = models.CharField(
+        max_length=20,
+        choices=SOURCE_CHOICES,
+        default='MANUAL'
+    )
+
     amount = models.DecimalField(max_digits=12, decimal_places=2)
+
     description = models.TextField()
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)  # <-- add this
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
     created_at = models.DateTimeField(default=timezone.now)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
-        return f"{self.transaction_type} - {self.amount}"
+        return f"{self.transaction_id} - {self.transaction_type} - {self.amount}"

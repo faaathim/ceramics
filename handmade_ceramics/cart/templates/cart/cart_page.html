@@ -41,9 +41,7 @@
         margin-bottom: 8px;
     }
 
-    .cart-icon {
-        font-size: 28px;
-    }
+    .cart-icon { font-size: 28px; }
 
     .items-count {
         color: #888;
@@ -85,13 +83,8 @@
         transition: background 0.2s;
     }
 
-    .cart-table tbody tr:hover {
-        background: #333;
-    }
-
-    .cart-table tbody tr:last-child {
-        border-bottom: none;
-    }
+    .cart-table tbody tr:hover { background: #333; }
+    .cart-table tbody tr:last-child { border-bottom: none; }
 
     .cart-table td {
         color: #ddd;
@@ -101,9 +94,7 @@
     }
 
     /* ===== DELETE COLUMN ===== */
-    .delete-column {
-        width: 50px;
-    }
+    .delete-column { width: 50px; }
 
     .delete-btn {
         width: 32px;
@@ -130,9 +121,7 @@
     }
 
     /* ===== IMAGE COLUMN ===== */
-    .image-column {
-        width: 120px;
-    }
+    .image-column { width: 120px; }
 
     .image-column img {
         width: 100px;
@@ -143,9 +132,7 @@
         transition: transform 0.3s ease;
     }
 
-    .cart-table tbody tr:hover .image-column img {
-        transform: scale(1.05);
-    }
+    .cart-table tbody tr:hover .image-column img { transform: scale(1.05); }
 
     .no-image {
         width: 100px;
@@ -160,9 +147,7 @@
     }
 
     /* ===== PRODUCT INFO COLUMN ===== */
-    .product-info-column {
-        min-width: 180px;
-    }
+    .product-info-column { min-width: 180px; }
 
     .product-name {
         color: #fff;
@@ -173,15 +158,10 @@
         letter-spacing: 0.5px;
     }
 
-    .product-variant {
-        color: #888;
-        font-size: 14px;
-    }
+    .product-variant { color: #888; font-size: 14px; }
 
     /* ===== PRICE COLUMN ===== */
-    .price-column {
-        min-width: 120px;
-    }
+    .price-column { min-width: 120px; }
 
     .price-discounted {
         display: block;
@@ -212,9 +192,7 @@
     }
 
     /* ===== QUANTITY COLUMN ===== */
-    .quantity-column {
-        min-width: 130px;
-    }
+    .quantity-column { min-width: 130px; }
 
     .qty-wrapper {
         display: inline-flex;
@@ -238,15 +216,8 @@
         border-radius: 4px;
     }
 
-    .qty-btn:hover {
-        background: #3a3a3a;
-        color: #4caf50;
-    }
-
-    .qty-btn:disabled {
-        color: #444;
-        cursor: not-allowed;
-    }
+    .qty-btn:hover { background: #3a3a3a; color: #4caf50; }
+    .qty-btn:disabled { color: #444; cursor: not-allowed; }
 
     .qty-display {
         min-width: 28px;
@@ -289,10 +260,7 @@
         letter-spacing: 1px;
     }
 
-    .coupon-area {
-        display: flex;
-        gap: 10px;
-    }
+    .coupon-area { display: flex; gap: 10px; }
 
     .coupon-input {
         flex: 1;
@@ -311,10 +279,7 @@
         box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
     }
 
-    .coupon-input::placeholder {
-        color: #555;
-        font-size: 0.85rem;
-    }
+    .coupon-input::placeholder { color: #555; font-size: 0.85rem; }
 
     .btn-apply-coupon {
         background: transparent;
@@ -330,10 +295,7 @@
         font-size: 0.8rem;
     }
 
-    .btn-apply-coupon:hover {
-        background: #4caf50;
-        color: #000;
-    }
+    .btn-apply-coupon:hover { background: #4caf50; color: #000; }
 
     .coupon-status {
         background-color: #1a1a1a;
@@ -370,10 +332,7 @@
         white-space: nowrap;
     }
 
-    .btn-remove-coupon:hover {
-        background: #f44336;
-        color: #fff;
-    }
+    .btn-remove-coupon:hover { background: #f44336; color: #fff; }
 
     /* ===== TOTALS BOX ===== */
     .cart-totals-box {
@@ -401,13 +360,8 @@
         color: #ddd;
     }
 
-    .totals-line.offer-discount {
-        color: #70c090;
-    }
-
-    .totals-line.coupon-discount {
-        color: #4caf50;
-    }
+    .totals-line.offer-discount { color: #70c090; }
+    .totals-line.coupon-discount { color: #4caf50; }
 
     .totals-line.final-total {
         font-size: 18px;
@@ -419,6 +373,37 @@
         margin-bottom: 0;
     }
 
+    /* ===== COD LIMIT NOTICE ===== */
+    .cod-limit-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: rgba(255, 152, 0, 0.08);
+        border: 1px solid rgba(255, 152, 0, 0.35);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 16px;
+    }
+
+    .cod-limit-notice .notice-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .cod-limit-notice .notice-text {
+        font-size: 13px;
+        color: #ffb74d;
+        line-height: 1.5;
+    }
+
+    .cod-limit-notice .notice-text strong {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    /* ===== CHECKOUT BUTTON ===== */
     .btn-proceed-checkout {
         width: 100%;
         background: transparent;
@@ -429,7 +414,7 @@
         letter-spacing: 2px;
         font-weight: 600;
         cursor: pointer;
-        margin-top: 24px;
+        margin-top: 20px;
         transition: all 0.3s ease;
         border-radius: 8px;
         font-size: 0.9rem;
@@ -469,17 +454,8 @@
         text-align: center;
     }
 
-    .no-items-icon {
-        font-size: 64px;
-        margin-bottom: 20px;
-        opacity: 0.3;
-    }
-
-    .no-items-text {
-        color: #888;
-        font-size: 18px;
-        margin-bottom: 30px;
-    }
+    .no-items-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.3; }
+    .no-items-text { color: #888; font-size: 18px; margin-bottom: 30px; }
 
     .btn-discover {
         display: inline-block;
@@ -494,38 +470,19 @@
         transition: all 0.3s;
     }
 
-    .btn-discover:hover {
-        background: #fff;
-        color: #1a1a1a;
-    }
+    .btn-discover:hover { background: #fff; color: #1a1a1a; }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 1024px) {
-        .cart-table-wrapper {
-            overflow-x: auto;
-        }
-
-        .cart-table {
-            min-width: 800px;
-        }
-
-        .cart-bottom-section {
-            grid-template-columns: 1fr;
-        }
+        .cart-table-wrapper { overflow-x: auto; }
+        .cart-table { min-width: 800px; }
+        .cart-bottom-section { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 768px) {
-        .cart-main-container {
-            margin: 20px auto;
-        }
-
-        .cart-header-section h1 {
-            font-size: 24px;
-        }
-
-        .cart-table {
-            min-width: 700px;
-        }
+        .cart-main-container { margin: 20px auto; }
+        .cart-header-section h1 { font-size: 24px; }
+        .cart-table { min-width: 700px; }
     }
 </style>
 
@@ -666,6 +623,25 @@
                     <span id="cart-total">₹{{ total_price|floatformat:0 }}</span>
                 </div>
 
+                <!-- COD limit notice — shown/hidden dynamically by JS too -->
+                {% if total_price > cod_limit %}
+                <div class="cod-limit-notice" id="cod-limit-notice">
+                    <span class="notice-icon">⚠️</span>
+                    <div class="notice-text">
+                        <strong>Cash on Delivery unavailable</strong>
+                        COD is not available for orders above ₹{{ cod_limit }}. Please use Razorpay / UPI or your Wallet at checkout.
+                    </div>
+                </div>
+                {% else %}
+                <div class="cod-limit-notice" id="cod-limit-notice" style="display:none;">
+                    <span class="notice-icon">⚠️</span>
+                    <div class="notice-text">
+                        <strong>Cash on Delivery unavailable</strong>
+                        COD is not available for orders above ₹{{ cod_limit }}. Please use Razorpay / UPI or your Wallet at checkout.
+                    </div>
+                </div>
+                {% endif %}
+
                 <a href="{% url 'checkout:checkout' %}" class="btn-proceed-checkout">
                     <span>Proceed to Checkout</span>
                 </a>
@@ -684,6 +660,8 @@
 </div>
 
 <script>
+    const COD_LIMIT = {{ cod_limit }};
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -700,6 +678,12 @@
     }
 
     const csrftoken = getCookie('csrftoken');
+
+    function updateCodNotice(total) {
+        const notice = document.getElementById('cod-limit-notice');
+        if (!notice) return;
+        notice.style.display = total > COD_LIMIT ? 'flex' : 'none';
+    }
 
     function updateQuantity(itemId, action) {
         const formData = new FormData();
@@ -734,7 +718,12 @@
             if (cartSubtotal) cartSubtotal.textContent = `₹${Math.round(data.cart_subtotal)}`;
             if (cartDiscount && data.discount > 0) cartDiscount.textContent = `− ₹${Math.round(data.discount)}`;
             if (cartOfferDisc && data.offer_discount > 0) cartOfferDisc.textContent = `− ₹${Math.round(data.offer_discount)}`;
-            if (cartTotal) cartTotal.textContent = `₹${Math.round(data.cart_total)}`;
+
+            const newTotal = Math.round(data.cart_total);
+            if (cartTotal) cartTotal.textContent = `₹${newTotal}`;
+
+            // Update COD notice based on live total
+            updateCodNotice(newTotal);
 
             const itemCount = document.getElementById('cart-item-count');
             if (itemCount) {

@@ -4,6 +4,21 @@
 {% block content %}
 {% include 'user_navbar.html' %}
 
+<!-- Django Messages -->
+{% if messages %}
+<div class="messages-container">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags }} {% if 'error' in message.tags %}alert-error{% elif 'success' in message.tags %}alert-success{% elif 'warning' in message.tags %}alert-warning{% else %}alert-info{% endif %}">
+    <span class="alert-icon">
+      {% if 'error' in message.tags %}✕{% elif 'success' in message.tags %}✓{% elif 'warning' in message.tags %}⚠{% else %}ℹ{% endif %}
+    </span>
+    <span class="alert-text">{{ message }}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <div class="profile-container">
   <div class="profile-sidebar-wrapper">
     {% include "user_profile/sidebar.html" %}
@@ -68,6 +83,106 @@
 </div>
 
 <style>
+  /* ─── Messages ─────────────────────────────────────── */
+  .messages-container {
+    max-width: 1400px;
+    margin: 20px auto 0;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .alert-icon {
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alert-text {
+    flex: 1;
+  }
+
+  .alert-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .alert-close:hover { opacity: 1; }
+
+  /* Error */
+  .alert-error {
+    background: rgba(244, 67, 54, 0.12);
+    border: 1px solid rgba(244, 67, 54, 0.35);
+    color: #f44336;
+  }
+  .alert-error .alert-icon {
+    background: rgba(244, 67, 54, 0.2);
+  }
+  .alert-error .alert-close { color: #f44336; }
+
+  /* Success */
+  .alert-success {
+    background: rgba(76, 175, 80, 0.12);
+    border: 1px solid rgba(76, 175, 80, 0.35);
+    color: #4caf50;
+  }
+  .alert-success .alert-icon {
+    background: rgba(76, 175, 80, 0.2);
+  }
+  .alert-success .alert-close { color: #4caf50; }
+
+  /* Warning */
+  .alert-warning {
+    background: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.35);
+    color: #ffc107;
+  }
+  .alert-warning .alert-icon {
+    background: rgba(255, 193, 7, 0.2);
+  }
+  .alert-warning .alert-close { color: #ffc107; }
+
+  /* Info */
+  .alert-info {
+    background: rgba(33, 150, 243, 0.12);
+    border: 1px solid rgba(33, 150, 243, 0.35);
+    color: #2196f3;
+  }
+  .alert-info .alert-icon {
+    background: rgba(33, 150, 243, 0.2);
+  }
+  .alert-info .alert-close { color: #2196f3; }
+
+  /* ─── Layout ────────────────────────────────────────── */
   .profile-container {
     display: flex;
     max-width: 1400px;
@@ -159,22 +274,11 @@
     position: relative;
   }
 
-  .nav-item:hover {
-    background: #3a3a3a;
-  }
+  .nav-item:hover { background: #3a3a3a; }
+  .nav-item.active { background: #3a3a3a; }
 
-  .nav-item.active {
-    background: #3a3a3a;
-  }
-
-  .nav-icon {
-    margin-right: 12px;
-    font-size: 18px;
-  }
-
-  .nav-text {
-    flex: 1;
-  }
+  .nav-icon { margin-right: 12px; font-size: 18px; }
+  .nav-text  { flex: 1; }
 
   .nav-badge {
     background: #fff;
@@ -185,6 +289,7 @@
     font-weight: bold;
   }
 
+  /* ─── Content ───────────────────────────────────────── */
   .profile-content {
     flex: 1;
     background: #1a1a1a;
@@ -225,9 +330,7 @@
   }
 
   /* Transactions Section */
-  .transactions-section {
-    margin-top: 20px;
-  }
+  .transactions-section { margin-top: 20px; }
 
   .transactions-section .section-title {
     color: #fff;
@@ -251,9 +354,7 @@
     border-collapse: collapse;
   }
 
-  .transactions-table thead {
-    background: #1a1a1a;
-  }
+  .transactions-table thead { background: #1a1a1a; }
 
   .transactions-table th {
     color: #fff;
@@ -269,13 +370,8 @@
     transition: background 0.2s;
   }
 
-  .transactions-table tbody tr:hover {
-    background: #333;
-  }
-
-  .transactions-table tbody tr:last-child {
-    border-bottom: none;
-  }
+  .transactions-table tbody tr:hover { background: #333; }
+  .transactions-table tbody tr:last-child { border-bottom: none; }
 
   .transactions-table td {
     color: #ddd;
@@ -293,33 +389,15 @@
     text-transform: uppercase;
   }
 
-  .type-credit {
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-  }
-
-  .type-debit {
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
-  }
+  .type-credit { background: rgba(76, 175, 80, 0.2);  color: #4caf50; }
+  .type-debit  { background: rgba(244, 67, 54, 0.2);  color: #f44336; }
 
   /* Transaction Amount */
-  .transaction-amount {
-    font-weight: 600;
-    font-size: 16px;
-  }
+  .transaction-amount { font-weight: 600; font-size: 16px; }
+  .amount-credit { color: #4caf50; }
+  .amount-debit  { color: #f44336; }
 
-  .amount-credit {
-    color: #4caf50;
-  }
-
-  .amount-debit {
-    color: #f44336;
-  }
-
-  .transaction-description {
-    color: #ddd;
-  }
+  .transaction-description { color: #ddd; }
 
   /* No Transactions */
   .no-transactions {
@@ -336,46 +414,37 @@
     margin: 0;
   }
 
-  /* Responsive */
+  /* ─── Responsive ────────────────────────────────────── */
   @media (max-width: 1024px) {
-    .transactions-table-wrapper {
-      overflow-x: auto;
-    }
-
-    .transactions-table {
-      min-width: 700px;
-    }
+    .transactions-table-wrapper { overflow-x: auto; }
+    .transactions-table { min-width: 700px; }
   }
 
   @media (max-width: 768px) {
-    .profile-container {
-      flex-direction: column;
-    }
-
-    .profile-sidebar-wrapper {
-      flex: 1;
-    }
-
-    .profile-content {
-      padding: 20px;
-    }
-
-    .profile-header-section h1 {
-      font-size: 24px;
-    }
-
-    .wallet-balance-card {
-      padding: 30px;
-    }
-
-    .balance-amount {
-      font-size: 36px;
-    }
-
-    .transactions-section .section-title {
-      font-size: 20px;
-    }
+    .profile-container { flex-direction: column; }
+    .profile-sidebar-wrapper { flex: 1; }
+    .profile-content { padding: 20px; }
+    .profile-header-section h1 { font-size: 24px; }
+    .wallet-balance-card { padding: 30px; }
+    .balance-amount { font-size: 36px; }
+    .transactions-section .section-title { font-size: 20px; }
+    .messages-container { margin-top: 12px; }
   }
 </style>
+
+<!-- Auto-dismiss messages after 5 seconds -->
+<script>
+  (function () {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function (alert) {
+      setTimeout(function () {
+        alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-6px)';
+        setTimeout(function () { alert.remove(); }, 400);
+      }, 5000);
+    });
+  })();
+</script>
 
 {% endblock %}

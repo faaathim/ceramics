@@ -1,3 +1,5 @@
+# product_management/models.py
+
 from django.db import models
 from django.utils import timezone
 from django.db.models import Avg, Count, Sum

@@ -1,3 +1,5 @@
+# custom_admin/urls.py
+
 from django.urls import path, include
 from . import views as ca_views
 
@@ -38,6 +40,9 @@ path(
     include(('offers.admin_urls', 'offers'), namespace='offers')
 ),
 
-
+path(
+    'wallet/',
+    include('wallet.admin_urls', namespace='wallet_admin')
+),
 
 ]

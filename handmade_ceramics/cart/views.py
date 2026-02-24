@@ -165,6 +165,7 @@ def cart_page(request):
         'discount': discount,
         'total_price': total,
         'coupon': coupon,
+        "cod_limit": settings.COD_LIMIT,
     }
 
     return render(request, 'cart/cart_page.html', context)

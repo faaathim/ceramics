@@ -1,0 +1,535 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .wallet-detail-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            color: #b0b0b0;
+            border: 1px solid #404040;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
+            color: #e8e8e8;
+            transform: translateX(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,.5);
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title i {
+            color: #9b8bdb;
+        }
+
+        .transaction-id-header {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: #9b8bdb;
+            background: rgba(155,139,219,.1);
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(155,139,219,.2);
+        }
+
+        /* Cards Grid */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .detail-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.5);
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,.7);
+            border-color: #404040;
+        }
+
+        .detail-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .card-header-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .card-header-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .icon-purple { background: rgba(155,139,219,.15); color: #9b8bdb; }
+        .icon-blue   { background: rgba(112,160,192,.15); color: #70a0c0; }
+        .icon-green  { background: rgba(112,192,144,.15); color: #70c090; }
+        .icon-orange { background: rgba(224,160,112,.15); color: #e0a070; }
+
+        .card-header-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #e8e8e8;
+        }
+
+        .card-header-subtitle {
+            font-size: 0.8rem;
+            color: #808080;
+            margin-top: 2px;
+        }
+
+        /* Detail Rows */
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #232323;
+            gap: 20px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-row:first-child {
+            padding-top: 0;
+        }
+
+        .detail-label {
+            color: #808080;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+            min-width: 130px;
+        }
+
+        .detail-label i {
+            width: 14px;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .detail-value {
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .detail-value.mono {
+            font-family: 'Courier New', monospace;
+            color: #9b8bdb;
+            font-size: 0.88rem;
+        }
+
+        .detail-value.description-text {
+            color: #b0b0b0;
+            font-style: italic;
+            text-align: right;
+        }
+
+        /* Type & Source Badges */
+        .type-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+        }
+        .type-credit { background: linear-gradient(135deg,#2a4a3a,#3a5a4a); color: #70c090; }
+        .type-debit  { background: linear-gradient(135deg,#4a2a2a,#5a3a3a); color: #e07070; }
+
+        .source-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            background: rgba(155,139,219,.15); color: #9b8bdb;
+        }
+
+        /* Amount Highlight */
+        .amount-display {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .amount-credit { color: #70c090; }
+        .amount-debit  { color: #e07070; }
+
+        .amount-card-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .balance-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .balance-label {
+            font-size: 0.8rem;
+            color: #808080;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .balance-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #9b8bdb;
+        }
+
+        /* Related Order Button */
+        .order-link-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+            border-radius: 12px;
+            border: 1px solid #4a5a6a;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .order-link-card:hover {
+            background: linear-gradient(135deg, #3a4a5a, #4a5a6a);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(112,160,192,.25);
+            border-color: #5a6a7a;
+        }
+
+        .order-link-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .order-link-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(112,160,192,.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #70a0c0;
+        }
+
+        .order-link-text {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .order-link-label {
+            font-size: 0.8rem;
+            color: #808080;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .order-link-id {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #70a0c0;
+            font-size: 1rem;
+        }
+
+        .order-link-arrow {
+            color: #70a0c0;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .order-link-card:hover .order-link-arrow {
+            transform: translateX(5px);
+        }
+
+        .no-order-note {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            background: rgba(255,255,255,.03);
+            border-radius: 10px;
+            border: 1px dashed #333;
+            color: #606060;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 900px) {
+            .detail-grid { grid-template-columns: 1fr; }
+            .detail-card.full-width { grid-column: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .wallet-detail-content { margin-left: 0; padding: 20px; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .amount-display { font-size: 1.4rem; }
+        }
+    </style>
+
+    <div class="wallet-detail-content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-left">
+                <a href="{% url 'custom_admin:wallet_admin:admin_wallet_transaction_list' %}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <div>
+                    <div class="page-title">
+                        <i class="fas fa-wallet"></i> Transaction Detail
+                    </div>
+                    <span class="transaction-id-header">{{ transaction.transaction_id }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amount Highlight Card -->
+        <div class="detail-card" style="margin-bottom: 25px;">
+            <div class="amount-card-inner">
+                <div>
+                    <div style="font-size:0.8rem; color:#808080; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">
+                        Transaction Amount
+                    </div>
+                    <div class="amount-display {% if transaction.transaction_type == 'credit' %}amount-credit{% else %}amount-debit{% endif %}">
+                        {% if transaction.transaction_type == 'credit' %}+{% else %}-{% endif %}₹{{ transaction.amount }}
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                    <span class="type-badge {% if transaction.transaction_type == 'credit' %}type-credit{% else %}type-debit{% endif %}">
+                        <i class="fas {% if transaction.transaction_type == 'credit' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
+                        {{ transaction.get_transaction_type_display }}
+                    </span>
+                    <div class="balance-chip">
+                        <span class="balance-label">Wallet Balance</span>
+                        <span class="balance-value">₹{{ wallet.balance }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Detail Grid -->
+        <div class="detail-grid">
+
+            <!-- Transaction Info -->
+            <div class="detail-card">
+                <div class="card-header-section">
+                    <div class="card-header-icon icon-purple">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div>
+                        <div class="card-header-title">Transaction Info</div>
+                        <div class="card-header-subtitle">Details of this transaction</div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-hashtag"></i> ID</span>
+                    <span class="detail-value mono">{{ transaction.transaction_id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-calendar-alt"></i> Date</span>
+                    <span class="detail-value">{{ transaction.created_at|date:"d M Y, H:i" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-exchange-alt"></i> Type</span>
+                    <span class="detail-value">
+                        <span class="type-badge {% if transaction.transaction_type == 'credit' %}type-credit{% else %}type-debit{% endif %}">
+                            <i class="fas {% if transaction.transaction_type == 'credit' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
+                            {{ transaction.get_transaction_type_display }}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-tag"></i> Source</span>
+                    <span class="detail-value">
+                        <span class="source-badge">
+                            <i class="fas fa-circle" style="font-size:0.45rem;"></i>
+                            {{ transaction.get_source_display }}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-align-left"></i> Description</span>
+                    <span class="detail-value description-text">
+                        {{ transaction.description|default:"—" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- User & Wallet Info -->
+            <div class="detail-card">
+                <div class="card-header-section">
+                    <div class="card-header-icon icon-blue">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="card-header-title">User & Wallet Info</div>
+                        <div class="card-header-subtitle">Account associated with this transaction</div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-id-badge"></i> Full Name</span>
+                    <span class="detail-value">{{ user.get_full_name|default:"—" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-envelope"></i> Email</span>
+                    <span class="detail-value" style="font-size:0.9rem;">{{ user.email }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-user-circle"></i> Username</span>
+                    <span class="detail-value">{{ user.username }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-wallet"></i> Balance</span>
+                    <span class="detail-value" style="color:#9b8bdb; font-weight:700; font-size:1.1rem;">
+                        ₹{{ wallet.balance }}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-check-circle"></i> Active</span>
+                    <span class="detail-value">
+                        {% if user.is_active %}
+                            <span style="color:#70c090; font-weight:600;"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Active</span>
+                        {% else %}
+                            <span style="color:#e07070; font-weight:600;"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Inactive</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Related Order -->
+            <div class="detail-card full-width">
+                <div class="card-header-section">
+                    <div class="card-header-icon icon-orange">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div>
+                        <div class="card-header-title">Related Order</div>
+                        <div class="card-header-subtitle">Order linked to this transaction</div>
+                    </div>
+                </div>
+
+                {% if transaction.order %}
+                    <a href="{% url 'custom_admin:orders_admin:admin_order_detail' transaction.order.order_id %}"
+                       class="order-link-card">
+                        <div class="order-link-left">
+                            <div class="order-link-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="order-link-text">
+                                <span class="order-link-label">Order ID</span>
+                                <span class="order-link-id">{{ transaction.order.order_id }}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                            <div style="text-align:right;">
+                                <div style="font-size:0.8rem; color:#808080;">Order Total</div>
+                                <div style="color:#70c090; font-weight:700;">₹{{ transaction.order.total_amount }}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:0.8rem; color:#808080;">Order Date</div>
+                                <div style="color:#e8e8e8; font-weight:600;">{{ transaction.order.created_at|date:"d M Y" }}</div>
+                            </div>
+                            <i class="fas fa-chevron-right order-link-arrow"></i>
+                        </div>
+                    </a>
+                {% else %}
+                    <div class="no-order-note">
+                        <i class="fas fa-info-circle" style="font-size:1.2rem; flex-shrink:0;"></i>
+                        <span>This transaction is not linked to any order.</span>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div><!-- /.detail-grid -->
+    </div><!-- /.wallet-detail-content -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </section>
+</div>
+{% endblock %}

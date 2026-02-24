@@ -13,6 +13,7 @@ from django.db import transaction
 
 from wallet.services import debit_wallet
 from wallet.models import Wallet
+from django.conf import settings
 
 @login_required
 def checkout_page(request):
@@ -33,7 +34,7 @@ def checkout_page(request):
     )
 
     tax_amount = 0
-    shipping_amount = 0
+    shipping_amount = Decimal(str(settings.DELIVERY_CHARGE))
 
     # ✅ READ FROM SESSION ONLY
     discount = Decimal(str(request.session.get("discount_amount", 0)))
@@ -60,6 +61,7 @@ def checkout_page(request):
         "discount": discount,
         "total": total,
         "coupon": coupon,
+        "cod_limit": settings.COD_LIMIT,
     }
 
     return render(request, "checkout/checkout.html", context)
@@ -104,7 +106,7 @@ def place_order(request):
         for item in cart_items
     )
     tax_amount = 0
-    shipping_amount = 0
+    shipping_amount = Decimal(str(settings.DELIVERY_CHARGE))
 
     discount = Decimal(str(request.session.get("discount_amount", 0)))
     coupon_id = request.session.get("coupon_id")
@@ -114,6 +116,13 @@ def place_order(request):
     total = subtotal + tax_amount + shipping_amount - discount
     if total < 1:
         total = 1
+    
+    if payment_method == "COD" and total > settings.COD_LIMIT:
+        messages.error(
+            request,
+            f"Cash on Delivery is not available for orders above ₹{settings.COD_LIMIT}."
+        )
+        return redirect("checkout:checkout")
 
     # ✅ Create order (PENDING if Razorpay, CONFIRMED if COD)
     if payment_method == "COD":

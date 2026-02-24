@@ -32,11 +32,11 @@
 
   <!-- Messages Display -->
   {% if messages %}
-  <div class="messages-container">
+  <div class="messages-container" id="messages-container">
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}" role="alert">
       <span class="alert-icon">
-        {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✓{% else %}ℹ️{% endif %}
+        {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✅{% else %}ℹ️{% endif %}
       </span>
       <span class="alert-text">{{ message }}</span>
       <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">×</button>
@@ -64,7 +64,8 @@
           <div class="addresses-container">
             {% for addr in addresses %}
             <div class="address-card">
-              <input type="radio" name="address_id" value="{{ addr.id }}" id="addr_{{ addr.id }}" required>
+              <input type="radio" name="address_id" value="{{ addr.id }}" id="addr_{{ addr.id }}" required
+                {% if forloop.first %}checked{% endif %}>
               <label for="addr_{{ addr.id }}">
                 <div class="address-content">
                   <div class="address-header">
@@ -111,6 +112,7 @@
         </div>
 
         <div class="payment-methods-container">
+
           <!-- Wallet Payment -->
           {% if user.wallet.balance >= total %}
           <div class="payment-method-card">
@@ -129,7 +131,7 @@
             </label>
           </div>
           {% else %}
-          <div class="payment-method-card wallet-insufficient" title="Insufficient wallet balance">
+          <div class="payment-method-card payment-method-disabled" title="Insufficient wallet balance">
             <div class="wallet-insufficient-content">
               <div class="payment-method-icon">👛</div>
               <div class="payment-method-details">
@@ -144,8 +146,23 @@
           {% endif %}
 
           <!-- Cash on Delivery -->
+          {% if total > cod_limit %}
+          <div class="payment-method-card payment-method-disabled" title="COD not available for orders above ₹{{ cod_limit }}">
+            <div class="wallet-insufficient-content">
+              <div class="payment-method-icon">💵</div>
+              <div class="payment-method-details">
+                <div class="payment-method-title">Cash on Delivery</div>
+                <div class="wallet-insufficient-message">
+                  <span class="insufficient-icon">⚠️</span>
+                  Not available for orders above ₹{{ cod_limit }}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
           <div class="payment-method-card">
-            <input type="radio" name="payment_method" value="COD" id="payment_cod" checked>
+            <input type="radio" name="payment_method" value="COD" id="payment_cod"
+              {% if user.wallet.balance < total %}checked{% endif %}>
             <label for="payment_cod">
               <div class="payment-method-content">
                 <div class="payment-method-icon">💵</div>
@@ -157,10 +174,12 @@
               </div>
             </label>
           </div>
+          {% endif %}
 
           <!-- Razorpay / UPI -->
           <div class="payment-method-card">
-            <input type="radio" name="payment_method" value="RAZORPAY" id="payment_razorpay">
+            <input type="radio" name="payment_method" value="RAZORPAY" id="payment_razorpay"
+              {% if total > cod_limit and user.wallet.balance < total %}checked{% endif %}>
             <label for="payment_razorpay">
               <div class="payment-method-content">
                 <div class="payment-method-icon">💳</div>
@@ -172,6 +191,7 @@
               </div>
             </label>
           </div>
+
         </div>
       </div>
 
@@ -249,11 +269,7 @@
 
           <!-- Selected Payment Info (Dynamic) -->
           <div class="payment-info" id="selected-payment-info">
-            <div class="payment-icon">💵</div>
-            <div class="payment-text">
-              <strong>Cash on Delivery</strong>
-              <p>Pay when you receive your order</p>
-            </div>
+            <!-- Populated by JS on load -->
           </div>
 
           <!-- Place Order Button -->
@@ -350,19 +366,20 @@
     margin-bottom: 15px;
     animation: slideIn 0.3s ease-out;
     position: relative;
+    transition: opacity 0.3s, transform 0.3s;
   }
 
   @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* Django message.tags mapping:
+     error   → alert-error
+     success → alert-success
+     warning → alert-warning
+     info    → alert-info
+  */
   .alert-error {
     background: rgba(244, 67, 54, 0.15);
     border: 1px solid rgba(244, 67, 54, 0.4);
@@ -375,10 +392,16 @@
     color: #69f0ae;
   }
 
-  .alert-info, .alert-warning {
-    background: rgba(255, 193, 7, 0.15);
-    border: 1px solid rgba(255, 193, 7, 0.4);
-    color: #ffd740;
+  .alert-warning {
+    background: rgba(255, 152, 0, 0.15);
+    border: 1px solid rgba(255, 152, 0, 0.4);
+    color: #ffb74d;
+  }
+
+  .alert-info {
+    background: rgba(33, 150, 243, 0.15);
+    border: 1px solid rgba(33, 150, 243, 0.4);
+    color: #64b5f6;
   }
 
   .alert-icon {
@@ -701,6 +724,16 @@
     border-color: #666;
   }
 
+  /* Disabled payment option (wallet insufficient / COD limit) */
+  .payment-method-disabled {
+    background: #2a2a2a;
+    border: 2px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 20px;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .payment-method-content {
     display: flex;
     align-items: center;
@@ -728,34 +761,6 @@
     font-size: 13px;
   }
 
-  .wallet-warning {
-    color: #ff9800;
-    font-size: 12px;
-    margin-top: 6px;
-    font-weight: 500;
-  }
-
-  .payment-method-check {
-    font-size: 20px;
-    color: #4caf50;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .payment-method-card input[type="radio"]:checked + label .payment-method-check {
-    opacity: 1;
-  }
-
-  /* Wallet Insufficient Balance State */
-  .wallet-insufficient {
-    background: #2a2a2a;
-    border: 2px solid #3a3a3a;
-    border-radius: 12px;
-    padding: 20px;
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
   .wallet-insufficient-content {
     display: flex;
     align-items: center;
@@ -773,6 +778,17 @@
 
   .insufficient-icon {
     font-size: 14px;
+  }
+
+  .payment-method-check {
+    font-size: 20px;
+    color: #4caf50;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .payment-method-card input[type="radio"]:checked + label .payment-method-check {
+    opacity: 1;
   }
 
   /* Order Summary */
@@ -800,19 +816,9 @@
     padding-right: 10px;
   }
 
-  .cart-items-list::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .cart-items-list::-webkit-scrollbar-track {
-    background: #1a1a1a;
-    border-radius: 3px;
-  }
-
-  .cart-items-list::-webkit-scrollbar-thumb {
-    background: #3a3a3a;
-    border-radius: 3px;
-  }
+  .cart-items-list::-webkit-scrollbar { width: 6px; }
+  .cart-items-list::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 3px; }
+  .cart-items-list::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 3px; }
 
   .cart-item {
     display: flex;
@@ -842,13 +848,9 @@
     object-fit: cover;
   }
 
-  .image-placeholder {
-    font-size: 28px;
-  }
+  .image-placeholder { font-size: 28px; }
 
-  .item-details {
-    flex: 1;
-  }
+  .item-details { flex: 1; }
 
   .item-details h4 {
     color: #fff;
@@ -887,9 +889,7 @@
     font-size: 15px;
   }
 
-  .price-row.discount {
-    color: #4caf50;
-  }
+  .price-row.discount { color: #4caf50; }
 
   .price-row.total {
     margin-top: 15px;
@@ -919,11 +919,10 @@
     border-radius: 8px;
     margin-bottom: 20px;
     border: 1px solid #2a2a2a;
+    min-height: 70px;
   }
 
-  .payment-icon {
-    font-size: 32px;
-  }
+  .payment-icon { font-size: 32px; }
 
   .payment-text strong {
     color: #fff;
@@ -973,9 +972,7 @@
     box-shadow: none;
   }
 
-  .btn-place-order span {
-    font-size: 22px;
-  }
+  .btn-place-order span { font-size: 22px; }
 
   /* Security Badge */
   .security-badge {
@@ -991,114 +988,93 @@
 
   /* Responsive */
   @media (max-width: 1024px) {
-    .checkout-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .checkout-section:last-child {
-      order: -1;
-    }
+    .checkout-grid { grid-template-columns: 1fr; }
+    .checkout-section:last-child { order: -1; }
   }
 
   @media (max-width: 768px) {
-    .checkout-container {
-      padding: 20px 15px;
-    }
-
-    .header-top {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 15px;
-    }
-
-    .checkout-header h1 {
-      font-size: 24px;
-    }
-
-    .btn-back-to-cart {
-      font-size: 14px;
-      padding: 8px 16px;
-    }
-
-    .checkout-steps {
-      padding: 20px 10px;
-    }
-
-    .step span {
-      font-size: 12px;
-    }
-
-    .step-line {
-      width: 40px;
-    }
-
-    .checkout-section {
-      padding: 20px;
-    }
-
-    .section-header h2 {
-      font-size: 20px;
-    }
-
-    .cart-items-list {
-      max-height: 250px;
-    }
-
-    .alert {
-      padding: 12px 16px;
-    }
-
-    .alert-text {
-      font-size: 14px;
-    }
+    .checkout-container { padding: 20px 15px; }
+    .header-top { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .checkout-header h1 { font-size: 24px; }
+    .btn-back-to-cart { font-size: 14px; padding: 8px 16px; }
+    .checkout-steps { padding: 20px 10px; }
+    .step span { font-size: 12px; }
+    .step-line { width: 40px; }
+    .checkout-section { padding: 20px; }
+    .section-header h2 { font-size: 20px; }
+    .cart-items-list { max-height: 250px; }
+    .alert { padding: 12px 16px; }
+    .alert-text { font-size: 14px; }
   }
 </style>
 
 <script>
-  // Dynamic Payment Info Update
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
+
     const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
-    const paymentInfo = document.getElementById('selected-payment-info');
-    const walletBalanceEl = document.getElementById('wallet-balance');
-    const checkoutForm = document.getElementById('checkout-form');
+    const paymentInfo   = document.getElementById('selected-payment-info');
+    const checkoutForm  = document.getElementById('checkout-form');
     const placeOrderBtn = document.getElementById('place-order-btn');
-    
-    // Update payment info display based on selected method
+
+    // ─── Payment info map ────────────────────────────────────────────────────
+    const walletBalance = document.getElementById('wallet-balance')
+      ? document.getElementById('wallet-balance').textContent
+      : '0.00';
+
+    const paymentDetails = {
+      WALLET: {
+        icon: '👛',
+        title: 'Pay with Wallet',
+        desc: `₹${walletBalance} will be deducted from your wallet`,
+      },
+      COD: {
+        icon: '💵',
+        title: 'Cash on Delivery',
+        desc: 'Pay when you receive your order',
+      },
+      RAZORPAY: {
+        icon: '💳',
+        title: 'Razorpay / UPI',
+        desc: 'Pay online via UPI, Cards, Wallet',
+      },
+    };
+
+    function renderPaymentInfo(value) {
+      const d = paymentDetails[value];
+      if (!d) return;
+      paymentInfo.innerHTML = `
+        <div class="payment-icon">${d.icon}</div>
+        <div class="payment-text">
+          <strong>${d.title}</strong>
+          <p>${d.desc}</p>
+        </div>`;
+    }
+
+    // Show info for already-checked radio on page load
+    const checkedRadio = document.querySelector('input[name="payment_method"]:checked');
+    if (checkedRadio) {
+      renderPaymentInfo(checkedRadio.value);
+    }
+
+    // Update info when user changes selection
     paymentRadios.forEach(radio => {
-      radio.addEventListener('change', function() {
-        if (this.value === 'WALLET') {
-          const walletBalance = walletBalanceEl ? walletBalanceEl.textContent : '0.00';
-          paymentInfo.innerHTML = `
-            <div class="payment-icon">👛</div>
-            <div class="payment-text">
-              <strong>Pay with Wallet</strong>
-              <p>₹${walletBalance} will be deducted from your wallet</p>
-            </div>
-          `;
-        } else if (this.value === 'COD') {
-          paymentInfo.innerHTML = `
-            <div class="payment-icon">💵</div>
-            <div class="payment-text">
-              <strong>Cash on Delivery</strong>
-              <p>Pay when you receive your order</p>
-            </div>
-          `;
-        } else if (this.value === 'RAZORPAY') {
-          paymentInfo.innerHTML = `
-            <div class="payment-icon">💳</div>
-            <div class="payment-text">
-              <strong>Razorpay / UPI</strong>
-              <p>Pay online via UPI, Cards, Wallet</p>
-            </div>
-          `;
-        }
+      radio.addEventListener('change', function () {
+        renderPaymentInfo(this.value);
       });
     });
 
-    // Form submission handler - prevent double submission
+    // ─── Prevent double-submit ───────────────────────────────────────────────
     if (checkoutForm && placeOrderBtn) {
-      checkoutForm.addEventListener('submit', function(e) {
-        // Disable the button to prevent double submission
+      checkoutForm.addEventListener('submit', function (e) {
+        // Guard: ensure a payment method is selected
+        const selected = document.querySelector('input[name="payment_method"]:checked');
+        if (!selected) {
+          e.preventDefault();
+          showInlineError('Please select a payment method to continue.');
+          return;
+        }
+
+        // Disable button
         placeOrderBtn.disabled = true;
         placeOrderBtn.innerHTML = '<span>⏳</span> Processing...';
         placeOrderBtn.style.opacity = '0.7';
@@ -1106,15 +1082,45 @@
       });
     }
 
-    // Auto-dismiss messages after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
+    // ─── Auto-dismiss Django messages after 5 s ──────────────────────────────
+    document.querySelectorAll('.alert').forEach(alert => {
       setTimeout(() => {
         alert.style.opacity = '0';
         alert.style.transform = 'translateY(-10px)';
         setTimeout(() => alert.remove(), 300);
       }, 5000);
     });
+
+    // ─── Scroll to messages if any exist ─────────────────────────────────────
+    const msgContainer = document.getElementById('messages-container');
+    if (msgContainer) {
+      msgContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ─── Helper: show an inline error without a page reload ──────────────────
+    function showInlineError(text) {
+      // Remove existing inline errors
+      document.querySelectorAll('.alert-inline').forEach(el => el.remove());
+
+      const div = document.createElement('div');
+      div.className = 'alert alert-error alert-inline';
+      div.role = 'alert';
+      div.innerHTML = `
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text">${text}</span>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">×</button>`;
+
+      // Insert before form
+      checkoutForm.parentNode.insertBefore(div, checkoutForm);
+      div.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      setTimeout(() => {
+        div.style.opacity = '0';
+        div.style.transform = 'translateY(-10px)';
+        setTimeout(() => div.remove(), 300);
+      }, 5000);
+    }
+
   });
 </script>
 

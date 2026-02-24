@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block top %}
+  {% include "admin_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+  {% include "admin_sidebar.html" %}
+  <section class="main-area">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .wallet-management-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Messages Container */
+        .messages-container {
+            position: fixed;
+            top: 90px;
+            right: 30px;
+            z-index: 9999;
+            max-width: 450px;
+            pointer-events: none;
+        }
+
+        .alert {
+            pointer-events: all;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            border: 1px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: currentColor;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0);    opacity: 1; }
+            to   { transform: translateX(120%); opacity: 0; }
+        }
+
+        .alert.hiding {
+            animation: slideOutRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        .alert-success  { background: linear-gradient(135deg, rgba(42,74,58,.95),  rgba(58,90,74,.95));  border-color: #4a6a5a; color: #70c090; }
+        .alert-error,
+        .alert-danger   { background: linear-gradient(135deg, rgba(74,42,42,.95),  rgba(90,58,58,.95));  border-color: #6a4a4a; color: #e07070; }
+        .alert-warning  { background: linear-gradient(135deg, rgba(74,74,42,.95),  rgba(90,90,58,.95));  border-color: #6a6a4a; color: #d0c070; }
+        .alert-info     { background: linear-gradient(135deg, rgba(42,58,74,.95),  rgba(58,74,90,.95));  border-color: #4a5a6a; color: #70a0c0; }
+
+        .alert-icon    { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+        .alert-content { flex: 1; min-width: 0; }
+        .alert-message { display: block; color: inherit; font-weight: 500; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+
+        .alert-close {
+            flex-shrink: 0; background: none; border: none; color: inherit;
+            cursor: pointer; font-size: 1.1rem; padding: 0;
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; opacity: 0.7; transition: all 0.2s ease; margin-top: 2px;
+        }
+        .alert-close:hover { opacity: 1; background: rgba(255,255,255,.1); }
+        .alert-close:active { transform: scale(0.9); }
+
+        .alert-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: currentColor; opacity: 0.4;
+            animation: progressShrink 5s linear forwards;
+        }
+
+        @keyframes progressShrink { from { width: 100%; } to { width: 0%; } }
+
+        /* Filters */
+        .filters-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 20px 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.5);
+            margin-bottom: 30px;
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+        .filters-container:hover { box-shadow: 0 8px 30px rgba(0,0,0,.7); border-color: #404040; }
+
+        .filters-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+
+        .filter-label {
+            color: #b0b0b0; font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .filter-input, .filter-select {
+            padding: 14px 20px;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            background: #0f0f0f;
+            color: #e8e8e8;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        .filter-input:focus, .filter-select:focus {
+            outline: none; border-color: #9b8bdb; background: #1a1a1a;
+            box-shadow: 0 0 0 4px rgba(155,139,219,.1);
+        }
+        .filter-input::placeholder { color: #606060; }
+
+        .filter-actions {
+            grid-column: 1 / -1;
+            display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px; border: none; border-radius: 12px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 8px;
+            text-decoration: none; white-space: nowrap;
+        }
+        .btn-primary { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); color:#fff; border:2px solid transparent; }
+        .btn-primary:hover { background: linear-gradient(135deg,#ab9beb,#9b8bdb); transform:translateY(-2px); box-shadow:0 5px 20px rgba(155,139,219,.5); }
+        .btn-secondary { background:transparent; color:#909090; border:2px solid #404040; }
+        .btn-secondary:hover { background:#2a2a2a; color:#e8e8e8; border-color:#505050; transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.5); }
+
+        /* Table */
+        .table-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,.5);
+            overflow: hidden;
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-table { width: 100%; margin: 0; border-collapse: collapse; }
+        .wallet-table thead { background: linear-gradient(135deg,#2a2a2a,#3a3a3a); }
+        .wallet-table th {
+            padding: 20px 25px; text-align: left; font-weight: 600;
+            color: #b0b0b0; text-transform: uppercase; font-size: 0.85rem;
+            letter-spacing: 0.5px; border-bottom: 2px solid #404040;
+        }
+        .wallet-table tbody tr { border-bottom: 1px solid #2a2a2a; transition: all 0.3s ease; }
+        .wallet-table tbody tr:hover { background: linear-gradient(135deg,#252525,#303030); }
+        .wallet-table td { padding: 20px 25px; color: #e8e8e8; font-size: 0.95rem; vertical-align: middle; }
+
+        .transaction-id {
+            font-weight: 700;
+            color: #9b8bdb;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .user-info { display: flex; flex-direction: column; gap: 4px; }
+        .user-name  { font-weight: 600; color: #e8e8e8; }
+        .user-email { font-size: 0.85rem; color: #909090; }
+
+        /* Transaction type badges */
+        .type-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+        }
+        .type-credit {
+            background: linear-gradient(135deg,#2a4a3a,#3a5a4a);
+            color: #70c090;
+        }
+        .type-debit {
+            background: linear-gradient(135deg,#4a2a2a,#5a3a3a);
+            color: #e07070;
+        }
+
+        /* Source badge */
+        .source-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            background: rgba(155,139,219,.15); color: #9b8bdb;
+        }
+
+        .amount-credit { font-weight: 700; font-size: 1.05rem; color: #70c090; }
+        .amount-debit  { font-weight: 700; font-size: 1.05rem; color: #e07070; }
+
+        .btn-view {
+            padding: 8px 16px;
+            background: linear-gradient(135deg,#2a3a4a,#3a4a5a);
+            color: #70a0c0; border: 1px solid #4a5a6a;
+            border-radius: 8px; text-decoration: none;
+            font-weight: 600; font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-view:hover {
+            background: linear-gradient(135deg,#3a4a5a,#4a5a6a);
+            color: #80b0d0; transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(112,160,192,.4);
+        }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #606060; }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
+        .empty-state p { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; }
+
+        /* Pagination */
+        .pagination-container {
+            background: linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%);
+            border-radius: 15px; padding: 25px; margin-top: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.5);
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #333333; flex-wrap: wrap; gap: 15px;
+        }
+        .pagination-info { color: #b0b0b0; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .pagination-links { display: flex; gap: 10px; }
+        .pagination-links a, .pagination-links span {
+            padding: 10px 18px;
+            background: linear-gradient(135deg,#2a2a2a,#3a3a3a);
+            color: #e8e8e8; text-decoration: none; border-radius: 10px;
+            font-weight: 600; transition: all 0.3s ease;
+            border: 1px solid #404040;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .pagination-links a:hover:not(.disabled) { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); transform: translateY(-2px); border-color: #9b8bdb; }
+        .pagination-links .active  { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); border-color: #9b8bdb; }
+        .pagination-links .disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media (max-width: 768px) {
+            .messages-container  { right: 10px; left: 10px; max-width: none; }
+            .wallet-management-content { margin-left: 0; padding: 20px; }
+            .filters-form { grid-template-columns: 1fr; }
+            .table-container { overflow-x: auto; }
+            .pagination-container { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+
+    <div class="wallet-management-content">
+
+        <!-- Messages -->
+        <div class="messages-container" id="messagesContainer">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
+                        <i class="alert-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <div class="alert-content">
+                            <span class="alert-message">{{ message }}</span>
+                        </div>
+                        <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="alert-progress"></div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-container">
+            <form method="GET" class="filters-form">
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-search"></i> Search</label>
+                    <input type="text" name="q" value="{{ q|default:'' }}" class="filter-input"
+                           placeholder="Transaction ID or email">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-exchange-alt"></i> Type</label>
+                    <select name="type" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="credit" {% if request.GET.type == 'credit' %}selected{% endif %}>Credit</option>
+                        <option value="debit"  {% if request.GET.type == 'debit'  %}selected{% endif %}>Debit</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-tag"></i> Source</label>
+                    <select name="source" class="filter-select">
+                        <option value="">All Sources</option>
+                        <option value="order_refund"   {% if request.GET.source == 'order_refund'   %}selected{% endif %}>Order Refund</option>
+                        <option value="order_payment"  {% if request.GET.source == 'order_payment'  %}selected{% endif %}>Order Payment</option>
+                        <option value="admin_credit"   {% if request.GET.source == 'admin_credit'   %}selected{% endif %}>Admin Credit</option>
+                        <option value="referral_bonus" {% if request.GET.source == 'referral_bonus' %}selected{% endif %}>Referral Bonus</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-calendar-alt"></i> Date From</label>
+                    <input type="date" name="date_from" value="{{ request.GET.date_from }}" class="filter-input">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-calendar-alt"></i> Date To</label>
+                    <input type="date" name="date_to" value="{{ request.GET.date_to }}" class="filter-input">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'custom_admin:wallet_admin:admin_wallet_transaction_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="wallet-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> Transaction ID</th>
+                        <th><i class="fas fa-calendar"></i> Date</th>
+                        <th><i class="fas fa-user"></i> User</th>
+                        <th><i class="fas fa-exchange-alt"></i> Type</th>
+                        <th><i class="fas fa-rupee-sign"></i> Amount</th>
+                        <th><i class="fas fa-tag"></i> Source</th>
+                        <th><i class="fas fa-cog"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                        <tr>
+                            <td>
+                                <span class="transaction-id">{{ tx.transaction_id }}</span>
+                            </td>
+                            <td>{{ tx.created_at|date:"d M Y H:i" }}</td>
+                            <td>
+                                <div class="user-info">
+                                    <span class="user-name">{{ tx.wallet.user.get_full_name|default:tx.wallet.user.username }}</span>
+                                    <span class="user-email">{{ tx.wallet.user.email }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="type-badge {% if tx.transaction_type == 'credit' %}type-credit{% else %}type-debit{% endif %}">
+                                    <i class="fas {% if tx.transaction_type == 'credit' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
+                                    {{ tx.get_transaction_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="{% if tx.transaction_type == 'credit' %}amount-credit{% else %}amount-debit{% endif %}">
+                                    {% if tx.transaction_type == 'credit' %}+{% else %}-{% endif %}₹{{ tx.amount }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="source-badge">
+                                    <i class="fas fa-circle" style="font-size:0.5rem;"></i>
+                                    {{ tx.get_source_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'custom_admin:wallet_admin:admin_wallet_transaction_detail' tx.transaction_id %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-wallet"></i>
+                                    <p>No transactions found.</p>
+                                    {% if request.GET.q or request.GET.type or request.GET.source %}
+                                        <small style="color:#909090;">Try adjusting your filters.</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if transactions.paginator.num_pages > 1 %}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                <i class="fas fa-file-alt"></i>
+                <span>Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
+            </div>
+            <div class="pagination-links">
+                {% if transactions.has_previous %}
+                    <a href="?page=1&{{ query_params }}"><i class="fas fa-angle-double-left"></i> First</a>
+                    <a href="?page={{ transactions.previous_page_number }}&{{ query_params }}"><i class="fas fa-angle-left"></i> Previous</a>
+                {% else %}
+                    <span class="disabled"><i class="fas fa-angle-double-left"></i> First</span>
+                    <span class="disabled"><i class="fas fa-angle-left"></i> Previous</span>
+                {% endif %}
+
+                {% for p in transactions.paginator.page_range %}
+                    <a href="?page={{ p }}&{{ query_params }}" class="{% if transactions.number == p %}active{% endif %}">{{ p }}</a>
+                {% endfor %}
+
+                {% if transactions.has_next %}
+                    <a href="?page={{ transactions.next_page_number }}&{{ query_params }}">Next <i class="fas fa-angle-right"></i></a>
+                    <a href="?page={{ transactions.paginator.num_pages }}&{{ query_params }}">Last <i class="fas fa-angle-double-right"></i></a>
+                {% else %}
+                    <span class="disabled">Next <i class="fas fa-angle-right"></i></span>
+                    <span class="disabled">Last <i class="fas fa-angle-double-right"></i></span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div><!-- /.wallet-management-content -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const MessageHandler = {
+            alerts: new Map(),
+            autoDismissDelay: 5000,
+            init() { this.setupAlerts(); },
+            setupAlerts() {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    const id = alert.getAttribute('data-alert-id');
+                    const tid = setTimeout(() => this.dismissAlert(alert), this.autoDismissDelay);
+                    this.alerts.set(id, tid);
+                });
+            },
+            dismissAlert(el) {
+                if (!el || !el.parentElement) return;
+                el.classList.add('hiding');
+                setTimeout(() => { if (el.parentElement) el.remove(); }, 400);
+            },
+            clearTimeout(el) {
+                const id = el.getAttribute('data-alert-id');
+                if (this.alerts.has(id)) { clearTimeout(this.alerts.get(id)); this.alerts.delete(id); }
+            }
+        };
+
+        function dismissAlert(btn) {
+            const alert = btn.closest('.alert');
+            MessageHandler.clearTimeout(alert);
+            MessageHandler.dismissAlert(alert);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => MessageHandler.init());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.alert').forEach(a => {
+                    MessageHandler.clearTimeout(a); MessageHandler.dismissAlert(a);
+                });
+            }
+        });
+    </script>
+  </section>
+</div>
+{% endblock %}

@@ -1,75 +1,84 @@
+# orders/views.py
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib import messages
 from django.http import HttpResponse
 from django.core.paginator import Paginator
-from .models import Order, OrderItem
+from django.utils import timezone
+
+from .models import Order
 from cart.models import CartItem
 from user_profile.models import Profile
-import io
-from reportlab.pdfgen import canvas # type: ignore
 from coupons.models import CouponUsage
 from wallet.models import Wallet, WalletTransaction
-from django.db import transaction
 
+import io
+from reportlab.pdfgen import canvas  # type: ignore
 
 
 @login_required
 def order_list(request):
-    # Get user profile for sidebar
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    
-    # Get search query and status filter
+
     query = request.GET.get('q', '')
     status_filter = request.GET.get('status', 'all')
-    
-    # Filter orders
+
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    
+
     if query:
         orders = orders.filter(order_id__icontains=query)
-    
-    if status_filter and status_filter != 'all':
+
+    if status_filter != 'all':
         orders = orders.filter(status=status_filter)
-    
-    # Pagination (optional)
-    paginator = Paginator(orders, 10)  # 10 orders per page
+
+    paginator = Paginator(orders, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         'orders': page_obj,
         'profile': profile,
         'query': query,
         'status_filter': status_filter,
-        'is_paginated': paginator.num_pages > 1,
         'page_obj': page_obj,
+        'is_paginated': paginator.num_pages > 1,
     }
-    
+
     return render(request, 'orders/order_list.html', context)
 
 
 @login_required
 def order_detail(request, order_id):
-    # Get user profile for sidebar
+
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+
+    order = get_object_or_404(
+        Order,
+        order_id=order_id,
+        user=request.user
+    )
+
     items = order.items.all()
-    
+
     context = {
         "order": order,
         "items": items,
         "profile": profile,
     }
-    
+
     return render(request, "orders/order_detail.html", context)
+
 
 @login_required
 @transaction.atomic
 def cancel_order(request, order_id):
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    order = get_object_or_404(
+        Order,
+        order_id=order_id,
+        user=request.user
+    )
 
     if order.status not in ['PENDING', 'CONFIRMED']:
         messages.error(request, "Order cannot be cancelled.")
@@ -78,40 +87,60 @@ def cancel_order(request, order_id):
     order.status = 'CANCELLED'
     order.save()
 
-    # Refund to wallet if paid
-    if order.is_paid:
-        wallet = Wallet.objects.select_for_update().get(user=request.user)
+    if order.is_paid and not order.is_refunded:
+
+        wallet, _ = Wallet.objects.select_for_update().get_or_create(
+            user=request.user,
+            defaults={'balance': 0}
+        )
 
         wallet.balance += order.total_amount
         wallet.save()
 
         WalletTransaction.objects.create(
             wallet=wallet,
-            transaction_type='CREDIT',
+            transaction_type=WalletTransaction.CREDIT,
+            source='CANCEL_REFUND',
             amount=order.total_amount,
-            description=f"Refund for cancelled order {order.order_id}"
+            description=f"Refund for cancelled order {order.order_id}",
+            order=order
         )
 
-    messages.success(request, "Order cancelled and amount refunded to wallet.")
-    return redirect(order.get_absolute_url())
+        order.is_refunded = True
+        order.save()
 
+    if order.coupon:
+        CouponUsage.objects.filter(
+            user=request.user,
+            coupon=order.coupon,
+            order=order
+        ).delete()
+
+    messages.success(
+        request,
+        "Order cancelled successfully. Refund processed if applicable."
+    )
+
+    return redirect(order.get_absolute_url())
 
 
 @login_required
 @transaction.atomic
 def return_order(request, order_id):
-    # Get user profile for sidebar
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    order = get_object_or_404(
+        Order,
+        order_id=order_id,
+        user=request.user
+    )
 
-    # Only delivered orders can be returned
     if order.status != 'DELIVERED':
         messages.error(request, 'Only delivered orders can be returned.')
         return redirect('orders:order_list')
 
     if request.method == 'POST':
-        reason = request.POST.get('reason', '')
+        reason = request.POST.get('reason', '').strip()
 
         if not reason:
             messages.error(request, 'Please provide a return reason.')
@@ -126,8 +155,9 @@ def return_order(request, order_id):
 
         messages.success(
             request,
-            f'Return request for order {order.order_id} has been submitted successfully.'
+            f'Return request for order {order.order_id} submitted successfully.'
         )
+
         return redirect('orders:order_list')
 
     return render(request, 'orders/order_return_form.html', {
@@ -138,18 +168,22 @@ def return_order(request, order_id):
 
 @login_required
 def download_invoice(request, order_id):
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    """
+    Generates PDF invoice for the order
+    """
+
+    order = get_object_or_404(
+        Order,
+        order_id=order_id,
+        user=request.user
+    )
 
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer)
 
-    # Starting position
     x_margin = 50
     y = 800
 
-    # ------------------------
-    # Store / Invoice Header
-    # ------------------------
     p.setFont("Helvetica-Bold", 18)
     p.drawString(x_margin, y, "Handmade Ceramics Store")
 
@@ -157,29 +191,26 @@ def download_invoice(request, order_id):
     p.setFont("Helvetica", 10)
     p.drawString(x_margin, y, "Handcrafted ceramic products made with love")
     y -= 15
-    p.drawString(x_margin, y, "Email: support@ceramics.com | Phone: +91-XXXXXXXXXX")
+    p.drawString(x_margin, y, "Email: support@ceramics.com")
 
-    # Invoice title
     p.setFont("Helvetica-Bold", 16)
     p.drawRightString(550, 800, "INVOICE")
 
-    # ------------------------
-    # Order Details
-    # ------------------------
     y -= 40
     p.setFont("Helvetica", 11)
     p.drawString(x_margin, y, f"Order ID: {order.order_id}")
     y -= 15
-    p.drawString(x_margin, y, f"Order Date: {order.created_at.strftime('%d %B %Y')}")
+    p.drawString(
+        x_margin,
+        y,
+        f"Order Date: {order.created_at.strftime('%d %B %Y')}"
+    )
     y -= 15
-    p.drawString(x_margin, y, f"Order Status: {order.get_status_display()}")
+    p.drawString(x_margin, y, f"Status: {order.get_status_display()}")
 
-    # ------------------------
-    # Customer Details
-    # ------------------------
     y -= 30
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(x_margin, y, "Billing Address")
+    p.drawString(x_margin, y, "Shipping Address")
 
     y -= 18
     p.setFont("Helvetica", 11)
@@ -192,51 +223,37 @@ def download_invoice(request, order_id):
         y,
         f"{order.shipping_city}, {order.shipping_state} - {order.shipping_pincode}"
     )
-    y -= 15
-    p.drawString(x_margin, y, f"Phone: {order.shipping_phone}")
-    y -= 15
-    p.drawString(x_margin, y, f"Email: {order.shipping_email}")
 
-    # ------------------------
-    # Order Items Header
-    # ------------------------
     y -= 35
     p.setFont("Helvetica-Bold", 12)
     p.drawString(x_margin, y, "Order Items")
+    y -= 15
 
-    y -= 10
-    p.line(x_margin, y, 550, y)
-
-    # ------------------------
-    # Order Items List
-    # ------------------------
-    y -= 20
     p.setFont("Helvetica", 11)
 
     for item in order.items.all():
-        # Page break if space is low
+
         if y < 100:
             p.showPage()
             y = 800
             p.setFont("Helvetica", 11)
 
-        item_name = item.product_name
+        name = item.product_name
         if item.variant_color:
-            item_name += f" ({item.variant_color})"
+            name += f" ({item.variant_color})"
 
-        p.drawString(x_margin, y, item_name)
+        p.drawString(x_margin, y, name)
         y -= 15
 
         p.drawString(
             x_margin + 20,
             y,
-            f"Qty: {item.quantity}  |  Price: {item.unit_price:.2f}  |  Total: {item.item_total:.2f}"
+            f"Qty: {item.quantity} | "
+            f"Price: {item.unit_price:.2f} | "
+            f"Total: {item.item_total:.2f}"
         )
         y -= 20
 
-    # ------------------------
-    # Total Amount
-    # ------------------------
     y -= 10
     p.line(x_margin, y, 550, y)
 
@@ -244,12 +261,9 @@ def download_invoice(request, order_id):
     p.setFont("Helvetica-Bold", 13)
     p.drawRightString(550, y, f"Total Amount: {order.total_amount:.2f}")
 
-    # ------------------------
-    # Footer
-    # ------------------------
     p.setFont("Helvetica", 9)
-    p.drawString(x_margin, 50, "This is a system generated invoice.")
-    p.drawRightString(550, 50, "Thank you for shopping with us!")
+    p.drawString(x_margin, 50, "System generated invoice.")
+    p.drawRightString(550, 50, "Thank you for shopping!")
 
     p.showPage()
     p.save()
@@ -260,4 +274,5 @@ def download_invoice(request, order_id):
     response["Content-Disposition"] = (
         f'attachment; filename="invoice_{order.order_id}.pdf"'
     )
+
     return response

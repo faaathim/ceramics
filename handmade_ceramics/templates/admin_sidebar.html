@@ -315,6 +315,18 @@
                 <span>Orders</span>
             </a>
         </li>
+
+        <!-- Wallet -->
+        <li class="sidebar-menu-item">
+            <a href="{% url 'custom_admin:wallet_admin:admin_wallet_transaction_list' %}" 
+               class="sidebar-link" 
+               data-page="Wallet" 
+               data-icon="fa-wallet">
+                <i class="fa-solid fa-wallet sidebar-icon"></i>
+                <span>Wallet</span>
+            </a>
+        </li>
+
         <li class="sidebar-menu-item">
             <a href="{% url 'custom_admin:category_management:category_list' %}" 
                class="sidebar-link" 
@@ -517,6 +529,9 @@
                         updateActivePage(link);
                         foundActive = true;
                     } else if (currentPath.includes('coupon') && pageName.includes('coupon')) {
+                        updateActivePage(link);
+                        foundActive = true;
+                    } else if (currentPath.includes('wallet') && pageName.includes('wallet')) {
                         updateActivePage(link);
                         foundActive = true;
                     } else if (currentPath.includes('sales') && pageName.includes('sales')) {

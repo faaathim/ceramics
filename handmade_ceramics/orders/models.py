@@ -68,6 +68,7 @@ class Order(models.Model):
     # Payment & status
     payment_method = models.CharField(max_length=50, default='COD')  # 'COD' for now
     is_paid = models.BooleanField(default=False)
+    is_refunded = models.BooleanField(default=False)
     status = models.CharField(max_length=30, choices=ORDER_STATUS_CHOICES, default='PENDING')
 
     # Optional notes / reason fields
