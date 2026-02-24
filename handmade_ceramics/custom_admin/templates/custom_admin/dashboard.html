@@ -8,500 +8,660 @@
 <div class="layout">
   {% include "admin_sidebar.html" %}
   <section class="main-area">
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
-            body {
-                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-            .dashboard-content {
-                margin-left: 250px;
-                margin-top: 70px;
-                padding: 40px;
-                min-height: calc(100vh - 70px);
-            }
+    <style>
+      body {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-            /* Messages styling */
-            .messages-container {
-                position: fixed;
-                top: 90px;
-                right: 30px;
-                z-index: 9999;
-                max-width: 400px;
-            }
+      .dashboard-content {
+        margin-left: 250px;
+        margin-top: 70px;
+        padding: 40px;
+        min-height: calc(100vh - 70px);
+      }
 
-            .alert {
-                padding: 18px 24px;
-                border-radius: 12px;
-                margin-bottom: 15px;
-                font-size: 0.95rem;
-                font-weight: 600;
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-                animation: slideInRight 0.4s ease-out, fadeOut 0.4s ease-out 4.6s;
-                position: relative;
-                border: 1px solid;
-            }
+      /* ── Messages ── */
+      .messages-container {
+        position: fixed;
+        top: 90px;
+        right: 30px;
+        z-index: 9999;
+        max-width: 400px;
+      }
 
-            @keyframes slideInRight {
-                from {
-                    opacity: 0;
-                    transform: translateX(100px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
+      .alert {
+        padding: 18px 24px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        animation: slideInRight 0.4s ease-out, fadeOut 0.4s ease-out 4.6s;
+        position: relative;
+        border: 1px solid;
+      }
 
-            @keyframes fadeOut {
-                from {
-                    opacity: 1;
-                }
-                to {
-                    opacity: 0;
-                }
-            }
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+      }
 
-            .alert-success {
-                background: linear-gradient(135deg, #2a3a2a, #3a4a3a);
-                border-color: #4a5a4a;
-                color: #70c090;
-            }
+      /* Django message tags: success, error, warning, info */
+      .alert-success {
+        background: linear-gradient(135deg, #2a3a2a, #3a4a3a);
+        border-color: #4a5a4a;
+        color: #70c090;
+      }
+      .alert-error {
+        background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
+        border-color: #5a4a4a;
+        color: #e09070;
+      }
+      .alert-warning {
+        background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
+        border-color: #5a5a4a;
+        color: #e0b060;
+      }
+      .alert-info {
+        background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+        border-color: #4a4a5a;
+        color: #7090c0;
+      }
+      /* Django sometimes adds "messages" tag alongside – handle unknown gracefully */
+      .alert-messages {
+        background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+        border-color: #4a4a5a;
+        color: #7090c0;
+      }
 
-            .alert-error {
-                background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
-                border-color: #5a4a4a;
-                color: #e09070;
-            }
+      .alert i { font-size: 1.3rem; }
 
-            .alert-info {
-                background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
-                border-color: #4a4a5a;
-                color: #7090c0;
-            }
+      .alert-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.6;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 0;
+        width: 24px; height: 24px;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease;
+      }
+      .alert-close:hover { opacity: 1; }
 
-            .alert-warning {
-                background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
-                border-color: #5a5a4a;
-                color: #e0b060;
-            }
+      /* ── Stat Cards ── */
+      .stats-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #333;
+      }
+      .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #404040, #606060);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+      .stats-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+        border-color: #505050;
+      }
+      .stats-card:hover::before { transform: scaleX(1); }
 
-            .alert i {
-                font-size: 1.3rem;
-            }
+      .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .stats-title {
+        color: #b0b0b0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .stats-icon {
+        width: 55px; height: 55px;
+        border-radius: 15px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+      }
+      .stats-card:hover .stats-icon { transform: rotate(10deg) scale(1.1); }
 
-            .alert-close {
-                margin-left: auto;
-                background: none;
-                border: none;
-                color: inherit;
-                opacity: 0.6;
-                cursor: pointer;
-                font-size: 1.2rem;
-                padding: 0;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: opacity 0.3s ease;
-            }
+      .icon-purple { background: linear-gradient(135deg, #2a2a3a, #3a3a4a); color: #9b8bdb; }
+      .icon-yellow { background: linear-gradient(135deg, #3a3a2a, #4a4a3a); color: #e0b060; }
+      .icon-green  { background: linear-gradient(135deg, #2a3a2a, #3a4a3a); color: #70c090; }
+      .icon-orange { background: linear-gradient(135deg, #3a2a2a, #4a3a3a); color: #e09070; }
 
-            .alert-close:hover {
-                opacity: 1;
-            }
+      .stats-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #e8e8e8;
+        margin: 15px 0 10px 0;
+      }
 
-            .stats-card {
-                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-                border-radius: 20px;
-                padding: 30px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-                border: 1px solid #333333;
-            }
+      /* ── Chart Card ── */
+      .chart-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        margin-top: 35px;
+        transition: all 0.3s ease;
+        border: 1px solid #333;
+      }
+      .chart-card:hover {
+        box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+        border-color: #505050;
+      }
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .chart-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #e8e8e8;
+      }
 
-            .stats-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, #404040, #606060);
-                transform: scaleX(0);
-                transition: transform 0.3s ease;
-            }
+      /* Chart canvas wrapper */
+      .chart-wrapper {
+        position: relative;
+        height: 350px;
+        background: linear-gradient(135deg, #0f0f0f, #1f1f1f);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #2a2a2a;
+        margin-bottom: 25px;
+      }
 
-            .stats-card:hover {
-                transform: translateY(-10px);
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-                border-color: #505050;
-            }
+      /* Chart loading skeleton */
+      .chart-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #606060;
+        font-size: 1.1rem;
+        gap: 15px;
+      }
 
-            .stats-card:hover::before {
-                transform: scaleX(1);
-            }
+      .loading-animation {
+        width: 100%;
+        height: 6px;
+        background: #2a2a2a;
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+      }
+      .loading-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #404040, #707070, #404040);
+        width: 40%;
+        animation: loading 1.5s infinite;
+        border-radius: 3px;
+      }
+      @keyframes loading {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
+      }
 
-            .stats-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
+      /* ── Bottom Tables ── */
+      .bottom-tables {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 35px;
+      }
 
-            .stats-title {
-                color: #b0b0b0;
-                font-size: 0.95rem;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
+      .table-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        border: 1px solid #333;
+        transition: all 0.3s ease;
+      }
+      .table-card:hover {
+        box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+        border-color: #505050;
+      }
+      .table-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e8e8e8;
+        margin-bottom: 20px;
+      }
 
-            .stats-icon {
-                width: 55px;
-                height: 55px;
-                border-radius: 15px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                transition: all 0.3s ease;
-            }
+      .top-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+      .top-table thead tr {
+        background: #0f0f0f;
+        border-bottom: 1px solid #333;
+      }
+      .top-table thead th {
+        padding: 12px 14px;
+        color: #808080;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.78rem;
+      }
+      .top-table thead th:last-child { text-align: right; }
 
-            .stats-card:hover .stats-icon {
-                transform: rotate(10deg) scale(1.1);
-            }
+      .top-table tbody tr {
+        border-bottom: 1px solid #252525;
+        transition: background 0.2s ease;
+      }
+      .top-table tbody tr:last-child { border-bottom: none; }
+      .top-table tbody tr:hover { background: #252525; }
 
-            .icon-purple {
-                background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
-                color: #9b8bdb;
-            }
+      .top-table tbody td {
+        padding: 11px 14px;
+        color: #c8c8c8;
+        vertical-align: middle;
+      }
+      .top-table tbody td:last-child {
+        text-align: right;
+        font-weight: 700;
+        color: #e8e8e8;
+      }
 
-            .icon-yellow {
-                background: linear-gradient(135deg, #3a3a2a, #4a4a3a);
-                color: #e0b060;
-            }
+      .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px; height: 24px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: #2a2a2a;
+        color: #808080;
+        margin-right: 8px;
+      }
+      .rank-badge.rank-1 { background: rgba(224,176,96,0.2);  color: #e0b060; }
+      .rank-badge.rank-2 { background: rgba(176,192,192,0.2); color: #b0c0c0; }
+      .rank-badge.rank-3 { background: rgba(192,144,96,0.2);  color: #c09060; }
 
-            .icon-green {
-                background: linear-gradient(135deg, #2a3a2a, #3a4a3a);
-                color: #70c090;
-            }
+      .sold-bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+      .sold-bar {
+        height: 6px;
+        border-radius: 3px;
+        background: #333;
+        width: 80px;
+        overflow: hidden;
+      }
+      .sold-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #404040, #9b8bdb);
+        transition: width 0.6s ease;
+      }
+      .sold-bar-fill.cat { background: linear-gradient(90deg, #404040, #70c090); }
 
-            .icon-orange {
-                background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
-                color: #e09070;
-            }
+      .table-empty {
+        text-align: center;
+        padding: 30px;
+        color: #505050;
+        font-size: 0.9rem;
+      }
+    </style>
 
-            .stats-value {
-                font-size: 2.2rem;
-                font-weight: 700;
-                color: #e8e8e8;
-                margin: 15px 0 10px 0;
-            }
-
-            .stats-change {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-size: 0.85rem;
-                font-weight: 600;
-            }
-
-            .change-positive {
-                color: #70c090;
-            }
-
-            .change-negative {
-                color: #e07070;
-            }
-
-            .change-icon {
-                font-size: 1rem;
-            }
-
-            .chart-card {
-                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-                border-radius: 20px;
-                padding: 35px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-                margin-top: 35px;
-                transition: all 0.3s ease;
-                border: 1px solid #333333;
-            }
-
-            .chart-card:hover {
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-                border-color: #505050;
-            }
-
-            .chart-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 30px;
-            }
-
-            .chart-title {
-                font-size: 1.4rem;
-                font-weight: 700;
-                color: #e8e8e8;
-            }
-
-            .month-selector {
-                padding: 10px 20px;
-                border: 2px solid #404040;
-                border-radius: 10px;
-                background: #2a2a2a;
-                color: #b0b0b0;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-
-            .month-selector:hover {
-                border-color: #606060;
-                background: #333333;
-            }
-
-            .chart-placeholder {
-                height: 350px;
-                background: linear-gradient(135deg, #0f0f0f, #1f1f1f);
-                border-radius: 15px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #606060;
-                font-size: 1.1rem;
-                margin-bottom: 25px;
-                border: 1px solid #2a2a2a;
-            }
-
-            .report-section {
-                background: #0f0f0f;
-                padding: 25px;
-                border-radius: 15px;
-                margin-top: 20px;
-                border: 1px solid #2a2a2a;
-            }
-
-            .report-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-            }
-
-            .report-title {
-                font-weight: 700;
-                color: #e8e8e8;
-                font-size: 1.1rem;
-            }
-
-            .print-btn {
-                padding: 12px 28px;
-                background: linear-gradient(135deg, #404040, #505050);
-                color: #e8e8e8;
-                border: none;
-                border-radius: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                border: 1px solid #606060;
-            }
-
-            .print-btn:hover {
-                background: linear-gradient(135deg, #505050, #606060);
-                transform: translateY(-3px);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            }
-
-            .loading-animation {
-                width: 100%;
-                height: 6px;
-                background: #2a2a2a;
-                border-radius: 3px;
-                overflow: hidden;
-                position: relative;
-            }
-
-            .loading-bar {
-                height: 100%;
-                background: linear-gradient(90deg, #404040, #707070, #404040);
-                width: 40%;
-                animation: loading 1.5s infinite;
-                border-radius: 3px;
-            }
-
-            @keyframes loading {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(350%); }
-            }
-        </style>
-    </head>
-    <body>
-        <!-- Messages Container -->
-        {% if messages %}
-        <div class="messages-container">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
-                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-                    <span>{{ message }}</span>
-                    <button class="alert-close" onclick="closeAlert('alert-{{ forloop.counter }}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            {% endfor %}
+    <!-- ── Messages ── -->
+    {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+          {% if 'error' in message.tags %}
+            <i class="fas fa-exclamation-circle"></i>
+          {% elif 'success' in message.tags %}
+            <i class="fas fa-check-circle"></i>
+          {% elif 'warning' in message.tags %}
+            <i class="fas fa-exclamation-triangle"></i>
+          {% else %}
+            <i class="fas fa-info-circle"></i>
+          {% endif %}
+          <span>{{ message }}</span>
+          <button class="alert-close" onclick="closeAlert('alert-{{ forloop.counter }}')">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
 
-        <div class="dashboard-content">
-            <!-- Stats Cards -->
-            <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div>
-                                <div class="stats-title">Total User</div>
-                                <div class="stats-value">40,689</div>
-                                <div class="stats-change change-positive">
-                                    <i class="fas fa-arrow-up change-icon"></i>
-                                    <span>8.5% Up from yesterday</span>
-                                </div>
-                            </div>
-                            <div class="stats-icon icon-purple">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div>
-                                <div class="stats-title">Total Order</div>
-                                <div class="stats-value">10,293</div>
-                                <div class="stats-change change-positive">
-                                    <i class="fas fa-arrow-up change-icon"></i>
-                                    <span>1.3% Up from past week</span>
-                                </div>
-                            </div>
-                            <div class="stats-icon icon-yellow">
-                                <i class="fas fa-box"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div>
-                                <div class="stats-title">Total Sales</div>
-                                <div class="stats-value">$89,000</div>
-                                <div class="stats-change change-negative">
-                                    <i class="fas fa-arrow-down change-icon"></i>
-                                    <span>4.3% Down from yesterday</span>
-                                </div>
-                            </div>
-                            <div class="stats-icon icon-green">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div>
-                                <div class="stats-title">Total Pending</div>
-                                <div class="stats-value">2,040</div>
-                                <div class="stats-change change-positive">
-                                    <i class="fas fa-arrow-up change-icon"></i>
-                                    <span>1.8% Up from yesterday</span>
-                                </div>
-                            </div>
-                            <div class="stats-icon icon-orange">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="dashboard-content">
+
+      <!-- ── Stat Cards ── -->
+      <div class="row g-4">
+
+        <!-- Total Users -->
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-header">
+              <div>
+                <div class="stats-title">Total Users</div>
+                <div class="stats-value">{{ total_users }}</div>
+              </div>
+              <div class="stats-icon icon-purple">
+                <i class="fas fa-users"></i>
+              </div>
             </div>
-
-            <!-- Chart Section -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Sales Details</h3>
-                    <select class="month-selector">
-                        <option>October</option>
-                        <option>September</option>
-                        <option>August</option>
-                        <option>July</option>
-                    </select>
-                </div>
-                <div class="chart-placeholder">
-                    <i class="fas fa-chart-area" style="font-size: 3rem; opacity: 0.3; margin-right: 15px;"></i>
-                    <span>Sales Chart Visualization</span>
-                </div>
-                <div class="loading-animation">
-                    <div class="loading-bar"></div>
-                </div>
-
-                <!-- Print Report Section -->
-                <div class="report-section">
-                    <div class="report-header">
-                        <h4 class="report-title">Print sales report</h4>
-                        <select class="month-selector" style="margin-right: 15px;">
-                            <option>October</option>
-                            <option>September</option>
-                            <option>August</option>
-                        </select>
-                        <button class="print-btn">
-                            <i class="fas fa-print"></i>
-                            <span>Print pdf</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            // Auto-hide messages after 5 seconds
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    alert.style.transition = 'opacity 0.4s ease-out';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 400);
-                });
-            }, 5000);
+        <!-- Total Orders -->
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-header">
+              <div>
+                <div class="stats-title">Total Orders</div>
+                <div class="stats-value">{{ total_orders }}</div>
+              </div>
+              <div class="stats-icon icon-yellow">
+                <i class="fas fa-box"></i>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            // Close alert manually
-            function closeAlert(id) {
-                const alert = document.getElementById(id);
-                alert.style.transition = 'opacity 0.4s ease-out';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 400);
+        <!-- Total Sales (delivered orders) -->
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-header">
+              <div>
+                <div class="stats-title">Total Sales</div>
+                <div class="stats-value">₹{{ total_sales|floatformat:2 }}</div>
+              </div>
+              <div class="stats-icon icon-green">
+                <i class="fas fa-chart-line"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Pending -->
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-header">
+              <div>
+                <div class="stats-title">Pending Orders</div>
+                <div class="stats-value">{{ total_pending }}</div>
+              </div>
+              <div class="stats-icon icon-orange">
+                <i class="fas fa-clock"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row -->
+
+      <!-- ── Revenue & Orders Chart ── -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Sales Details — {{ current_year|default:"This Year" }}</h3>
+        </div>
+
+        <div class="chart-wrapper">
+          <div class="chart-loading" id="mainChartLoading">
+            <i class="fas fa-chart-area" style="font-size:2rem;opacity:0.3;"></i>
+            <span>Loading chart…</span>
+          </div>
+          <canvas id="mainChart" style="display:none;"></canvas>
+        </div>
+
+        <div class="loading-animation" id="mainLoadingBar">
+          <div class="loading-bar"></div>
+        </div>
+      </div>
+
+      <!-- ── Top Products & Top Categories Tables ── -->
+      <div class="bottom-tables">
+
+        <!-- Top Products -->
+        <div class="table-card">
+          <div class="table-card-title">
+            <i class="fas fa-trophy" style="color:#e0b060;margin-right:8px;font-size:0.95rem;"></i>
+            Top 10 Products
+          </div>
+          <div id="topProductsTableWrap">
+            <div class="table-empty"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…</div>
+          </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="table-card">
+          <div class="table-card-title">
+            <i class="fas fa-layer-group" style="color:#70c090;margin-right:8px;font-size:0.95rem;"></i>
+            Top 10 Categories
+          </div>
+          <div id="topCategoriesTableWrap">
+            <div class="table-empty"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /dashboard-content -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      /* ─── Message helpers ─── */
+      setTimeout(function () {
+        document.querySelectorAll('.alert').forEach(function (alert) {
+          alert.style.transition = 'opacity 0.4s ease-out';
+          alert.style.opacity = '0';
+          setTimeout(function () { alert.remove(); }, 400);
+        });
+      }, 5000);
+
+      function closeAlert(id) {
+        var alert = document.getElementById(id);
+        alert.style.transition = 'opacity 0.4s ease-out';
+        alert.style.opacity = '0';
+        setTimeout(function () { alert.remove(); }, 400);
+      }
+
+      /* ─── Chart.js defaults ─── */
+      Chart.defaults.color = '#b0b0b0';
+      Chart.defaults.borderColor = '#2a2a2a';
+      Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+
+      /* ─── Main Revenue + Orders Chart ─── */
+      fetch("{% url 'custom_admin:chart_data' %}")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          document.getElementById('mainChartLoading').style.display = 'none';
+          document.getElementById('mainLoadingBar').style.display = 'none';
+
+          var canvas = document.getElementById('mainChart');
+          canvas.style.display = 'block';
+
+          new Chart(canvas, {
+            type: 'line',
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: 'Revenue (₹)',
+                  data: data.revenue,
+                  borderColor: '#70c090',
+                  backgroundColor: 'rgba(112,192,144,0.12)',
+                  tension: 0.4,
+                  fill: true,
+                  pointBackgroundColor: '#70c090',
+                  pointRadius: 5,
+                  pointHoverRadius: 8,
+                  yAxisID: 'yRevenue',
+                },
+                {
+                  label: 'Orders',
+                  data: data.orders,
+                  borderColor: '#e0b060',
+                  backgroundColor: 'rgba(224,176,96,0.10)',
+                  tension: 0.4,
+                  fill: false,
+                  pointBackgroundColor: '#e0b060',
+                  pointRadius: 5,
+                  pointHoverRadius: 8,
+                  yAxisID: 'yOrders',
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: {
+                  labels: { color: '#b0b0b0', padding: 20, usePointStyle: true }
+                },
+                tooltip: {
+                  backgroundColor: '#1a1a1a',
+                  borderColor: '#404040',
+                  borderWidth: 1,
+                  padding: 12,
+                  titleColor: '#e8e8e8',
+                  bodyColor: '#b0b0b0',
+                }
+              },
+              scales: {
+                x: {
+                  grid: { color: '#2a2a2a' },
+                  ticks: { color: '#808080' }
+                },
+                yRevenue: {
+                  type: 'linear',
+                  position: 'left',
+                  grid: { color: '#2a2a2a' },
+                  ticks: {
+                    color: '#70c090',
+                    callback: function (v) { return '₹' + v.toLocaleString(); }
+                  }
+                },
+                yOrders: {
+                  type: 'linear',
+                  position: 'right',
+                  grid: { drawOnChartArea: false },
+                  ticks: { color: '#e0b060' }
+                }
+              }
             }
-        </script>
-    </body>
-    </html>
+          });
+        })
+        .catch(function (err) {
+          console.error('Chart data error:', err);
+          document.getElementById('mainChartLoading').innerHTML =
+            '<i class="fas fa-exclamation-circle" style="color:#e09070;margin-right:10px;"></i>' +
+            '<span style="color:#e09070;">Failed to load chart data.</span>';
+        });
+
+      /* ─── Top Products Table ─── */
+      fetch("{% url 'custom_admin:top_products' %}")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var wrap = document.getElementById('topProductsTableWrap');
+          if (!data.length) {
+            wrap.innerHTML = '<div class="table-empty">No data available.</div>';
+            return;
+          }
+          var max = data[0].total_sold;
+          var rows = data.map(function (d, i) {
+            var rank = i + 1;
+            var rankClass = rank <= 3 ? ' rank-' + rank : '';
+            var pct = max > 0 ? Math.round((d.total_sold / max) * 100) : 0;
+            return '<tr>' +
+              '<td><span class="rank-badge' + rankClass + '">' + rank + '</span>' + (d.product_name || '—') + '</td>' +
+              '<td>' +
+                '<div class="sold-bar-wrap">' +
+                  '<div class="sold-bar"><div class="sold-bar-fill" style="width:' + pct + '%"></div></div>' +
+                  d.total_sold +
+                '</div>' +
+              '</td>' +
+            '</tr>';
+          }).join('');
+          wrap.innerHTML =
+            '<table class="top-table">' +
+              '<thead><tr><th>#&nbsp; Product</th><th>Units Sold</th></tr></thead>' +
+              '<tbody>' + rows + '</tbody>' +
+            '</table>';
+        })
+        .catch(function () {
+          document.getElementById('topProductsTableWrap').innerHTML =
+            '<div class="table-empty" style="color:#e09070;">Failed to load data.</div>';
+        });
+
+      /* ─── Top Categories Table ─── */
+      fetch("{% url 'custom_admin:top_categories' %}")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var wrap = document.getElementById('topCategoriesTableWrap');
+          if (!data.length) {
+            wrap.innerHTML = '<div class="table-empty">No data available.</div>';
+            return;
+          }
+          var max = data[0].total_sold;
+          var rows = data.map(function (d, i) {
+            var rank = i + 1;
+            var rankClass = rank <= 3 ? ' rank-' + rank : '';
+            var pct = max > 0 ? Math.round((d.total_sold / max) * 100) : 0;
+            return '<tr>' +
+              '<td><span class="rank-badge' + rankClass + '">' + rank + '</span>' + (d.category || 'Uncategorised') + '</td>' +
+              '<td>' +
+                '<div class="sold-bar-wrap">' +
+                  '<div class="sold-bar"><div class="sold-bar-fill cat" style="width:' + pct + '%"></div></div>' +
+                  d.total_sold +
+                '</div>' +
+              '</td>' +
+            '</tr>';
+          }).join('');
+          wrap.innerHTML =
+            '<table class="top-table">' +
+              '<thead><tr><th>#&nbsp; Category</th><th>Units Sold</th></tr></thead>' +
+              '<tbody>' + rows + '</tbody>' +
+            '</table>';
+        })
+        .catch(function () {
+          document.getElementById('topCategoriesTableWrap').innerHTML =
+            '<div class="table-empty" style="color:#e09070;">Failed to load data.</div>';
+        });
+    </script>
+
   </section>
 </div>
-{% endblock %}
+{% endblock %} 

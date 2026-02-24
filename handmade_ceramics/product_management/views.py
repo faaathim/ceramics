@@ -132,119 +132,144 @@ def product_create(request):
 @admin_required
 @transaction.atomic
 def product_edit(request, pk):
-    """Edit product with improved validation for images."""
     product = get_object_or_404(Product.all_objects, pk=pk)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
-        main_file = request.FILES.get('main_image')
-        gallery_files = request.FILES.getlist('images')
-        
-        # Check if user wants to remove images
-        remove_main = bool(request.POST.get('remove_main_image'))
-        remove_gallery = bool(request.POST.get('remove_gallery_images'))
 
+        main_file = request.FILES.get("main_image")
+        gallery_files = request.FILES.getlist("images")
 
-        # ===== IMAGE COUNTING LOGIC =====
+        # Check if remove checkboxes are selected
+        remove_main = "remove_main_image" in request.POST
+        remove_gallery = "remove_gallery_images" in request.POST
 
-        # Determine if main image will exist
+        # -----------------------------
+        # STEP 1: COUNT IMAGES AFTER EDIT
+        # -----------------------------
+
+        # MAIN IMAGE CHECK
         if main_file:
             will_have_main = True
-        elif product.main_image and not remove_main:
-            will_have_main = True
-        else:
+        elif remove_main:
             will_have_main = False
-
-        # Determine gallery count
-        if remove_gallery:
-            existing_gallery = 0
         else:
-            existing_gallery = product.images.count()
+            will_have_main = bool(product.main_image)
 
-        new_gallery = len(gallery_files)
+        # GALLERY IMAGE CHECK
+        existing_gallery_count = product.images.count()
+        new_gallery_count = len(gallery_files)
 
-        # If new gallery files are uploaded → they replace existing gallery
-        if new_gallery > 0:
-            gallery_after = new_gallery
+        if new_gallery_count > 0:
+            # New uploads replace old gallery
+            gallery_after = new_gallery_count
+        elif remove_gallery:
+            gallery_after = 0
         else:
-            gallery_after = existing_gallery
+            gallery_after = existing_gallery_count
 
-        total_after = (1 if will_have_main else 0) + gallery_after
+        total_images_after = (1 if will_have_main else 0) + gallery_after
 
-        # ===== VALIDATION =====
-        if total_after < 3:
-            messages.error(request, f"Total images must be at least 3. After your changes, you will have {total_after} image(s). Please add {3 - total_after} more image(s).")
-        elif total_after > 7:
-            messages.error(request, f"Total images cannot exceed 7. After your changes, you will have {total_after} image(s). Please remove {total_after - 7} image(s).")
-        else:
-            if form.is_valid():
-                product = form.save(commit=False)
-                
-                # Handle main image removal
-                if remove_main and product.main_image:
+        # -----------------------------
+        # STEP 2: VALIDATE IMAGE LIMIT
+        # -----------------------------
+
+        if total_images_after < 3:
+            messages.error(
+                request,
+                f"Minimum 3 images required. After update you will have {total_images_after}. "
+                f"Please add {3 - total_images_after} more image(s)."
+            )
+            return render(request, "product_management/product_edit.html", {
+                "form": form,
+                "product": product
+            })
+
+        if total_images_after > 7:
+            messages.error(
+                request,
+                f"Maximum 7 images allowed. After update you will have {total_images_after}. "
+                f"Please remove {total_images_after - 7} image(s)."
+            )
+            return render(request, "product_management/product_edit.html", {
+                "form": form,
+                "product": product
+            })
+
+        # -----------------------------
+        # STEP 3: SAVE PRODUCT
+        # -----------------------------
+
+        if form.is_valid():
+            product = form.save(commit=False)
+
+            # ===== MAIN IMAGE HANDLING =====
+
+            if remove_main and product.main_image:
+                try:
+                    if os.path.isfile(product.main_image.path):
+                        os.remove(product.main_image.path)
+                except Exception:
+                    pass
+                product.main_image = None
+
+            if main_file:
+                # Remove old main image
+                try:
+                    if product.main_image and os.path.isfile(product.main_image.path):
+                        os.remove(product.main_image.path)
+                except Exception:
+                    pass
+
+                product.main_image = main_file
+
+            # ===== GALLERY HANDLING =====
+
+            if remove_gallery:
+                for img in product.images.all():
                     try:
-                        if os.path.isfile(product.main_image.path):
-                            os.remove(product.main_image.path)
+                        if img.image and os.path.isfile(img.image.path):
+                            os.remove(img.image.path)
                     except Exception:
                         pass
-                    product.main_image = None
+                product.images.all().delete()
 
-                # Handle main image replacement
-                if main_file:
+            if gallery_files:
+                # Remove old gallery images
+                for img in product.images.all():
                     try:
-                        if product.main_image and os.path.isfile(product.main_image.path):
-                            os.remove(product.main_image.path)
+                        if img.image and os.path.isfile(img.image.path):
+                            os.remove(img.image.path)
                     except Exception:
                         pass
-                    main_filename = f'{product.id}_main.jpg'
-                    abs_main = os.path.join(settings.MEDIA_ROOT, 'products', 'main', main_filename)
-                    rel_main = os.path.join('products', 'main', main_filename)
-                    process_and_save_image(main_file, abs_main, size=(800, 800))
-                    product.main_image = rel_main
+                product.images.all().delete()
 
-                # Handle gallery removal
-                if remove_gallery:
-                    for old in product.images.all():
-                        try:
-                            if old.image and os.path.isfile(old.image.path):
-                                os.remove(old.image.path)
-                        except Exception:
-                            pass
-                    product.images.all().delete()
+                # Add new gallery images
+                for index, uploaded in enumerate(gallery_files):
+                    ProductImage.objects.create(
+                        product=product,
+                        image=uploaded,
+                        order=index
+                    )
 
-                # Handle gallery replacement
-                if gallery_files:
-                    for old in product.images.all():
-                        try:
-                            if old.image and os.path.isfile(old.image.path):
-                                os.remove(old.image.path)
-                        except Exception:
-                            pass
-                    product.images.all().delete()
-                    
-                    for idx, uploaded in enumerate(gallery_files):
-                        fname = f'{idx}_{uploaded.name}'
-                        rel_dir = os.path.join('products', str(product.id))
-                        abs_path = os.path.join(settings.MEDIA_ROOT, rel_dir, fname)
-                        rel_path = os.path.join(rel_dir, fname)
-                        process_and_save_image(uploaded, abs_path, size=(1024, 1024))
-                        ProductImage.objects.create(product=product, image=rel_path, order=idx)
+            # If no main image but gallery exists → set first gallery image as main
+            if not product.main_image and product.images.exists():
+                product.main_image = product.images.first().image
 
-                # If no main image but gallery exists, set first as main
-                if not product.main_image and product.images.exists():
-                    product.main_image = product.images.first().image.name
+            product.save()
 
-                product.save()
-                messages.success(request, f'Product "{product.name}" updated successfully!')
-                return redirect(reverse('custom_admin:product_management:product_list'))
-            else:
-                messages.error(request, "Please correct the errors below.")
+            messages.success(request, "Product updated successfully!")
+            return redirect("custom_admin:product_management:product_list")
+
+        else:
+            messages.error(request, "Please correct the errors below.")
 
     else:
         form = ProductForm(instance=product)
 
-    return render(request, 'product_management/product_edit.html', {
-        'form': form, 'action': 'Edit', 'product': product
+    return render(request, "product_management/product_edit.html", {
+        "form": form,
+        "product": product
     })
 
 

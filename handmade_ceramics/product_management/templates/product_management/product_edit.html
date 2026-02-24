@@ -1317,9 +1317,12 @@
                         </span>
                     </div>
 
-                    <!-- Hidden fields for tracking removals -->
-                    <input type="hidden" name="remove_main_image" id="removeMainImageFlag" value="false">
-                    <input type="hidden" name="remove_gallery_images" id="removeGalleryFlag" value="false">
+                    <!-- 
+                        FIX: Removed the two broken hidden boolean flags.
+                        Instead, the JS will dynamically inject hidden inputs
+                        named "remove_main_image" and "remove_gallery_ids[]"
+                        directly into formData before submission.
+                    -->
 
                     <hr class="section-divider">
 
@@ -1478,7 +1481,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        // Function to close Django messages
+        // ─── Django message helpers ────────────────────────────────────────────────
         function closeDjangoMessage(id) {
             const message = document.querySelector(`[data-message-id="${id}"]`);
             if (message) {
@@ -1487,155 +1490,140 @@
             }
         }
 
-        // Auto-dismiss Django messages after 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            const djangoMessages = document.querySelectorAll('.django-message');
-            djangoMessages.forEach((message, index) => {
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.django-message').forEach((message, index) => {
                 setTimeout(() => {
                     message.style.animation = 'slideInRight 0.3s ease reverse';
                     setTimeout(() => message.remove(), 300);
-                }, 5000 + (index * 500));
+                }, 5000 + index * 500);
             });
         });
 
-        // Toast notification function for JavaScript-triggered messages
+        // ─── Toast helper ──────────────────────────────────────────────────────────
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast-message ${type}`;
-            
-            const icon = type === 'error' ? 'fa-exclamation-circle' : 
-                        type === 'success' ? 'fa-check-circle' : 
-                        type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-            
-            const iconColor = type === 'error' ? '#e07070' : 
-                            type === 'success' ? '#70c090' : 
-                            type === 'warning' ? '#e0b870' : '#7ab8e0';
-            
+
+            const iconMap = {
+                error: 'fa-exclamation-circle',
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            const colorMap = {
+                error: '#e07070',
+                success: '#70c090',
+                warning: '#e0b870',
+                info: '#7ab8e0'
+            };
+
             toast.innerHTML = `
-                <i class="fas ${icon}" style="color: ${iconColor}; font-size: 1.2rem;"></i>
-                <span style="color: #e8e8e8;">${message}</span>
+                <i class="fas ${iconMap[type] || iconMap.info}" style="color:${colorMap[type] || colorMap.info};font-size:1.2rem;"></i>
+                <span style="color:#e8e8e8;">${message}</span>
             `;
-            
             container.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideInRight 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
 
-        // Confirmation modal functions
+        // ─── Confirmation modal ────────────────────────────────────────────────────
         function showConfirmationModal(options) {
-            const modal = document.getElementById('confirmationModal');
-            const icon = document.querySelector('.confirmation-icon');
-            const title = document.querySelector('.confirmation-title');
-            const message = document.querySelector('.confirmation-message');
-            const details = document.querySelector('.confirmation-details');
-            const warning = document.querySelector('.confirmation-warning');
-            const confirmBtn = document.querySelector('.confirmation-btn-confirm');
-            
+            const modal       = document.getElementById('confirmationModal');
+            const icon        = document.querySelector('.confirmation-icon');
+            const title       = document.querySelector('.confirmation-title');
+            const message     = document.querySelector('.confirmation-message');
+            const details     = document.querySelector('.confirmation-details');
+            const warning     = document.querySelector('.confirmation-warning');
+            const confirmBtn  = document.querySelector('.confirmation-btn-confirm');
+
             icon.className = `confirmation-icon ${options.type || 'warning'}`;
             icon.innerHTML = `<i class="fas ${options.icon || 'fa-exclamation-triangle'}"></i>`;
-            
-            title.textContent = options.title || 'Confirm Action';
+
+            title.textContent   = options.title   || 'Confirm Action';
             message.textContent = options.message || 'Are you sure you want to proceed?';
-            
+
             if (options.details) {
-                details.innerHTML = options.details;
+                details.innerHTML    = options.details;
                 details.style.display = 'block';
             } else {
                 details.style.display = 'none';
             }
-            
+
             if (options.warning) {
                 warning.querySelector('.confirmation-warning-text').textContent = options.warning;
                 warning.style.display = 'flex';
             } else {
                 warning.style.display = 'none';
             }
-            
-            confirmBtn.innerHTML = `<i class="fas ${options.confirmIcon || 'fa-check'}"></i> ${options.confirmText || 'Confirm'}`;
-            confirmBtn.className = `confirmation-btn confirmation-btn-confirm ${options.confirmClass || ''}`;
-            
-            confirmBtn.onclick = () => {
-                if (options.onConfirm) options.onConfirm();
-                hideConfirmationModal();
-            };
-            
+
+            confirmBtn.innerHTML  = `<i class="fas ${options.confirmIcon || 'fa-check'}"></i> ${options.confirmText || 'Confirm'}`;
+            confirmBtn.className  = `confirmation-btn confirmation-btn-confirm ${options.confirmClass || ''}`;
+            confirmBtn.onclick    = () => { if (options.onConfirm) options.onConfirm(); hideConfirmationModal(); };
+
             modal.classList.add('active');
         }
 
         function hideConfirmationModal() {
-            const modal = document.getElementById('confirmationModal');
-            modal.classList.remove('active');
+            document.getElementById('confirmationModal').classList.remove('active');
         }
 
-        // Close modal on outside click
-        document.getElementById('confirmationModal').addEventListener('click', (e) => {
-            if (e.target.id === 'confirmationModal') {
-                hideConfirmationModal();
-            }
+        document.getElementById('confirmationModal').addEventListener('click', e => {
+            if (e.target.id === 'confirmationModal') hideConfirmationModal();
         });
 
-        // Escape key to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                hideConfirmationModal();
-            }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') hideConfirmationModal();
         });
 
-        // Global variables
-        let cropper = null;
-        let currentCropTarget = null;
-        let newMainImageFile = null;
-        let newGalleryFiles = [];
-        let croppedNewMainBlob = null;
+        // ─── State ────────────────────────────────────────────────────────────────
+        let cropper             = null;
+        let currentCropTarget   = null;
+        let newMainImageFile    = null;
+        let newGalleryFiles     = [];
+        let croppedNewMainBlob  = null;
         let croppedNewGalleryBlobs = [];
-        
-        // Track current images
-        let currentMainExists = {{ product.main_image|yesno:"true,false" }};
+
+        // FIX: track which specific gallery image IDs have been removed
+        let currentMainExists   = {{ product.main_image|yesno:"true,false" }};
         let currentGalleryCount = {{ product.images.count }};
-        let removedGalleryIds = [];
-        let removeMainFlag = false;
+        let removedGalleryIds   = [];   // array of numeric IDs
+        let removeMainFlag      = false;
 
         const mainImageUploadArea = document.getElementById('mainImageUploadArea');
-        const mainImageInput = document.getElementById('mainImageInput');
-        const galleryUploadArea = document.getElementById('galleryUploadArea');
-        const galleryInput = document.getElementById('galleryInput');
-        const cropModal = document.getElementById('cropModal');
-        const cropImage = document.getElementById('cropImage');
+        const mainImageInput      = document.getElementById('mainImageInput');
+        const galleryUploadArea   = document.getElementById('galleryUploadArea');
+        const galleryInput        = document.getElementById('galleryInput');
+        const cropModal           = document.getElementById('cropModal');
+        const cropImage           = document.getElementById('cropImage');
 
-        // Calculate total images
+        // ─── Image counting ────────────────────────────────────────────────────────
         function getTotalImageCount() {
-            const currentMain = (currentMainExists && !removeMainFlag) ? 1 : 0;
+            const currentMain    = (currentMainExists && !removeMainFlag) ? 1 : 0;
             const currentGallery = currentGalleryCount - removedGalleryIds.length;
-            const newMain = (croppedNewMainBlob) ? 1 : 0;
-            const newGallery = croppedNewGalleryBlobs.length;
-            
+            const newMain        = croppedNewMainBlob ? 1 : 0;
+            const newGallery     = croppedNewGalleryBlobs.length;
             return currentMain + currentGallery + newMain + newGallery;
         }
 
-        // Update image counter
         function updateImageCounter() {
-            const totalImages = getTotalImageCount();
-            const counter = document.getElementById('imageCounter');
+            const total    = getTotalImageCount();
+            const counter  = document.getElementById('imageCounter');
             const countSpan = document.getElementById('imageCount');
-            
-            countSpan.textContent = totalImages;
-            
+
+            countSpan.textContent = total;
             counter.classList.remove('warning', 'error');
-            if (totalImages > 7) {
-                counter.classList.add('error');
-            } else if (totalImages < 3) {
-                counter.classList.add('warning');
-            }
+            if (total > 7)      counter.classList.add('error');
+            else if (total < 3) counter.classList.add('warning');
         }
 
-        // Remove current main image - WITH CONFIRMATION
+        // ─── Remove current main image ─────────────────────────────────────────────
         function removeCurrentMainImage() {
             const totalAfterRemoval = getTotalImageCount() - 1;
-            
+
             showConfirmationModal({
                 type: 'warning',
                 icon: 'fa-image',
@@ -1651,23 +1639,20 @@
                         <span>${totalAfterRemoval} image(s) will remain</span>
                     </div>
                 `,
-                warning: totalAfterRemoval < 3 
+                warning: totalAfterRemoval < 3
                     ? `Warning: You need at least 3 images total. After removal, you'll have ${totalAfterRemoval} image(s).`
                     : 'The image will be permanently removed when you save the product.',
                 confirmText: 'Remove Image',
                 confirmIcon: 'fa-trash',
                 onConfirm: () => {
                     removeMainFlag = true;
-                    document.getElementById('removeMainImageFlag').value = 'true';
-                    
+
                     const mainElement = document.querySelector('[data-type="current-main"]');
-                    if (mainElement) {
-                        mainElement.remove();
-                    }
-                    
+                    if (mainElement) mainElement.remove();
+
                     currentMainExists = false;
                     updateImageCounter();
-                    
+
                     if (totalAfterRemoval < 3) {
                         showToast(`Warning: You need ${3 - totalAfterRemoval} more image(s)`, 'warning');
                     } else {
@@ -1677,14 +1662,14 @@
             });
         }
 
-        // Remove current gallery image - WITH CONFIRMATION
+        // ─── Remove current gallery image ──────────────────────────────────────────
         function removeCurrentGalleryImage(imageId) {
-            const totalAfterRemoval = getTotalImageCount() - 1;
+            const totalAfterRemoval     = getTotalImageCount() - 1;
             const currentGalleryElement = document.querySelector(`[data-id="${imageId}"]`);
-            const galleryNumber = currentGalleryElement ? 
-                Array.from(document.querySelectorAll('[data-type="current-gallery"]')).indexOf(currentGalleryElement) + 1 : 
-                '?';
-            
+            const galleryNumber         = currentGalleryElement
+                ? Array.from(document.querySelectorAll('[data-type="current-gallery"]')).indexOf(currentGalleryElement) + 1
+                : '?';
+
             showConfirmationModal({
                 type: 'warning',
                 icon: 'fa-images',
@@ -1700,24 +1685,22 @@
                         <span>${totalAfterRemoval} image(s) will remain</span>
                     </div>
                 `,
-                warning: totalAfterRemoval < 3 
+                warning: totalAfterRemoval < 3
                     ? `Warning: You need at least 3 images total. After removal, you'll have ${totalAfterRemoval} image(s).`
                     : 'The image will be permanently removed when you save the product.',
                 confirmText: 'Remove Image',
                 confirmIcon: 'fa-trash',
                 onConfirm: () => {
+                    // FIX: push the actual numeric ID so the view knows which row to delete
                     if (!removedGalleryIds.includes(imageId)) {
                         removedGalleryIds.push(imageId);
-                        document.getElementById('removeGalleryFlag').value = 'true';
                     }
-                    
+
                     const galleryElement = document.querySelector(`[data-id="${imageId}"]`);
-                    if (galleryElement) {
-                        galleryElement.remove();
-                    }
-                    
+                    if (galleryElement) galleryElement.remove();
+
                     updateImageCounter();
-                    
+
                     if (totalAfterRemoval < 3) {
                         showToast(`Warning: You need ${3 - totalAfterRemoval} more image(s)`, 'warning');
                     } else {
@@ -1727,58 +1710,55 @@
             });
         }
 
-        // Main Image Upload Area Click
-        mainImageUploadArea.addEventListener('click', (e) => {
-            if (e.target.closest('.preview-remove')) return;
-            mainImageInput.click();
+        // ─── Upload area events ────────────────────────────────────────────────────
+        mainImageUploadArea.addEventListener('click', e => {
+            if (!e.target.closest('.preview-remove')) mainImageInput.click();
         });
 
-        // Gallery Upload Area Click
-        galleryUploadArea.addEventListener('click', (e) => {
-            if (e.target.closest('.preview-remove')) return;
-            galleryInput.click();
+        galleryUploadArea.addEventListener('click', e => {
+            if (!e.target.closest('.preview-remove')) galleryInput.click();
         });
 
-        // Main Image - Drag and drop
-        mainImageUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            mainImageUploadArea.classList.add('dragover');
-        });
-
-        mainImageUploadArea.addEventListener('dragleave', () => {
-            mainImageUploadArea.classList.remove('dragover');
-        });
-
-        mainImageUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            mainImageUploadArea.classList.remove('dragover');
-            
-            if (e.dataTransfer.files.length) {
-                const file = e.dataTransfer.files[0];
-                if (file.type.startsWith('image/')) {
-                    handleNewMainImageSelect(file);
+        ['dragover', 'dragleave', 'drop'].forEach(evt => {
+            mainImageUploadArea.addEventListener(evt, e => {
+                e.preventDefault();
+                if (evt === 'dragover')  mainImageUploadArea.classList.add('dragover');
+                if (evt === 'dragleave') mainImageUploadArea.classList.remove('dragover');
+                if (evt === 'drop') {
+                    mainImageUploadArea.classList.remove('dragover');
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('image/')) handleNewMainImageSelect(file);
                 }
-            }
+            });
+
+            galleryUploadArea.addEventListener(evt, e => {
+                e.preventDefault();
+                if (evt === 'dragover')  galleryUploadArea.classList.add('dragover');
+                if (evt === 'dragleave') galleryUploadArea.classList.remove('dragover');
+                if (evt === 'drop') {
+                    galleryUploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files.length) handleNewGalleryFilesSelect(Array.from(e.dataTransfer.files));
+                }
+            });
         });
 
-        mainImageInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleNewMainImageSelect(e.target.files[0]);
-            }
+        mainImageInput.addEventListener('change', e => {
+            if (e.target.files.length) handleNewMainImageSelect(e.target.files[0]);
         });
 
+        galleryInput.addEventListener('change', e => {
+            if (e.target.files.length) handleNewGalleryFilesSelect(Array.from(e.target.files));
+        });
+
+        // ─── Main image handling ───────────────────────────────────────────────────
         function handleNewMainImageSelect(file) {
             const totalAfter = getTotalImageCount() + 1 - (croppedNewMainBlob ? 1 : 0);
-            
-            if (totalAfter > 7) {
-                showToast('Cannot add main image - would exceed 7 image limit', 'error');
-                return;
-            }
+            if (totalAfter > 7) { showToast('Cannot add main image — would exceed 7 image limit', 'error'); return; }
 
             const reader = new FileReader();
-            reader.onload = (e) => {
-                cropImage.src = e.target.result;
-                currentCropTarget = 'new-main';
+            reader.onload = e => {
+                cropImage.src         = e.target.result;
+                currentCropTarget     = 'new-main';
                 cropModal.classList.add('active');
                 initCropper();
             };
@@ -1787,7 +1767,7 @@
         }
 
         function removeNewMainImage() {
-            newMainImageFile = null;
+            newMainImageFile  = null;
             croppedNewMainBlob = null;
             document.getElementById('newMainImagePreview').innerHTML = '';
             updateImageCounter();
@@ -1795,8 +1775,7 @@
         }
 
         function showNewMainImagePreview(blob) {
-            const preview = document.getElementById('newMainImagePreview');
-            preview.innerHTML = `
+            document.getElementById('newMainImagePreview').innerHTML = `
                 <div class="image-preview-container">
                     <div class="preview-grid">
                         <div class="preview-item">
@@ -1811,62 +1790,28 @@
             `;
         }
 
-        // Gallery Images - Drag and drop
-        galleryUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            galleryUploadArea.classList.add('dragover');
-        });
-
-        galleryUploadArea.addEventListener('dragleave', () => {
-            galleryUploadArea.classList.remove('dragover');
-        });
-
-        galleryUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            galleryUploadArea.classList.remove('dragover');
-            
-            if (e.dataTransfer.files.length) {
-                handleNewGalleryFilesSelect(Array.from(e.dataTransfer.files));
-            }
-        });
-
-        galleryInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleNewGalleryFilesSelect(Array.from(e.target.files));
-            }
-        });
-
+        // ─── Gallery images handling ───────────────────────────────────────────────
         function handleNewGalleryFilesSelect(files) {
             const imageFiles = files.filter(f => f.type.startsWith('image/'));
-            
-            if (imageFiles.length === 0) {
-                showToast('Please select valid image files', 'error');
-                return;
-            }
+            if (!imageFiles.length) { showToast('Please select valid image files', 'error'); return; }
 
             const currentTotal = getTotalImageCount();
-            const totalAfter = currentTotal + imageFiles.length;
-            
-            if (totalAfter > 7) {
-                showToast(`Cannot add ${imageFiles.length} images. Would exceed 7 image limit (currently have ${currentTotal})`, 'error');
+            if (currentTotal + imageFiles.length > 7) {
+                showToast(`Cannot add ${imageFiles.length} image(s) — would exceed 7 image limit (currently have ${currentTotal})`, 'error');
                 return;
             }
-
-            if (imageFiles.length > 0) {
-                processNewGalleryImage(imageFiles[0], 0, imageFiles);
-            }
+            processNewGalleryImage(imageFiles[0], 0, imageFiles);
         }
 
-        let pendingNewGalleryFiles = [];
-        let currentNewGalleryIndex = 0;
+        let pendingNewGalleryFiles  = [];
+        let currentNewGalleryIndex  = 0;
 
         function processNewGalleryImage(file, index, allFiles) {
-            pendingNewGalleryFiles = allFiles;
-            currentNewGalleryIndex = index;
-
+            pendingNewGalleryFiles  = allFiles;
+            currentNewGalleryIndex  = index;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                cropImage.src = e.target.result;
+            reader.onload = e => {
+                cropImage.src     = e.target.result;
                 currentCropTarget = `new-gallery-${newGalleryFiles.length}`;
                 cropModal.classList.add('active');
                 initCropper();
@@ -1884,14 +1829,9 @@
 
         function updateNewGalleryPreview() {
             const preview = document.getElementById('newGalleryPreview');
-            
-            if (newGalleryFiles.length === 0) {
-                preview.innerHTML = '';
-                return;
-            }
+            if (!croppedNewGalleryBlobs.length) { preview.innerHTML = ''; return; }
 
             let html = '<div class="image-preview-container"><div class="preview-grid">';
-            
             croppedNewGalleryBlobs.forEach((blob, index) => {
                 html += `
                     <div class="preview-item">
@@ -1903,17 +1843,13 @@
                     </div>
                 `;
             });
-            
             html += '</div></div>';
             preview.innerHTML = html;
         }
 
-        // Cropper initialization
+        // ─── Cropper ──────────────────────────────────────────────────────────────
         function initCropper() {
-            if (cropper) {
-                cropper.destroy();
-            }
-            
+            if (cropper) cropper.destroy();
             cropper = new Cropper(cropImage, {
                 aspectRatio: 1,
                 viewMode: 1,
@@ -1929,40 +1865,25 @@
             });
         }
 
-        // Crop controls
-        document.getElementById('zoomIn').addEventListener('click', () => cropper.zoom(0.1));
-        document.getElementById('zoomOut').addEventListener('click', () => cropper.zoom(-0.1));
+        document.getElementById('zoomIn').addEventListener('click',    () => cropper.zoom(0.1));
+        document.getElementById('zoomOut').addEventListener('click',   () => cropper.zoom(-0.1));
         document.getElementById('rotateLeft').addEventListener('click', () => cropper.rotate(-45));
-        document.getElementById('rotateRight').addEventListener('click', () => cropper.rotate(45));
+        document.getElementById('rotateRight').addEventListener('click',() => cropper.rotate(45));
+        document.getElementById('reset').addEventListener('click',     () => { cropper.reset(); scaleX = 1; scaleY = 1; });
 
-        let scaleX = 1;
-        document.getElementById('flipH').addEventListener('click', () => {
-            scaleX = -scaleX;
-            cropper.scaleX(scaleX);
-        });
+        let scaleX = 1, scaleY = 1;
+        document.getElementById('flipH').addEventListener('click', () => { scaleX = -scaleX; cropper.scaleX(scaleX); });
+        document.getElementById('flipV').addEventListener('click', () => { scaleY = -scaleY; cropper.scaleY(scaleY); });
 
-        let scaleY = 1;
-        document.getElementById('flipV').addEventListener('click', () => {
-            scaleY = -scaleY;
-            cropper.scaleY(scaleY);
-        });
-
-        document.getElementById('reset').addEventListener('click', () => {
-            cropper.reset();
-            scaleX = 1;
-            scaleY = 1;
-        });
-
-        // Apply crop
         document.getElementById('applyCrop').addEventListener('click', () => {
-            const isMainImage = currentCropTarget === 'new-main';
+            const isMain = currentCropTarget === 'new-main';
             const canvas = cropper.getCroppedCanvas({
-                width: isMainImage ? 800 : 1024,
-                height: isMainImage ? 800 : 1024,
+                width: isMain ? 800 : 1024,
+                height: isMain ? 800 : 1024,
                 imageSmoothingQuality: 'high'
             });
-            
-            canvas.toBlob((blob) => {
+
+            canvas.toBlob(blob => {
                 if (currentCropTarget === 'new-main') {
                     croppedNewMainBlob = blob;
                     showNewMainImagePreview(blob);
@@ -1970,152 +1891,130 @@
                 } else {
                     newGalleryFiles.push(pendingNewGalleryFiles[currentNewGalleryIndex]);
                     croppedNewGalleryBlobs.push(blob);
-                    
-                    if (currentNewGalleryIndex + 1 < pendingNewGalleryFiles.length) {
-                        const totalAfter = getTotalImageCount() + 1;
-                        if (totalAfter <= 7) {
-                            processNewGalleryImage(pendingNewGalleryFiles[currentNewGalleryIndex + 1], currentNewGalleryIndex + 1, pendingNewGalleryFiles);
-                            return;
-                        }
+
+                    if (currentNewGalleryIndex + 1 < pendingNewGalleryFiles.length && getTotalImageCount() + 1 <= 7) {
+                        processNewGalleryImage(pendingNewGalleryFiles[currentNewGalleryIndex + 1], currentNewGalleryIndex + 1, pendingNewGalleryFiles);
+                        return;
                     }
-                    
+
                     updateNewGalleryPreview();
-                    showToast(`New gallery image ${croppedNewGalleryBlobs.length} added`, 'success');
+                    showToast(`Gallery image ${croppedNewGalleryBlobs.length} added`, 'success');
                 }
-                
+
                 updateImageCounter();
                 closeCropModal();
             }, 'image/jpeg', 0.85);
         });
 
-        // Cancel crop
         function closeCropModal() {
             cropModal.classList.remove('active');
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-            scaleX = 1;
-            scaleY = 1;
-            currentCropTarget = null;
+            if (cropper) { cropper.destroy(); cropper = null; }
+            scaleX = 1; scaleY = 1;
+            currentCropTarget      = null;
             pendingNewGalleryFiles = [];
             currentNewGalleryIndex = 0;
         }
 
         document.getElementById('cancelCrop').addEventListener('click', () => {
-            if (currentCropTarget === 'new-main') {
-                newMainImageFile = null;
-                mainImageInput.value = '';
-            }
+            if (currentCropTarget === 'new-main') { newMainImageFile = null; mainImageInput.value = ''; }
             closeCropModal();
             showToast('Image cropping cancelled', 'info');
         });
 
         document.getElementById('closeCropModal').addEventListener('click', () => {
-            if (currentCropTarget === 'new-main') {
-                newMainImageFile = null;
-                mainImageInput.value = '';
-            }
+            if (currentCropTarget === 'new-main') { newMainImageFile = null; mainImageInput.value = ''; }
             closeCropModal();
         });
 
-        // Form submission
+        // ─── Form submission ───────────────────────────────────────────────────────
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const totalImages = getTotalImageCount();
-            
+
             if (totalImages < 3) {
                 showToast('Please ensure at least 3 images total (current + new)', 'error');
                 return;
             }
-            
             if (totalImages > 7) {
                 showToast('Maximum 7 images allowed. Please remove some images.', 'error');
                 return;
             }
 
             const formData = new FormData(document.getElementById('productForm'));
-            
+
+            // Remove the file inputs collected by FormData — we'll re-add cropped blobs
             formData.delete('main_image');
             formData.delete('images');
-            
+
+            // FIX: send remove_main_image flag correctly
+            if (removeMainFlag) {
+                formData.set('remove_main_image', 'true');
+            }
+
+            // FIX: send each removed gallery ID individually so the view can call getlist()
+            removedGalleryIds.forEach(id => formData.append('remove_gallery_ids', id));
+
+            // Append cropped blobs
             if (croppedNewMainBlob) {
                 formData.append('main_image', croppedNewMainBlob, 'main_image.jpg');
             }
-            
-            croppedNewGalleryBlobs.forEach((blob, index) => {
-                formData.append('images', blob, `gallery_${index}.jpg`);
+            croppedNewGalleryBlobs.forEach((blob, i) => {
+                formData.append('images', blob, `gallery_${i}.jpg`);
             });
 
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
+            const submitBtn   = document.getElementById('submitBtn');
+            const originalHTML = submitBtn.innerHTML;
+            submitBtn.disabled  = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Product...';
 
             try {
                 const response = await fetch(window.location.href, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
+                    headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
                 });
 
                 if (response.redirected) {
                     showToast('Product updated successfully!', 'success');
-                    setTimeout(() => {
-                        window.location.href = response.url;
-                    }, 500);
+                    setTimeout(() => { window.location.href = response.url; }, 500);
                 } else {
                     const html = await response.text();
-                    document.body.innerHTML = html;
+                    document.open();
+                    document.write(html);
+                    document.close();
                 }
             } catch (error) {
                 showToast('Error submitting form. Please try again.', 'error');
                 console.error('Form submission error:', error);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
+                submitBtn.disabled  = false;
+                submitBtn.innerHTML = originalHTML;
             }
         });
 
-        // Track form modifications
+        // ─── Cancel guard ──────────────────────────────────────────────────────────
         let formModified = false;
-        
-        document.getElementById('productForm').addEventListener('change', () => {
-            formModified = true;
+        document.getElementById('productForm').addEventListener('change', () => { formModified = true; });
+        document.getElementById('productForm').addEventListener('input',  () => { formModified = true; });
+
+        document.getElementById('cancelBtn').addEventListener('click', e => {
+            const isDirty = formModified || croppedNewMainBlob || croppedNewGalleryBlobs.length || removeMainFlag || removedGalleryIds.length;
+            if (!isDirty) return;
+
+            e.preventDefault();
+            showConfirmationModal({
+                type: 'warning',
+                icon: 'fa-exclamation-circle',
+                title: 'Discard Changes?',
+                message: 'Are you sure you want to cancel? Any unsaved changes will be lost.',
+                details: `<div class="confirmation-details-item"><i class="fas fa-edit"></i><span>Form has unsaved changes</span></div>`,
+                warning: 'All your changes since the last save will be discarded.',
+                confirmText: 'Discard Changes',
+                confirmIcon: 'fa-times',
+                confirmClass: 'primary',
+                onConfirm: () => { window.location.href = e.target.href; }
+            });
         });
 
-        document.getElementById('productForm').addEventListener('input', () => {
-            formModified = true;
-        });
-
-        // Cancel button with confirmation if form was modified
-        document.getElementById('cancelBtn').addEventListener('click', (e) => {
-            if (formModified || croppedNewMainBlob || croppedNewGalleryBlobs.length > 0 || removeMainFlag || removedGalleryIds.length > 0) {
-                e.preventDefault();
-                
-                showConfirmationModal({
-                    type: 'warning',
-                    icon: 'fa-exclamation-circle',
-                    title: 'Discard Changes?',
-                    message: 'Are you sure you want to cancel? Any unsaved changes will be lost.',
-                    details: `
-                        <div class="confirmation-details-item">
-                            <i class="fas fa-edit"></i>
-                            <span>Form has unsaved changes</span>
-                        </div>
-                    `,
-                    warning: 'All your changes since the last save will be discarded.',
-                    confirmText: 'Discard Changes',
-                    confirmIcon: 'fa-times',
-                    confirmClass: 'primary',
-                    onConfirm: () => {
-                        window.location.href = e.target.href;
-                    }
-                });
-            }
-        });
-
-        // Initialize image counter on page load
+        // ─── Init ──────────────────────────────────────────────────────────────────
         updateImageCounter();
     </script>
   </section>

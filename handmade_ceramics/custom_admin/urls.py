@@ -10,6 +10,11 @@ urlpatterns = [
     path('login/', ca_views.login_view, name='login'),
     path('logout/', ca_views.logout_view, name='logout'),
 
+    path('', ca_views.dashboard_view, name='dashboard'),
+    path('dashboard/chart-data/', ca_views.dashboard_chart_data, name='chart_data'),
+    path('dashboard/top-products/', ca_views.top_products_data, name='top_products'),
+    path('dashboard/top-categories/', ca_views.top_categories_data, name='top_categories'),
+
     # user_management
     path('users/', include('user_management.urls', namespace='user_management')),
 
