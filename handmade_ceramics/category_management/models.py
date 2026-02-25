@@ -54,13 +54,10 @@ class Category(models.Model):
 
 
     def soft_delete(self):
-
-        # Soft delete category
         self.is_deleted = True
         self.is_listed = False
         self.save(update_fields=["is_deleted", "is_listed"])
 
-        # Soft delete related products
         products = Product.all_objects.filter(category=self, is_deleted=False)
 
         for product in products:
@@ -68,6 +65,5 @@ class Category(models.Model):
             product.is_listed = False
             product.save(update_fields=["is_deleted", "is_listed"])
 
-            # Soft delete variants
             product.variants.update(is_deleted=True, is_listed=False)
 

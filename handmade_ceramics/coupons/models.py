@@ -23,9 +23,6 @@ class Coupon(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_valid(self):
-        """
-        Check coupon active & expiry
-        """
         return self.is_active and self.expiry_date >= timezone.now()
 
     def __str__(self):
@@ -38,7 +35,7 @@ class CouponUsage(models.Model):
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
 
     used_at = models.DateTimeField(auto_now_add=True)
- 
+
     class Meta:
         unique_together = ('user', 'coupon')
 

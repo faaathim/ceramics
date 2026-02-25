@@ -10,16 +10,12 @@ from django.http import Http404, JsonResponse
 from .models import Product, ProductImage, Variant, VariantImage, product_average_rating, get_related_products
 from .forms import ProductForm, ProductSearchForm, VariantForm
 
-# permission decorator: allow only active superusers
 def superuser_check(user):
     return user.is_active and user.is_superuser
 
 def admin_required(view_func):
     return login_required(user_passes_test(superuser_check, login_url='custom_admin:login')(view_func), login_url='custom_admin:login')
 
-# =============================================
-# PRODUCT VIEWS
-# =============================================
 
 @admin_required
 def product_list(request):

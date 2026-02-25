@@ -14,18 +14,8 @@ from .forms import CategoryForm, CategorySearchForm
 
 import base64
 
-
-# -------------------------------------------------------------------
-# Permissions
-# -------------------------------------------------------------------
-
 def superuser_check(user):
     return user.is_active and user.is_superuser
-
-
-# -------------------------------------------------------------------
-# Category List
-# -------------------------------------------------------------------
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
@@ -64,10 +54,6 @@ def category_list(request):
     })
 
 
-# -------------------------------------------------------------------
-# Category Create
-# -------------------------------------------------------------------
-
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def category_create(request):
@@ -86,8 +72,6 @@ def category_create(request):
                 content=base64.b64decode(imgstr),
                 content_type=f'image/{ext}'
             )
-
-        # 🔑 Remove helper field so form never sees it
         post_data.pop('image_cropped', None)
 
         form = CategoryForm(post_data, files_data)
@@ -108,9 +92,6 @@ def category_create(request):
 
 
 
-# -------------------------------------------------------------------
-# Category Edit
-# -------------------------------------------------------------------
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 @login_required(login_url='custom_admin:login')
@@ -135,10 +116,8 @@ def category_edit(request, pk):
                 content_type=f'image/{ext}'
             )
         else:
-            # 🔑 CRITICAL: prevent Django from re-validating old file
             files_data.pop('image', None)
 
-        # Remove helper field
         post_data.pop('image_cropped', None)
 
         form = CategoryForm(post_data, files_data, instance=category)
@@ -159,10 +138,6 @@ def category_edit(request, pk):
     })
 
 
-# -------------------------------------------------------------------
-# Category Delete (Soft Delete)
-# -------------------------------------------------------------------
-
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def category_delete_confirm(request, pk):
@@ -178,9 +153,6 @@ def category_delete_confirm(request, pk):
     })
 
 
-# -------------------------------------------------------------------
-# Category Toggle (List / Unlist)
-# -------------------------------------------------------------------
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
@@ -190,8 +162,6 @@ def category_toggle(request, category_id):
         id=category_id,
         is_deleted=False
     )
-
-    # Prevent listing empty categories
     if not category.is_listed and not category.products.exists():
         messages.warning(request, "Cannot list a category with no products.")
         return redirect('custom_admin:category_management:category_list')

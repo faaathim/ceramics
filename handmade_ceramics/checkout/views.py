@@ -36,7 +36,6 @@ def checkout_page(request):
     tax_amount = 0
     shipping_amount = Decimal(str(settings.DELIVERY_CHARGE))
 
-    # ✅ READ FROM SESSION ONLY
     discount = Decimal(str(request.session.get("discount_amount", 0)))
     coupon_id = request.session.get("coupon_id")
 
@@ -46,7 +45,6 @@ def checkout_page(request):
 
     total = subtotal + tax_amount + shipping_amount - discount
 
-    # Safety: never allow negative total
     if total < 1:
         total = 1
 
@@ -82,7 +80,6 @@ def place_order(request):
 
     address = get_object_or_404(Address, id=address_id, user=user)
 
-    # Lock cart items
     cart_items = (
         CartItem.objects
         .filter(cart__user=user, variant__isnull=False, variant__is_deleted=False,
@@ -94,13 +91,11 @@ def place_order(request):
     if not cart_items.exists():
         return redirect("checkout:checkout")
 
-    # Check stock (for info only, we will reduce later if payment succeeds)
     for item in cart_items:
         if item.quantity > item.variant.stock:
             messages.error(request, f"Not enough stock for {item.variant.product.name}")
             return redirect("checkout:checkout")
 
-    # Calculate amounts
     subtotal = sum(
         item.variant.product.get_discounted_price() * item.quantity
         for item in cart_items
@@ -124,7 +119,6 @@ def place_order(request):
         )
         return redirect("checkout:checkout")
 
-    # ✅ Create order (PENDING if Razorpay, CONFIRMED if COD)
     if payment_method == "COD":
         order_status = "CONFIRMED"
         is_paid = True
@@ -152,13 +146,11 @@ def place_order(request):
         coupon=coupon if coupon else None,
     )
 
-    # Save coupon usage
     if coupon:
         CouponUsage.objects.create(user=user, coupon=coupon, order=order)
         request.session.pop('coupon_id', None)
         request.session.pop('discount_amount', None)
 
-    # Create order items
     for item in cart_items:
         OrderItem.objects.create(
             order=order,
@@ -170,7 +162,6 @@ def place_order(request):
             quantity=item.quantity
         )
 
-    # ✅ COD flow: reduce stock & clear cart immediately
     if payment_method == "COD":
         for item in cart_items:
             item.variant.stock -= item.quantity
@@ -179,37 +170,30 @@ def place_order(request):
         CartItem.objects.filter(cart__user=user).delete()
         return redirect("checkout:success", order_id=order.order_id)
 
-    # ✅ WALLET flow
     elif payment_method == "WALLET":
         wallet = Wallet.objects.select_for_update().get(user=request.user)
         
-        # Check if user has enough balance
         if wallet.balance < order.total_amount:
             messages.error(request, "Insufficient wallet balance")
             return redirect("checkout:checkout")
         
-        # Deduct from wallet
         debit_wallet(wallet, order.total_amount, f"Payment for order {order.order_id}", order=order)
 
-        # Mark order as paid
         order.is_paid = True
         order.payment_method = "WALLET"
         order.status = "CONFIRMED"
         order.save()
 
-        # Reduce stock
         for item in cart_items:
             item.variant.stock -= item.quantity
             item.variant.save()
 
-        # Clear cart
         CartItem.objects.filter(cart__user=request.user).delete()
 
         messages.success(request, "Order paid using wallet.")
         return redirect("checkout:success", order_id=order.order_id)
 
 
-    # ✅ Razorpay flow
     else:
         return redirect("payments:start", order_id=order.order_id)
 

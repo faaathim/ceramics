@@ -5,17 +5,19 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Coupon
 from .forms import CouponForm
 
+
 def superuser_check(user):
     return user.is_active and user.is_superuser
+
 
 @login_required
 @user_passes_test(superuser_check)
 def coupon_list(request):
     coupons = Coupon.objects.all().order_by('-created_at')
-
     return render(request, 'coupons/coupon_list.html', {
         'coupons': coupons
     })
+
 
 @login_required
 @user_passes_test(superuser_check)
@@ -29,13 +31,13 @@ def coupon_create(request):
             return redirect('custom_admin:coupons:coupon_list')
         else:
             messages.error(request, "Please fix the errors below.")
-
     else:
         form = CouponForm()
 
     return render(request, 'coupons/coupon_create.html', {
         'form': form
     })
+
 
 @login_required
 @user_passes_test(superuser_check)
@@ -49,12 +51,10 @@ def coupon_toggle(request, coupon_id):
 
     return redirect('custom_admin:coupons:coupon_list')
 
+
 @login_required
 @user_passes_test(superuser_check)
 def coupon_edit(request, coupon_id):
-    """
-    Edit an existing coupon
-    """
     coupon = get_object_or_404(Coupon, id=coupon_id)
 
     if request.method == 'POST':
@@ -78,9 +78,6 @@ def coupon_edit(request, coupon_id):
 @login_required
 @user_passes_test(superuser_check)
 def coupon_delete(request, coupon_id):
-    """
-    Delete a coupon (with confirmation)
-    """
     coupon = get_object_or_404(Coupon, id=coupon_id)
 
     if request.method == 'POST':
@@ -91,5 +88,3 @@ def coupon_delete(request, coupon_id):
     return render(request, 'coupons/coupon_confirm_delete.html', {
         'coupon': coupon
     })
-
-

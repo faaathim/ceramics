@@ -9,7 +9,6 @@ from django.urls import reverse
 from .models import Cart, CartItem
 from product_management.models import Variant
 
-# Optional Wishlist model
 try:
     from wishlist.models import Wishlist
 except ImportError:
@@ -21,31 +20,15 @@ except Exception:
     Coupon = None
 
 
-# -------------------------------------------------------------------
-# Helper functions
-# -------------------------------------------------------------------
-
 def _max_qty_limit():
-    """
-    Maximum quantity allowed per cart item (site-wide).
-    Can be configured in settings.py:
-        CART_MAX_QTY_PER_ITEM = 10
-    """
     return getattr(settings, 'CART_MAX_QTY_PER_ITEM', 10)
 
 
 def _get_user_cart(user):
-    """
-    Get or create the cart for the logged-in user.
-    Each user always has exactly one cart.
-    """
     cart, _ = Cart.objects.get_or_create(user=user)
     return cart
 
 
-# -------------------------------------------------------------------
-# Add to cart
-# -------------------------------------------------------------------
 @login_required
 def add_to_cart(request):
     if request.method != 'POST':
@@ -98,8 +81,6 @@ def add_to_cart(request):
         cart_item.quantity = min(cart_item.quantity + qty_to_add, allowed_max)
 
     cart_item.save()
-
-    # ✅ REMOVE FROM WISHLIST AFTER ADDING TO CART
     if Wishlist:
         Wishlist.objects.filter(
             user=request.user,
@@ -109,19 +90,11 @@ def add_to_cart(request):
     return redirect(reverse('cart:cart_page'))
 
 
-# -------------------------------------------------------------------
-# Cart page
-# -------------------------------------------------------------------
 
 @login_required
 def cart_page(request):
-    """
-    Display the cart page with subtotal, coupon discount, and total.
-    """
     cart = _get_user_cart(request.user)
     items = cart.items.select_related('variant__product')
-
-    # Calculate subtotal (price × quantity)
     subtotal = Decimal('0')
 
     for item in items:
@@ -129,8 +102,6 @@ def cart_page(request):
         item.item_total = discounted_price * item.quantity
         subtotal += item.item_total
 
-
-    # Coupon handling
     coupon_id = request.session.get('coupon_id')
     coupon = None
     discount = Decimal('0')
@@ -141,18 +112,15 @@ def cart_page(request):
             discount = (coupon.discount_percentage / Decimal('100')) * subtotal
             request.session['discount_amount'] = float(discount)
         else:
-            # Remove invalid coupon
             request.session.pop('coupon_id', None)
             request.session.pop('discount_amount', None)
             coupon = None
 
-    # Extra charges (kept simple for beginners)
     tax_amount = Decimal('0')
     shipping_amount = Decimal('0')
 
     total = subtotal + tax_amount + shipping_amount - discount
 
-    # Ensure minimum payable amount
     if total < 1:
         total = Decimal('1')
 
@@ -171,15 +139,8 @@ def cart_page(request):
     return render(request, 'cart/cart_page.html', context)
 
 
-# -------------------------------------------------------------------
-# Remove item from cart
-# -------------------------------------------------------------------
-
 @login_required
 def remove_cart_item(request, item_id):
-    """
-    Remove a single item from the cart.
-    """
     if request.method != 'POST':
         return HttpResponseBadRequest("Invalid request method.")
 
@@ -190,21 +151,8 @@ def remove_cart_item(request, item_id):
     return redirect(reverse('cart:cart_page'))
 
 
-# -------------------------------------------------------------------
-# Update quantity (AJAX)
-# -------------------------------------------------------------------
-
 @login_required
 def update_quantity(request, item_id):
-    """
-    Update quantity for a cart item using AJAX.
-
-    POST data:
-      - action = increment | decrement
-      - OR qty = <number>
-
-    Returns updated totals as JSON.
-    """
     if request.method != 'POST' or request.headers.get('x-requested-with') != 'XMLHttpRequest':
         return HttpResponseBadRequest("Invalid request.")
 
@@ -218,7 +166,6 @@ def update_quantity(request, item_id):
     site_max = _max_qty_limit()
     allowed_max = min(site_max, variant.stock or 0)
 
-    # Determine new quantity
     if action == 'increment':
         new_qty = item.quantity + 1
     elif action == 'decrement':
@@ -231,13 +178,11 @@ def update_quantity(request, item_id):
     else:
         return JsonResponse({'error': 'No action provided'}, status=400)
 
-    # Enforce limits
     new_qty = max(1, min(new_qty, allowed_max))
 
     item.quantity = new_qty
     item.save()
 
-    # Recalculate totals
     items = cart.items.select_related('variant__product')
     subtotal = sum(
         i.variant.product.get_discounted_price() * i.quantity
