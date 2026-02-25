@@ -102,6 +102,48 @@
 
         @keyframes progressShrink { from { width: 100%; } to { width: 0%; } }
 
+        /* Page Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title i {
+            color: #9b8bdb;
+        }
+
+        .page-subtitle {
+            color: #909090;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .total-badge {
+            background: linear-gradient(135deg, rgba(155,139,219,.2), rgba(139,123,203,.2));
+            border: 1px solid rgba(155,139,219,.4);
+            color: #9b8bdb;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         /* Filters */
         .filters-container {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
@@ -113,6 +155,18 @@
             transition: all 0.3s ease;
         }
         .filters-container:hover { box-shadow: 0 8px 30px rgba(0,0,0,.7); border-color: #404040; }
+
+        .filters-title {
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         .filters-form {
             display: grid;
@@ -142,6 +196,7 @@
             box-shadow: 0 0 0 4px rgba(155,139,219,.1);
         }
         .filter-input::placeholder { color: #606060; }
+        .filter-select option { background: #1a1a1a; color: #e8e8e8; }
 
         .filter-actions {
             grid-column: 1 / -1;
@@ -156,9 +211,30 @@
             text-decoration: none; white-space: nowrap;
         }
         .btn-primary { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); color:#fff; border:2px solid transparent; }
-        .btn-primary:hover { background: linear-gradient(135deg,#ab9beb,#9b8bdb); transform:translateY(-2px); box-shadow:0 5px 20px rgba(155,139,219,.5); }
+        .btn-primary:hover { background: linear-gradient(135deg,#ab9beb,#9b8bdb); transform:translateY(-2px); box-shadow:0 5px 20px rgba(155,139,219,.5); color:#fff; }
         .btn-secondary { background:transparent; color:#909090; border:2px solid #404040; }
         .btn-secondary:hover { background:#2a2a2a; color:#e8e8e8; border-color:#505050; transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.5); }
+
+        /* Active filters indicator */
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .active-filter-tag {
+            background: rgba(155,139,219,.15);
+            border: 1px solid rgba(155,139,219,.3);
+            color: #9b8bdb;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
         /* Table */
         .table-container {
@@ -171,6 +247,32 @@
             transition: all 0.3s ease;
         }
 
+        .table-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #333333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg,#222222,#2a2a2a);
+        }
+
+        .table-header-title {
+            color: #e8e8e8;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-header-title i { color: #9b8bdb; }
+
+        .results-count {
+            color: #909090;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
         .wallet-table { width: 100%; margin: 0; border-collapse: collapse; }
         .wallet-table thead { background: linear-gradient(135deg,#2a2a2a,#3a3a3a); }
         .wallet-table th {
@@ -179,6 +281,7 @@
             letter-spacing: 0.5px; border-bottom: 2px solid #404040;
         }
         .wallet-table tbody tr { border-bottom: 1px solid #2a2a2a; transition: all 0.3s ease; }
+        .wallet-table tbody tr:last-child { border-bottom: none; }
         .wallet-table tbody tr:hover { background: linear-gradient(135deg,#252525,#303030); }
         .wallet-table td { padding: 20px 25px; color: #e8e8e8; font-size: 0.95rem; vertical-align: middle; }
 
@@ -186,12 +289,24 @@
             font-weight: 700;
             color: #9b8bdb;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            background: rgba(155,139,219,.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(155,139,219,.2);
+            display: inline-block;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
+        .date-cell { color: #c0c0c0; font-size: 0.9rem; }
+        .date-time { color: #707070; font-size: 0.8rem; margin-top: 2px; }
 
         .user-info { display: flex; flex-direction: column; gap: 4px; }
         .user-name  { font-weight: 600; color: #e8e8e8; }
-        .user-email { font-size: 0.85rem; color: #909090; }
+        .user-email { font-size: 0.82rem; color: #707070; }
 
         /* Transaction type badges */
         .type-badge {
@@ -201,18 +316,28 @@
         .type-credit {
             background: linear-gradient(135deg,#2a4a3a,#3a5a4a);
             color: #70c090;
+            border: 1px solid rgba(112,192,144,.2);
         }
         .type-debit {
             background: linear-gradient(135deg,#4a2a2a,#5a3a3a);
             color: #e07070;
+            border: 1px solid rgba(224,112,112,.2);
         }
 
         /* Source badge */
         .source-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
-            background: rgba(155,139,219,.15); color: #9b8bdb;
+            padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+            background: rgba(155,139,219,.1);
+            color: #9b8bdb;
+            border: 1px solid rgba(155,139,219,.2);
+            text-transform: capitalize;
         }
+
+        .source-order_refund   { background: rgba(112,192,144,.1); color: #70c090; border-color: rgba(112,192,144,.2); }
+        .source-order_payment  { background: rgba(112,160,192,.1); color: #70a0c0; border-color: rgba(112,160,192,.2); }
+        .source-admin_credit   { background: rgba(155,139,219,.1); color: #9b8bdb; border-color: rgba(155,139,219,.2); }
+        .source-referral_bonus { background: rgba(208,192,112,.1); color: #d0c070; border-color: rgba(208,192,112,.2); }
 
         .amount-credit { font-weight: 700; font-size: 1.05rem; color: #70c090; }
         .amount-debit  { font-weight: 700; font-size: 1.05rem; color: #e07070; }
@@ -233,30 +358,31 @@
         }
 
         .empty-state { text-align: center; padding: 60px 20px; color: #606060; }
-        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
-        .empty-state p { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; display: block; }
+        .empty-state p { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #707070; }
+        .empty-state small { color: #505050; }
 
         /* Pagination */
         .pagination-container {
             background: linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%);
-            border-radius: 15px; padding: 25px; margin-top: 25px;
+            border-radius: 15px; padding: 20px 25px; margin-top: 25px;
             box-shadow: 0 5px 20px rgba(0,0,0,.5);
             display: flex; justify-content: space-between; align-items: center;
             border: 1px solid #333333; flex-wrap: wrap; gap: 15px;
         }
-        .pagination-info { color: #b0b0b0; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .pagination-links { display: flex; gap: 10px; }
+        .pagination-info { color: #b0b0b0; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .pagination-links { display: flex; gap: 8px; flex-wrap: wrap; }
         .pagination-links a, .pagination-links span {
-            padding: 10px 18px;
+            padding: 9px 16px;
             background: linear-gradient(135deg,#2a2a2a,#3a3a3a);
             color: #e8e8e8; text-decoration: none; border-radius: 10px;
-            font-weight: 600; transition: all 0.3s ease;
+            font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease;
             border: 1px solid #404040;
             display: inline-flex; align-items: center; gap: 6px;
         }
-        .pagination-links a:hover:not(.disabled) { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); transform: translateY(-2px); border-color: #9b8bdb; }
-        .pagination-links .active  { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); border-color: #9b8bdb; }
-        .pagination-links .disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination-links a:hover { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); transform: translateY(-2px); border-color: #9b8bdb; color: #fff; }
+        .pagination-links .active  { background: linear-gradient(135deg,#9b8bdb,#8b7bcb); border-color: #9b8bdb; color: #fff; }
+        .pagination-links .disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
         @media (max-width: 768px) {
             .messages-container  { right: 10px; left: 10px; max-width: none; }
@@ -264,17 +390,23 @@
             .filters-form { grid-template-columns: 1fr; }
             .table-container { overflow-x: auto; }
             .pagination-container { flex-direction: column; align-items: flex-start; }
+            .page-header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 
     <div class="wallet-management-content">
 
-        <!-- Messages -->
+        <!-- Django Messages -->
         <div class="messages-container" id="messagesContainer">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
-                        <i class="alert-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <i class="alert-icon fas
+                            {% if 'success' in message.tags %}fa-check-circle
+                            {% elif 'error' in message.tags or 'danger' in message.tags %}fa-exclamation-circle
+                            {% elif 'warning' in message.tags %}fa-exclamation-triangle
+                            {% else %}fa-info-circle{% endif %}">
+                        </i>
                         <div class="alert-content">
                             <span class="alert-message">{{ message }}</span>
                         </div>
@@ -287,10 +419,27 @@
             {% endif %}
         </div>
 
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <div class="page-title">
+                    <i class="fas fa-wallet"></i>
+                    Wallet Transactions
+                </div>
+                <div class="page-subtitle">Manage and monitor all user wallet activity</div>
+            </div>
+            <div class="total-badge">
+                <i class="fas fa-list"></i>
+                {{ transactions.paginator.count }} Total Transaction{{ transactions.paginator.count|pluralize }}
+            </div>
+        </div>
+
         <!-- Filters -->
         <div class="filters-container">
+            <div class="filters-title">
+                <i class="fas fa-filter"></i> Filter Transactions
+            </div>
             <form method="GET" class="filters-form">
-
                 <div class="filter-group">
                     <label class="filter-label"><i class="fas fa-search"></i> Search</label>
                     <input type="text" name="q" value="{{ q|default:'' }}" class="filter-input"
@@ -336,15 +485,45 @@
                     </a>
                 </div>
             </form>
+
+            <!-- Active filter tags -->
+            {% if request.GET.q or request.GET.type or request.GET.source or request.GET.date_from or request.GET.date_to %}
+            <div class="active-filters">
+                {% if request.GET.q %}
+                    <span class="active-filter-tag"><i class="fas fa-search"></i> Search: "{{ request.GET.q }}"</span>
+                {% endif %}
+                {% if request.GET.type %}
+                    <span class="active-filter-tag"><i class="fas fa-exchange-alt"></i> Type: {{ request.GET.type|capfirst }}</span>
+                {% endif %}
+                {% if request.GET.source %}
+                    <span class="active-filter-tag"><i class="fas fa-tag"></i> Source: {{ request.GET.source|title }}</span>
+                {% endif %}
+                {% if request.GET.date_from %}
+                    <span class="active-filter-tag"><i class="fas fa-calendar"></i> From: {{ request.GET.date_from }}</span>
+                {% endif %}
+                {% if request.GET.date_to %}
+                    <span class="active-filter-tag"><i class="fas fa-calendar"></i> To: {{ request.GET.date_to }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
 
         <!-- Table -->
         <div class="table-container">
+            <div class="table-header">
+                <div class="table-header-title">
+                    <i class="fas fa-list-alt"></i>
+                    Transaction Records
+                </div>
+                <div class="results-count">
+                    Showing {{ transactions.start_index }}–{{ transactions.end_index }} of {{ transactions.paginator.count }}
+                </div>
+            </div>
             <table class="wallet-table">
                 <thead>
                     <tr>
                         <th><i class="fas fa-hashtag"></i> Transaction ID</th>
-                        <th><i class="fas fa-calendar"></i> Date</th>
+                        <th><i class="fas fa-calendar"></i> Date &amp; Time</th>
                         <th><i class="fas fa-user"></i> User</th>
                         <th><i class="fas fa-exchange-alt"></i> Type</th>
                         <th><i class="fas fa-rupee-sign"></i> Amount</th>
@@ -356,9 +535,12 @@
                     {% for tx in transactions %}
                         <tr>
                             <td>
-                                <span class="transaction-id">{{ tx.transaction_id }}</span>
+                                <span class="transaction-id" title="{{ tx.transaction_id }}">{{ tx.transaction_id }}</span>
                             </td>
-                            <td>{{ tx.created_at|date:"d M Y H:i" }}</td>
+                            <td>
+                                <div class="date-cell">{{ tx.created_at|date:"d M Y" }}</div>
+                                <div class="date-time">{{ tx.created_at|date:"H:i" }}</div>
+                            </td>
                             <td>
                                 <div class="user-info">
                                     <span class="user-name">{{ tx.wallet.user.get_full_name|default:tx.wallet.user.username }}</span>
@@ -377,14 +559,21 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="source-badge">
-                                    <i class="fas fa-circle" style="font-size:0.5rem;"></i>
+                                <span class="source-badge source-{{ tx.source }}">
+                                    <i class="fas
+                                        {% if tx.source == 'order_refund' %}fa-undo
+                                        {% elif tx.source == 'order_payment' %}fa-shopping-bag
+                                        {% elif tx.source == 'admin_credit' %}fa-shield-alt
+                                        {% elif tx.source == 'referral_bonus' %}fa-users
+                                        {% else %}fa-circle{% endif %}"
+                                        style="font-size:0.75rem;">
+                                    </i>
                                     {{ tx.get_source_display }}
                                 </span>
                             </td>
                             <td>
                                 <a href="{% url 'custom_admin:wallet_admin:admin_wallet_transaction_detail' tx.transaction_id %}" class="btn-view">
-                                    <i class="fas fa-eye"></i> View Details
+                                    <i class="fas fa-eye"></i> View
                                 </a>
                             </td>
                         </tr>
@@ -394,8 +583,10 @@
                                 <div class="empty-state">
                                     <i class="fas fa-wallet"></i>
                                     <p>No transactions found.</p>
-                                    {% if request.GET.q or request.GET.type or request.GET.source %}
-                                        <small style="color:#909090;">Try adjusting your filters.</small>
+                                    {% if request.GET.q or request.GET.type or request.GET.source or request.GET.date_from or request.GET.date_to %}
+                                        <small>Try adjusting or clearing your filters.</small>
+                                    {% else %}
+                                        <small>No wallet transactions exist yet.</small>
                                     {% endif %}
                                 </div>
                             </td>
@@ -414,20 +605,32 @@
             </div>
             <div class="pagination-links">
                 {% if transactions.has_previous %}
-                    <a href="?page=1&{{ query_params }}"><i class="fas fa-angle-double-left"></i> First</a>
-                    <a href="?page={{ transactions.previous_page_number }}&{{ query_params }}"><i class="fas fa-angle-left"></i> Previous</a>
+                    <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </a>
+                    <a href="?page={{ transactions.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                        <i class="fas fa-angle-left"></i> Prev
+                    </a>
                 {% else %}
                     <span class="disabled"><i class="fas fa-angle-double-left"></i> First</span>
-                    <span class="disabled"><i class="fas fa-angle-left"></i> Previous</span>
+                    <span class="disabled"><i class="fas fa-angle-left"></i> Prev</span>
                 {% endif %}
 
                 {% for p in transactions.paginator.page_range %}
-                    <a href="?page={{ p }}&{{ query_params }}" class="{% if transactions.number == p %}active{% endif %}">{{ p }}</a>
+                    {% if p == transactions.number %}
+                        <span class="active">{{ p }}</span>
+                    {% elif p >= transactions.number|add:"-2" and p <= transactions.number|add:"2" %}
+                        <a href="?page={{ p }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">{{ p }}</a>
+                    {% endif %}
                 {% endfor %}
 
                 {% if transactions.has_next %}
-                    <a href="?page={{ transactions.next_page_number }}&{{ query_params }}">Next <i class="fas fa-angle-right"></i></a>
-                    <a href="?page={{ transactions.paginator.num_pages }}&{{ query_params }}">Last <i class="fas fa-angle-double-right"></i></a>
+                    <a href="?page={{ transactions.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                        Next <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ transactions.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.source %}&source={{ request.GET.source }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </a>
                 {% else %}
                     <span class="disabled">Next <i class="fas fa-angle-right"></i></span>
                     <span class="disabled">Last <i class="fas fa-angle-double-right"></i></span>
@@ -456,23 +659,28 @@
                 el.classList.add('hiding');
                 setTimeout(() => { if (el.parentElement) el.remove(); }, 400);
             },
-            clearTimeout(el) {
+            clearAlertTimeout(el) {
                 const id = el.getAttribute('data-alert-id');
-                if (this.alerts.has(id)) { clearTimeout(this.alerts.get(id)); this.alerts.delete(id); }
+                if (this.alerts.has(id)) {
+                    clearTimeout(this.alerts.get(id));
+                    this.alerts.delete(id);
+                }
             }
         };
 
         function dismissAlert(btn) {
             const alert = btn.closest('.alert');
-            MessageHandler.clearTimeout(alert);
+            MessageHandler.clearAlertTimeout(alert);
             MessageHandler.dismissAlert(alert);
         }
 
         document.addEventListener('DOMContentLoaded', () => MessageHandler.init());
+
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.alert').forEach(a => {
-                    MessageHandler.clearTimeout(a); MessageHandler.dismissAlert(a);
+                    MessageHandler.clearAlertTimeout(a);
+                    MessageHandler.dismissAlert(a);
                 });
             }
         });

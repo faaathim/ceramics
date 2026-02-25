@@ -1,18 +1,391 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container py-4">
-    <h3>Return Order: {{ order.order_id }}</h3>
-    <p>Order status: {{ order.get_status_display }}</p>
+{% load static %}
 
-    <form method="POST">
+{% block content %}
+{% include 'user_navbar.html' %}
+
+<div class="profile-container">
+  <div class="profile-sidebar-wrapper">
+    {% include "user_profile/sidebar.html" %}
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-header-section">
+      <h1>RETURN ORDER</h1>
+    </div>
+
+    <!-- Django Messages -->
+    {% if messages %}
+      <div class="messages-wrapper">
+        {% for message in messages %}
+          <div class="alert-message alert-{{ message.tags }}">
+            <span class="alert-icon">
+              {% if 'error' in message.tags %}✕
+              {% elif 'success' in message.tags %}✓
+              {% else %}ℹ{% endif %}
+            </span>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Order Summary Card -->
+    <div class="order-summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Order ID</span>
+        <span class="summary-value order-id-text">{{ order.order_id }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Order Date</span>
+        <span class="summary-value">{{ order.created_at|date:"M d, Y" }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Total Amount</span>
+        <span class="summary-value amount-text">₹{{ order.total_amount }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Status</span>
+        <span class="status-badge status-{{ order.status|lower }}">
+          {{ order.get_status_display }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Return Form -->
+    <div class="return-form-card">
+      <h2 class="form-section-title">Return Request Details</h2>
+      <p class="form-subtitle">Please provide a reason for returning this order. Our team will review your request.</p>
+
+      <form method="POST" novalidate>
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="reason" class="form-label">Reason for return <span class="text-danger">*</span></label>
-            <textarea name="reason" id="reason" rows="3" class="form-control" required></textarea>
+
+        <div class="form-group">
+          <label for="reason" class="form-label">
+            Reason for Return <span class="required-star">*</span>
+          </label>
+          <textarea
+            name="reason"
+            id="reason"
+            rows="5"
+            class="form-textarea"
+            placeholder="Describe why you want to return this order (e.g., damaged product, wrong item received, quality issue)..."
+            required
+          ></textarea>
+          <span class="field-hint">Minimum 10 characters. Be as specific as possible.</span>
         </div>
 
-        <button type="submit" class="btn btn-warning">Submit Return Request</button>
-        <a href="{{ request.GET.next|default:order.get_absolute_url }}" class="btn btn-secondary">Cancel</a>
-    </form>
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">
+            <span>Submit Return Request</span>
+          </button>
+          <a href="{{ order.get_absolute_url }}" class="btn-back">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+
+  </div>
 </div>
+
+<style>
+  .profile-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+  }
+
+  .profile-sidebar-wrapper {
+    flex: 0 0 280px;
+  }
+
+  .profile-content {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .profile-header-section h1 {
+    color: #fff;
+    font-size: 32px;
+    margin-bottom: 30px;
+    font-weight: 600;
+  }
+
+  /* Messages */
+  .messages-wrapper {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alert-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .alert-icon {
+    font-size: 16px;
+    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .alert-error,
+  .alert-warning {
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+    color: #f44336;
+  }
+
+  .alert-error .alert-icon,
+  .alert-warning .alert-icon {
+    background: rgba(244, 67, 54, 0.3);
+  }
+
+  .alert-success {
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    color: #4caf50;
+  }
+
+  .alert-success .alert-icon {
+    background: rgba(76, 175, 80, 0.3);
+  }
+
+  .alert-info {
+    background: rgba(3, 169, 244, 0.15);
+    border: 1px solid rgba(3, 169, 244, 0.4);
+    color: #03a9f4;
+  }
+
+  .alert-info .alert-icon {
+    background: rgba(3, 169, 244, 0.3);
+  }
+
+  /* Order Summary Card */
+  .order-summary-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .summary-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .summary-label {
+    color: #888;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-value {
+    color: #ddd;
+    font-size: 15px;
+  }
+
+  .order-id-text {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .amount-text {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-pending   { background: rgba(255,193,7,0.2);   color: #ffc107; }
+  .status-confirmed { background: rgba(3,169,244,0.2);   color: #03a9f4; }
+  .status-delivered { background: rgba(76,175,80,0.2);   color: #4caf50; }
+  .status-cancelled { background: rgba(244,67,54,0.2);   color: #f44336; }
+  .status-returned  { background: rgba(255,152,0,0.2);   color: #ff9800; }
+  .status-return_requested { background: rgba(255,152,0,0.2); color: #ff9800; }
+
+  /* Return Form Card */
+  .return-form-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 35px 30px;
+  }
+
+  .form-section-title {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  .form-subtitle {
+    color: #888;
+    font-size: 14px;
+    margin: 0 0 30px;
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  .form-label {
+    display: block;
+    color: #ddd;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .required-star {
+    color: #f44336;
+    margin-left: 3px;
+  }
+
+  .form-textarea {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #3a3a3a;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 130px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .form-textarea:focus {
+    outline: none;
+    border-color: #ff9800;
+  }
+
+  .form-textarea::placeholder {
+    color: #555;
+  }
+
+  .field-hint {
+    display: block;
+    color: #666;
+    font-size: 12px;
+    margin-top: 7px;
+  }
+
+  /* Buttons */
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-submit {
+    background: #ff9800;
+    color: #000;
+    border: none;
+    padding: 13px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-submit:hover {
+    background: #e68900;
+    transform: translateY(-1px);
+  }
+
+  .btn-back {
+    background: transparent;
+    color: #aaa;
+    border: 1px solid #3a3a3a;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-back:hover {
+    background: #2a2a2a;
+    border-color: #666;
+    color: #fff;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .profile-container {
+      flex-direction: column;
+    }
+
+    .profile-sidebar-wrapper {
+      flex: 1;
+    }
+
+    .profile-content {
+      padding: 20px;
+    }
+
+    .profile-header-section h1 {
+      font-size: 24px;
+    }
+
+    .order-summary-card {
+      gap: 20px;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn-submit,
+    .btn-back {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
+  }
+</style>
+
 {% endblock %}
