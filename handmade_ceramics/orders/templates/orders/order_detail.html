@@ -23,7 +23,8 @@
     {% if messages %}
       <div class="messages-container" id="messages-container">
         {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} alert-dismissible">
+          {# Normalize tag: strip any "messages-" prefix Django sometimes adds #}
+          <div class="alert alert-{{ message.level_tag }}">
             <span class="alert-text">{{ message }}</span>
             <button type="button" class="alert-close" onclick="dismissAlert(this)" aria-label="Close">✕</button>
           </div>
@@ -31,28 +32,7 @@
       </div>
     {% endif %}
 
-    <!-- Order Status Banner -->
-    <div class="status-banner status-{{ order.status|lower }}">
-      <div class="status-icon">
-        {% if order.status == 'PENDING' %}⏳
-        {% elif order.status == 'CONFIRMED' %}✓
-        {% elif order.status == 'PROCESSING' %}⚙️
-        {% elif order.status == 'SHIPPED' %}🚚
-        {% elif order.status == 'DELIVERED' %}📦
-        {% elif order.status == 'CANCELLED' %}✕
-        {% elif order.status == 'RETURN_REQUESTED' %}↩
-        {% elif order.status == 'RETURN_PROCESSING' %}🔄
-        {% elif order.status == 'RETURNED' %}✅
-        {% endif %}
-      </div>
-      <div class="status-info">
-        <h3>{{ order.get_status_display }}</h3>
-        <p>Order placed on {{ order.created_at|date:"F d, Y" }}</p>
-        {% if order.is_refunded %}
-          <p class="refund-note">✅ Refund has been credited to your wallet.</p>
-        {% endif %}
-      </div>
-    </div>
+ 
 
     <!-- Main Content Grid -->
     <div class="details-grid">
@@ -142,15 +122,23 @@
                 </span>
               </td>
               <td class="item-actions">
+                {# --- cancel_order_item: only PENDING or CONFIRMED items --- #}
                 {% if item.item_status == 'PENDING' or item.item_status == 'CONFIRMED' %}
-                  {# Cancel individual item — maps to cancel_order_item view #}
                   <button type="button"
                           class="btn-item btn-item-cancel"
                           onclick="openModal('cancel-item-{{ item.id }}')">
                     ✕ Cancel
                   </button>
+
+                {# --- request_item_return: only DELIVERED items --- #}
                 {% elif item.item_status == 'DELIVERED' %}
-                  <span class="no-action">—</span>
+                  <button type="button"
+                          class="btn-item btn-item-return"
+                          onclick="openModal('return-item-{{ item.id }}')">
+                    ↩ Return
+                  </button>
+
+                {# --- read-only status tags for terminal/in-progress states --- #}
                 {% elif item.item_status == 'RETURN_REQUESTED' %}
                   <span class="status-tag tag-return-requested">Return Requested</span>
                 {% elif item.item_status == 'RETURN_PROCESSING' %}
@@ -178,14 +166,14 @@
         <span>📄</span> Download Invoice
       </a>
 
-      {# Cancel entire order — only when PENDING or CONFIRMED #}
+      {# cancel_order: only PENDING or CONFIRMED orders — view enforces this too #}
       {% if order.status == 'PENDING' or order.status == 'CONFIRMED' %}
         <button type="button" class="btn-action btn-cancel-order" onclick="openModal('cancel-order')">
           <span>✕</span> Cancel Order
         </button>
       {% endif %}
 
-      {# Return entire order — only when DELIVERED #}
+      {# return_order: only DELIVERED orders — view enforces this too #}
       {% if order.status == 'DELIVERED' %}
         <button type="button"
                 class="btn-action btn-return-order"
@@ -201,7 +189,7 @@
 
 <!-- ===================== MODALS ===================== -->
 
-<!-- Cancel Entire Order Modal — cancel_order view (POST /orders/<order_id>/cancel/) -->
+<!-- Cancel Entire Order — POSTs to cancel_order view -->
 {% if order.status == 'PENDING' or order.status == 'CONFIRMED' %}
 <div id="modal-cancel-order" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-cancel-order-title">
   <div class="modal-box">
@@ -209,7 +197,7 @@
     <h3 id="modal-cancel-order-title">Cancel Entire Order?</h3>
     <p>
       This will cancel all items in order <strong>{{ order.order_id }}</strong>.
-      {% if order.is_paid %}
+      {% if order.is_paid and not order.is_refunded %}
         A full refund of <strong>₹{{ order.total_amount }}</strong> will be credited to your wallet.
       {% endif %}
     </p>
@@ -224,7 +212,7 @@
 </div>
 {% endif %}
 
-<!-- Return Entire Order Modal — return_order view (POST /orders/<order_id>/return/) -->
+<!-- Return Entire Order — POSTs to return_order view (requires reason) -->
 {% if order.status == 'DELIVERED' %}
 <div id="modal-return-order" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-return-order-title">
   <div class="modal-box">
@@ -259,15 +247,14 @@
 <!-- Per-Item Modals -->
 {% for item in items %}
 
-  <!-- Cancel Item Modal — cancel_order_item view (POST /orders/cancel-item/<order_id>/<item_id>/) -->
+  {# Cancel Item — POSTs to cancel_order_item view with order_id + item_id #}
   {% if item.item_status == 'PENDING' or item.item_status == 'CONFIRMED' %}
   <div id="modal-cancel-item-{{ item.id }}" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-box">
       <div class="modal-icon modal-icon-danger">✕</div>
       <h3>Cancel Item?</h3>
       <p>
-        Cancel <strong>{{ item.product_name }}</strong>
-        {% if item.variant_color %} ({{ item.variant_color }}){% endif %}?
+        Cancel <strong>{{ item.product_name }}</strong>{% if item.variant_color %} ({{ item.variant_color }}){% endif %}?
         {% if order.is_paid %}
           A proportional refund will be credited to your wallet.
         {% endif %}
@@ -278,6 +265,7 @@
                 onclick="closeModal('cancel-item-{{ item.id }}')">
           Keep Item
         </button>
+        {# URL: cancel_order_item(order_id, item_id) #}
         <form method="post"
               action="{% url 'orders:cancel_order_item' order.order_id item.id %}">
           {% csrf_token %}
@@ -288,7 +276,37 @@
   </div>
   {% endif %}
 
-
+  {# Return Item — POSTs to request_item_return view with item_id only #}
+  {% if item.item_status == 'DELIVERED' %}
+  <div id="modal-return-item-{{ item.id }}" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-icon modal-icon-warning">↩</div>
+      <h3>Return Item?</h3>
+      <p>
+        Request a return for <strong>{{ item.product_name }}</strong>{% if item.variant_color %} ({{ item.variant_color }}){% endif %}.
+        {% if order.is_paid %}
+          Refund will be credited to your wallet once approved.
+        {% endif %}
+      </p>
+      {# URL: request_item_return(item_id) — no order_id needed #}
+      <form method="post" action="{% url 'orders:request_item_return' item.id %}">
+        {% csrf_token %}
+        <textarea name="reason"
+                  required
+                  placeholder="Please enter return reason"
+                  class="modal-textarea"></textarea>
+        <div class="modal-actions">
+          <button type="button"
+                  class="btn-modal-secondary"
+                  onclick="closeModal('return-item-{{ item.id }}')">
+            Cancel
+          </button>
+          <button type="submit" class="btn-modal-warning">Yes, Request Return</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 
 {% endfor %}
 
@@ -370,7 +388,10 @@
   .order-id-badge { color: #999; font-size: 16px; }
   .order-id-badge span { color: #fff; font-weight: 600; }
 
-  /* ── Messages ── */
+  /* ── Messages ──
+     Uses message.level_tag which always returns the plain tag
+     (success / error / warning / info) without any prefix.
+  */
   .messages-container { margin-bottom: 25px; display: flex; flex-direction: column; gap: 10px; }
   .alert {
     display: flex; align-items: center; justify-content: space-between;
@@ -384,20 +405,21 @@
   }
   .alert-close:hover { opacity: 1; }
 
-  /* Django message tags */
-  .alert-success  { background: rgba(76,175,80,0.15);  border: 1px solid #4caf50; color: #4caf50; }
-  .alert-success .alert-close  { color: #4caf50; }
-  .alert-error    { background: rgba(244,67,54,0.15);  border: 1px solid #f44336; color: #f44336; }
-  .alert-error .alert-close    { color: #f44336; }
-  .alert-warning  { background: rgba(255,193,7,0.15);  border: 1px solid #ffc107; color: #ffc107; }
-  .alert-warning .alert-close  { color: #ffc107; }
-  .alert-info     { background: rgba(3,169,244,0.15);  border: 1px solid #03a9f4; color: #03a9f4; }
-  .alert-info .alert-close     { color: #03a9f4; }
-  /* Fallback for "messages" prefixed tags */
-  .alert-messages-success { background: rgba(76,175,80,0.15);  border: 1px solid #4caf50; color: #4caf50; }
-  .alert-messages-error   { background: rgba(244,67,54,0.15);  border: 1px solid #f44336; color: #f44336; }
-  .alert-messages-warning { background: rgba(255,193,7,0.15);  border: 1px solid #ffc107; color: #ffc107; }
-  .alert-messages-info    { background: rgba(3,169,244,0.15);  border: 1px solid #03a9f4; color: #03a9f4; }
+  /* level_tag values: success, error, warning, info, debug */
+  .alert-success { background: rgba(76,175,80,0.15);  border: 1px solid #4caf50; color: #4caf50; }
+  .alert-success .alert-close { color: #4caf50; }
+
+  .alert-error   { background: rgba(244,67,54,0.15);  border: 1px solid #f44336; color: #f44336; }
+  .alert-error .alert-close   { color: #f44336; }
+
+  .alert-warning { background: rgba(255,193,7,0.15);  border: 1px solid #ffc107; color: #ffc107; }
+  .alert-warning .alert-close { color: #ffc107; }
+
+  .alert-info    { background: rgba(3,169,244,0.15);  border: 1px solid #03a9f4; color: #03a9f4; }
+  .alert-info .alert-close    { color: #03a9f4; }
+
+  .alert-debug   { background: rgba(158,158,158,0.15); border: 1px solid #9e9e9e; color: #9e9e9e; }
+  .alert-debug .alert-close   { color: #9e9e9e; }
 
   /* ── Status Banner ── */
   .status-banner {

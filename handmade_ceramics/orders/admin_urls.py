@@ -18,4 +18,15 @@ path(
     admin_views.admin_complete_return,
     name='admin_complete_return'
 ),
+path(
+    'return/approve/<int:item_id>/',
+    admin_views.approve_item_return,
+    name='approve_item_return'
+),
+
+path(
+    'return/reject/<int:item_id>/',
+    admin_views.reject_item_return,
+    name='reject_item_return'
+),
 ]

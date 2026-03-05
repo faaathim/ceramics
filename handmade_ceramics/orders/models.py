@@ -89,25 +89,45 @@ class Order(models.Model):
         ]
 
     def recalculate_totals(self):
-        active_items = self.items.exclude(item_status='CANCELLED')
+
+        # Exclude cancelled and returned items
+        active_items = self.items.exclude(
+            item_status__in=['CANCELLED', 'RETURNED']
+        )
+
         new_subtotal = sum(item.item_total for item in active_items)
 
+        # Coupon handling
+        discount = 0
         if self.coupon and new_subtotal > 0:
-            discount = (self.coupon.discount_percentage / 100) * new_subtotal
-        else:
-            discount = 0
 
+            # Check minimum order condition
+            if new_subtotal >= self.coupon.min_order_amount:
+                discount = (
+                    self.coupon.discount_percentage / 100
+                ) * new_subtotal
+            else:
+                # Coupon becomes invalid
+                self.coupon = None
+                discount = 0
+
+        # Shipping rule
+        if new_subtotal >= 1000:
+            shipping = 0
+        elif new_subtotal > 0:
+            shipping = 50
+        else:
+            shipping = 0
+
+        # If all items cancelled/returned
         if not active_items.exists():
-            self.shipping_charge = 0 
             self.status = 'CANCELLED'
             self.coupon = None
-            discount = 0
-        else:
-            self.shipping_charge = 50
 
         self.subtotal = new_subtotal
         self.discount_amount = discount
-        self.total_amount = new_subtotal + self.shipping_charge - discount
+        self.shipping_charge = shipping
+        self.total_amount = new_subtotal + shipping - discount
 
         self.save()
 
@@ -133,6 +153,12 @@ class Order(models.Model):
 
     def can_change_status(self, new_status):
         return new_status in self.ORDER_STATUS_FLOW.get(self.status, [])
+    
+    def calculate_refund(self, old_total):
+        """
+        Refund = old_total - new_total
+        """
+        return old_total - self.total_amount
 
 
 class OrderItem(models.Model):
@@ -177,9 +203,11 @@ class OrderItem(models.Model):
 
     @transaction.atomic
     def process_return(self):
-        if self.item_status != 'DELIVERED':
+        # Only delivered items can be returned
+        if self.item_status != 'RETURN_REQUESTED':
             return
-        
+
+        # Restore stock
         if self.variant:
             self.variant.stock += self.quantity
             self.variant.save()
@@ -187,6 +215,7 @@ class OrderItem(models.Model):
         self.item_status = 'RETURNED'
         self.save()
 
+        # Recalculate order totals
         self.order.recalculate_totals()
 
     def save(self, *args, **kwargs):

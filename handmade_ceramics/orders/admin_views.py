@@ -293,3 +293,59 @@ def admin_complete_return(request, order_id):
     messages.success(request, "Return completed and refund processed.")
 
     return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+from orders.models import OrderItem
+from wallet.models import Wallet, WalletTransaction
+
+
+def approve_item_return(request, item_id):
+
+    item = get_object_or_404(OrderItem, id=item_id)
+    order = item.order
+
+    if item.item_status != 'RETURN_REQUESTED':
+        messages.error(request, "Invalid return request.")
+        return redirect('custom_admin:orders_admin:admin_order_detail', order.order_id)
+
+    old_total = order.total_amount
+
+    item.process_return()
+
+    order.refresh_from_db()
+
+    refund = old_total - order.total_amount
+
+    if refund > 0:
+
+        wallet, created = Wallet.objects.get_or_create(
+            user=order.user
+        )
+
+        wallet.balance += refund
+        wallet.save()
+
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            amount=refund,
+            transaction_type='CREDIT',
+            description=f"Refund for return: {order.order_id}"
+        )
+
+    messages.success(request, "Return approved and refund processed.")
+
+    return redirect('custom_admin:orders_admin:admin_order_detail', order.order_id)
+
+
+def reject_item_return(request, item_id):
+
+    item = get_object_or_404(OrderItem, id=item_id)
+
+    item.item_status = 'DELIVERED'
+    item.save()
+
+    messages.info(request, "Return request rejected.")
+
+    return redirect('custom_admin:orders_admin:admin_order_detail', item.order.order_id)

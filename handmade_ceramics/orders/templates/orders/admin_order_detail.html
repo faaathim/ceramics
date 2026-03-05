@@ -336,6 +336,29 @@
         .item-status-return_processing{ background: linear-gradient(135deg, #4a3a1a, #5a4a2a); color: #e0a050; }
         .item-status-returned         { background: linear-gradient(135deg, #4a3a2a, #5a4a3a); color: #e0a070; }
 
+        /* ── Per-item return action buttons ── */
+        .item-action-approve {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+            border: 1px solid #4a7a5a; cursor: pointer; transition: all 0.25s ease;
+            background: linear-gradient(135deg, #2a5a3a, #3a6a4a); color: #70c090;
+            white-space: nowrap;
+        }
+        .item-action-approve:hover { background: linear-gradient(135deg, #3a6a4a, #4a7a5a); box-shadow: 0 4px 14px rgba(112,192,144,0.3); transform: translateY(-1px); }
+
+        .item-action-reject {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+            border: 1px solid #7a4a4a; cursor: pointer; transition: all 0.25s ease;
+            background: linear-gradient(135deg, #5a2a2a, #6a3a3a); color: #e07070;
+            white-space: nowrap;
+        }
+        .item-action-reject:hover { background: linear-gradient(135deg, #6a3a3a, #7a4a4a); box-shadow: 0 4px 14px rgba(224,112,112,0.3); transform: translateY(-1px); }
+
+        .item-actions-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        .no-action-dash { color: #505050; font-size: 1.1rem; }
+
         @media (max-width: 1200px) { .detail-grid { grid-template-columns: 1fr; } }
     </style>
 
@@ -596,6 +619,7 @@
                         <th><i class="fas fa-sort-numeric-up"></i> Quantity</th>
                         <th><i class="fas fa-dollar-sign"></i> Total</th>
                         <th><i class="fas fa-info-circle"></i> Status</th>
+                        <th><i class="fas fa-cog"></i> Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -624,10 +648,37 @@
                                 {{ item.get_item_status_display }}
                             </span>
                         </td>
+                        <td>
+                            {% if item.item_status == 'RETURN_REQUESTED' %}
+                            {# Approve or reject the individual item's return request #}
+                            <div class="item-actions-cell">
+                                <form method="POST"
+                                      action="{% url 'custom_admin:orders_admin:approve_item_return' item.id %}"
+                                      style="margin: 0;"
+                                      onsubmit="return confirm('Approve return for \'{{ item.product_name }}\'? A proportional refund will be issued.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="item-action-approve">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="POST"
+                                      action="{% url 'custom_admin:orders_admin:reject_item_return' item.id %}"
+                                      style="margin: 0;"
+                                      onsubmit="return confirm('Reject return for \'{{ item.product_name }}\'? Item will revert to Delivered.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="item-action-reject">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="no-action-dash">—</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: #606060;">
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #606060;">
                             <i class="fas fa-box-open" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
                             No items found in this order.
                         </td>
