@@ -18,5 +18,4 @@ path(
     admin_views.admin_complete_return,
     name='admin_complete_return'
 ),
-
 ]

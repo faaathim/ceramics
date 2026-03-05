@@ -1,10 +1,11 @@
+# orders/models.py
+
 from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from coupons.models import Coupon
-
 from product_management.models import Variant, Product
 
 User = get_user_model()
@@ -87,6 +88,29 @@ class Order(models.Model):
             models.Index(fields=['created_at']),
         ]
 
+    def recalculate_totals(self):
+        active_items = self.items.exclude(item_status='CANCELLED')
+        new_subtotal = sum(item.item_total for item in active_items)
+
+        if self.coupon and new_subtotal > 0:
+            discount = (self.coupon.discount_percentage / 100) * new_subtotal
+        else:
+            discount = 0
+
+        if not active_items.exists():
+            self.shipping_charge = 0 
+            self.status = 'CANCELLED'
+            self.coupon = None
+            discount = 0
+        else:
+            self.shipping_charge = 50
+
+        self.subtotal = new_subtotal
+        self.discount_amount = discount
+        self.total_amount = new_subtotal + self.shipping_charge - discount
+
+        self.save()
+
     def __str__(self):
         return f"{self.order_id} - {self.user}"
 
@@ -137,6 +161,33 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.product_name} x {self.quantity} ({self.order.order_id})"
 
+    @transaction.atomic
+    def cancel_item(self):
+        if self.item_status in ['CANCELLED', 'RETURNED']:
+            return
+        
+        if self.variant:
+            self.variant.stock += self.quantity
+            self.variant.save()
+
+        self.item_status = 'CANCELLED'  
+        self.save()
+
+        self.order.recalculate_totals()
+
+    @transaction.atomic
+    def process_return(self):
+        if self.item_status != 'DELIVERED':
+            return
+        
+        if self.variant:
+            self.variant.stock += self.quantity
+            self.variant.save()
+
+        self.item_status = 'RETURNED'
+        self.save()
+
+        self.order.recalculate_totals()
 
     def save(self, *args, **kwargs):
         self.item_total = self.unit_price * self.quantity

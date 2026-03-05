@@ -1,3 +1,5 @@
+# coupons/views.py 
+
 from decimal import Decimal
 
 from django.shortcuts import redirect

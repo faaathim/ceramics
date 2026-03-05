@@ -64,10 +64,6 @@
                 {% if order.status != 'CANCELLED' and order.status != 'DELIVERED' %}
                   <a href="{% url 'orders:cancel_order' order.order_id %}" class="btn-action btn-cancel">Cancel</a>
                 {% endif %}
-                
-                {% if order.status == 'DELIVERED' and order.status != 'RETURNED' %}
-                  <a href="{% url 'orders:return_order' order.order_id %}" class="btn-action btn-return">Return</a>
-                {% endif %}
 
                 <a href="{% url 'orders:download_invoice' order.order_id %}" class="btn-action btn-invoice">Invoice</a>
               </div>

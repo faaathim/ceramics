@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction
 
-from .models import Order
+from .models import Order, OrderItem
 from product_management.models import Variant
 from wallet.models import Wallet, WalletTransaction
 
@@ -87,7 +87,6 @@ def admin_order_list(request):
     return render(request, 'orders/admin_order_list.html', context)
 
 
-# admin order detail
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 @transaction.atomic
@@ -113,37 +112,57 @@ def admin_order_detail(request, order_id):
         old_status = order.status
         order.status = new_status
 
-        # ✅ Mark COD as paid when delivered
-        if new_status == 'DELIVERED' and order.payment_method == 'COD':
-            order.is_paid = True
+        # ✅ If order is delivered → update items
+        if new_status == 'DELIVERED':
+            # Mark COD as paid
+            if order.payment_method == 'COD':
+                order.is_paid = True
+
+            # ✅ Update only active items
+            order.items.exclude(item_status__in=['CANCELLED', 'RETURNED']).update(item_status='DELIVERED')
+
+            # ✅ Recalculate totals (optional but safe)
+            order.recalculate_totals()
 
 
-        # 🔥 AUTO REFUND if status manually changed to RETURNED
-        if (
-            new_status == 'RETURNED'
-            and not order.is_refunded
-            and (order.is_paid or order.payment_method == 'COD')
-        ):
+        # 🔥 When admin marks RETURN_PROCESSING
+        if new_status == 'RETURN_PROCESSING':
+            order.items.update(item_status='RETURN_PROCESSING')
 
-            wallet, _ = Wallet.objects.select_for_update().get_or_create(
-                user=order.user,
-                defaults={'balance': 0}
-            )
 
-            wallet.balance += order.total_amount
-            wallet.save()
+        # 🔥 When admin marks RETURNED
+        if new_status == 'RETURNED':
 
-            WalletTransaction.objects.create(
-                wallet=wallet,
-                transaction_type=WalletTransaction.CREDIT,
-                source='RETURN_REFUND',
-                amount=order.total_amount,
-                description=f"Refund for returned order {order.order_id}",
-                order=order
-            )
+            # 1️⃣ Increase stock back
+            for item in order.items.select_related('variant'):
+                if item.variant:
+                    item.variant.stock += item.quantity
+                    item.variant.save()
 
-            order.is_refunded = True
+            # 2️⃣ Update all items to RETURNED
+            order.items.update(item_status='RETURNED')
 
+            # 3️⃣ Refund if eligible and not already refunded
+            if (order.is_paid or order.payment_method == 'COD') and not order.is_refunded:
+
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(
+                    user=order.user,
+                    defaults={'balance': 0}
+                )
+
+                wallet.balance += order.total_amount
+                wallet.save()
+
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type=WalletTransaction.CREDIT,
+                    source='RETURN_REFUND',
+                    amount=order.total_amount,
+                    description=f"Refund for returned order {order.order_id}",
+                    order=order
+                )
+
+                order.is_refunded = True
 
         order.save()
 
@@ -187,40 +206,45 @@ def admin_inventory(request):
 
     return render(request, 'orders/admin_inventory.html', context)
 
-# admin verify return 
+
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
+@transaction.atomic
 def admin_verify_return(request, order_id):
 
     order = get_object_or_404(Order, order_id=order_id)
 
     if order.status != 'RETURN_REQUESTED':
-        messages.error(request, "No return request to verify.")
+        messages.error(request, "No return request found.")
         return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
 
     if request.method == 'POST':
         action = request.POST.get('action')
 
+        # ✅ APPROVE
         if action == 'approve':
             order.status = 'RETURN_PROCESSING'
+            order.items.update(item_status='RETURN_PROCESSING')
+            order.save()
+
             messages.success(request, "Return approved.")
 
+        # ❌ REJECT
         elif action == 'reject':
-            order.status = 'DELIVERED'
-            order.return_rejection_reason = request.POST.get('reason', '')
+            rejection_reason = request.POST.get('reason', '').strip()
 
-            for item in order.items.all():
-                item.item_status = 'DELIVERED'
-                item.save()
+            order.status = 'DELIVERED'
+            order.return_rejection_reason = rejection_reason
+            order.save()
+
+            # Restore items to delivered
+            order.items.update(item_status='DELIVERED')
 
             messages.success(request, "Return rejected.")
-
-        order.save()
 
     return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
 
 
-# admin complete return
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 @transaction.atomic
@@ -232,6 +256,7 @@ def admin_complete_return(request, order_id):
         messages.error(request, "Return not in processing state.")
         return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
 
+    # 1️⃣ Restore stock
     for item in order.items.select_related('variant'):
         if item.variant:
             item.variant.stock += item.quantity
@@ -240,10 +265,8 @@ def admin_complete_return(request, order_id):
         item.item_status = 'RETURNED'
         item.save()
 
-    if (
-    (order.is_paid or order.payment_method == 'COD')
-    and not order.is_refunded
-):
+    # 2️⃣ Refund wallet
+    if (order.is_paid or order.payment_method == 'COD') and not order.is_refunded:
 
         wallet, _ = Wallet.objects.select_for_update().get_or_create(
             user=order.user,
@@ -256,8 +279,10 @@ def admin_complete_return(request, order_id):
         WalletTransaction.objects.create(
             wallet=wallet,
             transaction_type=WalletTransaction.CREDIT,
+            source='RETURN_REFUND',
             amount=order.total_amount,
-            description=f"Refund for returned order {order.order_id}"
+            description=f"Refund for returned order {order.order_id}",
+            order=order
         )
 
         order.is_refunded = True
@@ -265,6 +290,6 @@ def admin_complete_return(request, order_id):
     order.status = 'RETURNED'
     order.save()
 
-    messages.success(request, "Return completed and wallet refunded.")
+    messages.success(request, "Return completed and refund processed.")
 
     return redirect('custom_admin:orders_admin:admin_order_detail', order_id)

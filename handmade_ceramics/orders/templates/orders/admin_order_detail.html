@@ -46,27 +46,25 @@
         }
 
         @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
         }
 
-        .alert-success {
-            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
-            border-color: #4a6a5a;
-            color: #70c090;
+        @keyframes slideOutRight {
+            from { transform: translateX(0);    opacity: 1; }
+            to   { transform: translateX(100%); opacity: 0; }
         }
 
-        .alert-error {
-            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
-            border-color: #6a4a4a;
-            color: #e07070;
+        .alert-success { background: linear-gradient(135deg, #2a4a3a, #3a5a4a); border-color: #4a6a5a; color: #70c090; }
+        .alert-error   { background: linear-gradient(135deg, #4a2a2a, #5a3a3a); border-color: #6a4a4a; color: #e07070; }
+        .alert-warning { background: linear-gradient(135deg, #4a3a1a, #5a4a2a); border-color: #6a5a3a; color: #e0b070; }
+        .alert-info    { background: linear-gradient(135deg, #1a3a4a, #2a4a5a); border-color: #3a5a6a; color: #70b0d0; }
+
+        .alert-close {
+            background: transparent; border: none; color: inherit;
+            cursor: pointer; margin-left: auto; opacity: 0.7; font-size: 0.9rem;
         }
+        .alert-close:hover { opacity: 1; }
 
         /* Page Header */
         .page-header {
@@ -89,6 +87,7 @@
             align-items: center;
             gap: 15px;
             margin: 0;
+            flex-wrap: wrap;
         }
 
         .order-id-badge {
@@ -96,6 +95,21 @@
             color: #9b8bdb;
             font-weight: 700;
         }
+
+        .order-status-pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .pill-pending           { background: rgba(208,192,112,0.15); color: #d0c070; border: 1px solid #d0c070; }
+        .pill-confirmed         { background: rgba(112,176,208,0.15); color: #70b0d0; border: 1px solid #70b0d0; }
+        .pill-processing        { background: rgba(112,176,208,0.15); color: #70b0d0; border: 1px solid #70b0d0; }
+        .pill-shipped           { background: rgba(155,139,219,0.15); color: #9b8bdb; border: 1px solid #9b8bdb; }
+        .pill-delivered         { background: rgba(112,192,144,0.15); color: #70c090; border: 1px solid #70c090; }
+        .pill-cancelled         { background: rgba(224,112,112,0.15); color: #e07070; border: 1px solid #e07070; }
+        .pill-return_requested  { background: rgba(224,192,112,0.15); color: #e0c070; border: 1px solid #e0c070; }
+        .pill-return_processing { background: rgba(224,160,80,0.15);  color: #e0a050; border: 1px solid #e0a050; }
+        .pill-returned          { background: rgba(224,160,112,0.15); color: #e0a070; border: 1px solid #e0a070; }
 
         .back-btn {
             padding: 12px 24px;
@@ -109,14 +123,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
-
-        .back-btn:hover {
-            background: #2a2a2a;
-            color: #e8e8e8;
-            border-color: #505050;
-            transform: translateY(-2px);
-        }
+        .back-btn:hover { background: #2a2a2a; color: #e8e8e8; border-color: #505050; transform: translateY(-2px); }
 
         /* Grid Layout */
         .detail-grid {
@@ -135,102 +144,63 @@
             border: 1px solid #333333;
             transition: all 0.3s ease;
         }
-
-        .info-card:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-            border-color: #404040;
-        }
+        .info-card:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); border-color: #404040; }
 
         .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #404040;
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #404040;
         }
+        .card-header i { font-size: 1.5rem; color: #9b8bdb; }
+        .card-header h3 { font-size: 1.3rem; font-weight: 700; color: #e8e8e8; margin: 0; }
 
-        .card-header i {
-            font-size: 1.5rem;
-            color: #9b8bdb;
-        }
-
-        .card-header h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #e8e8e8;
-            margin: 0;
-        }
-
-        .info-section {
-            margin-bottom: 25px;
-        }
-
-        .info-section:last-child {
-            margin-bottom: 0;
-        }
+        .info-section { margin-bottom: 25px; }
+        .info-section:last-child { margin-bottom: 0; }
 
         .section-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #b0b0b0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.85rem; font-weight: 600; color: #b0b0b0;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
         }
+        .section-title i { color: #9b8bdb; }
 
-        .section-title i {
-            color: #9b8bdb;
+        .info-text { color: #e8e8e8; line-height: 1.8; margin-bottom: 8px; }
+        .info-text strong { color: #9b8bdb; font-weight: 600; }
+        .info-label { color: #909090; font-size: 0.9rem; display: inline-block; min-width: 80px; }
+        .info-value { color: #e8e8e8; font-weight: 600; }
+
+        .paid-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+            background: rgba(112,192,144,0.15); color: #70c090; border: 1px solid #70c090;
         }
-
-        .info-text {
-            color: #e8e8e8;
-            line-height: 1.8;
-            margin-bottom: 8px;
+        .unpaid-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+            background: rgba(224,176,112,0.15); color: #e0b070; border: 1px solid #e0b070;
         }
-
-        .info-text strong {
-            color: #9b8bdb;
-            font-weight: 600;
-        }
-
-        .info-label {
-            color: #909090;
-            font-size: 0.9rem;
-            display: inline-block;
-            min-width: 80px;
-        }
-
-        .info-value {
-            color: #e8e8e8;
-            font-weight: 600;
-        }
-
-        .amount-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #2a2a2a;
-        }
-
-        .amount-row:last-child {
-            border-bottom: none;
-        }
-
-        .total-row {
-            padding: 20px 0 10px;
-            border-top: 2px solid #404040;
+        .refunded-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+            background: rgba(224,112,112,0.12); color: #e07070; border: 1px solid #e07070;
             margin-top: 10px;
         }
 
-        .total-amount {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #70c090;
+        .return-reason-box {
+            background: linear-gradient(135deg, #3a2a1a, #4a3a2a);
+            border: 1px solid #6a5a3a; border-radius: 10px;
+            padding: 16px 20px; margin-top: 20px;
         }
+        .return-reason-box .reason-label {
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #b0903a; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+        }
+        .return-reason-box .reason-text { color: #e0c080; font-size: 0.95rem; line-height: 1.6; }
+
+        /* Amount rows */
+        .amount-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2a2a2a; }
+        .amount-row:last-child { border-bottom: none; }
+        .total-row { padding: 20px 0 10px; border-top: 2px solid #404040; margin-top: 10px; }
+        .total-amount { font-size: 1.8rem; font-weight: 700; color: #70c090; }
 
         /* Status Form */
         .status-form {
@@ -240,62 +210,38 @@
             margin-top: 20px;
             border: 1px solid #404040;
         }
+        .status-form.disabled-form { opacity: 0.45; pointer-events: none; }
 
         .form-label {
-            color: #b0b0b0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            display: block;
+            color: #b0b0b0; font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 10px; display: block;
         }
 
         .status-select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #404040;
-            border-radius: 10px;
-            background: #0f0f0f;
-            color: #e8e8e8;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
+            width: 100%; padding: 12px 16px; border: 2px solid #404040; border-radius: 10px;
+            background: #0f0f0f; color: #e8e8e8; font-size: 0.95rem;
+            transition: all 0.3s ease; margin-bottom: 15px;
+        }
+        .status-select:focus { outline: none; border-color: #9b8bdb; background: #1a1a1a; box-shadow: 0 0 0 4px rgba(155,139,219,0.1); }
+        .status-select option { background: #1a1a1a; color: #e8e8e8; }
+
+        .status-terminal-note {
+            margin-top: 12px; font-size: 0.85rem; color: #707070;
+            font-style: italic; display: flex; align-items: center; gap: 6px;
         }
 
-        .status-select:focus {
-            outline: none;
-            border-color: #9b8bdb;
-            background: #1a1a1a;
-            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
-        }
-
+        /* Buttons */
         .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            padding: 12px 24px; border: none; border-radius: 10px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
             text-decoration: none;
         }
+        .btn-primary { background: linear-gradient(135deg, #9b8bdb, #8b7bcb); color: #ffffff; }
+        .btn-primary:hover { background: linear-gradient(135deg, #ab9beb, #9b8bdb); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(155,139,219,0.5); }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
-        }
-
-        /* Return Management Styles */
+        /* Return Management */
         .return-management {
             background: linear-gradient(135deg, #3a2a2a, #4a3a3a);
             border-radius: 12px;
@@ -304,230 +250,103 @@
             border: 1px solid #5a4a4a;
         }
 
-        .return-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .btn-approve {
-            background: linear-gradient(135deg, #2a5a3a, #3a6a4a);
-            color: #70c090;
-            flex: 1;
-        }
-
-        .btn-approve:hover {
-            background: linear-gradient(135deg, #3a6a4a, #4a7a5a);
-            box-shadow: 0 5px 20px rgba(112, 192, 144, 0.3);
-        }
-
-        .btn-reject {
-            background: linear-gradient(135deg, #5a2a2a, #6a3a3a);
-            color: #e07070;
-            flex: 1;
-        }
-
-        .btn-reject:hover {
-            background: linear-gradient(135deg, #6a3a3a, #7a4a4a);
-            box-shadow: 0 5px 20px rgba(224, 112, 112, 0.3);
-        }
-
-        .btn-complete {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            color: #ffffff;
-            width: 100%;
-        }
-
-        .btn-complete:hover {
-            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
-        }
-
         .return-status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
             background: linear-gradient(135deg, #5a4a2a, #6a5a3a);
-            color: #e0c070;
-            margin-bottom: 15px;
+            color: #e0c070; margin-bottom: 15px;
         }
+
+        .return-management p { color: #b0b0b0; font-size: 0.9rem; margin-bottom: 15px; line-height: 1.6; }
+        .return-management p strong { color: #e8e8e8; }
 
         .rejection-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #404040;
-            border-radius: 10px;
-            background: #0f0f0f;
-            color: #e8e8e8;
-            font-size: 0.95rem;
+            width: 100%; padding: 12px 16px; border: 2px solid #404040; border-radius: 10px;
+            background: #0f0f0f; color: #e8e8e8; font-size: 0.95rem;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-            min-height: 100px;
-            resize: vertical;
+            transition: all 0.3s ease; margin-bottom: 15px;
+            min-height: 100px; resize: vertical;
         }
+        .rejection-textarea:focus { outline: none; border-color: #9b8bdb; background: #1a1a1a; box-shadow: 0 0 0 4px rgba(155,139,219,0.1); }
+        .rejection-textarea::placeholder { color: #606060; }
 
-        .rejection-textarea:focus {
-            outline: none;
-            border-color: #9b8bdb;
-            background: #1a1a1a;
-            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
-        }
+        .return-actions { display: flex; gap: 12px; margin-top: 5px; }
 
-        .rejection-textarea::placeholder {
-            color: #606060;
+        .btn-approve {
+            background: linear-gradient(135deg, #2a5a3a, #3a6a4a); color: #70c090; flex: 1;
+            border: 1px solid #4a7a5a;
         }
+        .btn-approve:hover { background: linear-gradient(135deg, #3a6a4a, #4a7a5a); box-shadow: 0 5px 20px rgba(112,192,144,0.3); transform: translateY(-2px); }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #5a2a2a, #6a3a3a); color: #e07070; flex: 1;
+            border: 1px solid #7a4a4a;
+        }
+        .btn-reject:hover { background: linear-gradient(135deg, #6a3a3a, #7a4a4a); box-shadow: 0 5px 20px rgba(224,112,112,0.3); transform: translateY(-2px); }
+
+        .btn-complete {
+            background: linear-gradient(135deg, #9b8bdb, #8b7bcb); color: #ffffff; width: 100%;
+            justify-content: center;
+        }
+        .btn-complete:hover { background: linear-gradient(135deg, #ab9beb, #9b8bdb); box-shadow: 0 5px 20px rgba(155,139,219,0.5); transform: translateY(-2px); }
 
         /* Items Table */
         .items-card {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: 15px;
-            padding: 0;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            border: 1px solid #333333;
-            overflow: hidden;
+            border-radius: 15px; padding: 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5); border: 1px solid #333333; overflow: hidden;
         }
-
         .items-header {
-            padding: 25px 30px;
-            border-bottom: 2px solid #404040;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 25px 30px; border-bottom: 2px solid #404040;
+            display: flex; align-items: center; gap: 12px;
         }
+        .items-header i { font-size: 1.5rem; color: #9b8bdb; }
+        .items-header h3 { font-size: 1.3rem; font-weight: 700; color: #e8e8e8; margin: 0; }
 
-        .items-header i {
-            font-size: 1.5rem;
-            color: #9b8bdb;
-        }
-
-        .items-header h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #e8e8e8;
-            margin: 0;
-        }
-
-        .items-table {
-            width: 100%;
-            margin: 0;
-            border-collapse: collapse;
-        }
-
-        .items-table thead {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-        }
-
+        .items-table { width: 100%; margin: 0; border-collapse: collapse; }
+        .items-table thead { background: linear-gradient(135deg, #2a2a2a, #3a3a3a); }
         .items-table th {
-            padding: 20px 25px;
-            text-align: left;
-            font-weight: 600;
-            color: #b0b0b0;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
+            padding: 20px 25px; text-align: left; font-weight: 600; color: #b0b0b0;
+            text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;
         }
+        .items-table tbody tr { border-bottom: 1px solid #2a2a2a; transition: all 0.3s ease; }
+        .items-table tbody tr:hover { background: linear-gradient(135deg, #252525, #303030); }
+        .items-table tbody tr:last-child { border-bottom: none; }
+        .items-table td { padding: 20px 25px; color: #e8e8e8; font-size: 0.95rem; vertical-align: middle; }
 
-        .items-table tbody tr {
-            border-bottom: 1px solid #2a2a2a;
-            transition: all 0.3s ease;
-        }
-
-        .items-table tbody tr:hover {
-            background: linear-gradient(135deg, #252525, #303030);
-        }
-
-        .items-table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .items-table td {
-            padding: 20px 25px;
-            color: #e8e8e8;
-            font-size: 0.95rem;
-        }
-
-        .product-name {
-            font-weight: 600;
-            color: #e8e8e8;
-        }
+        .product-name { font-weight: 600; color: #e8e8e8; }
+        .item-return-reason { font-size: 0.82rem; color: #b09060; margin-top: 6px; font-style: italic; }
 
         .variant-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: rgba(155, 139, 219, 0.15);
-            color: #9b8bdb;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            background: rgba(155,139,219,0.15); color: #9b8bdb;
         }
-
-        .price {
-            font-weight: 600;
-            color: #70c090;
-        }
+        .price { font-weight: 600; color: #70c090; }
 
         .item-status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
         }
+        .item-status-pending          { background: linear-gradient(135deg, #4a4a2a, #5a5a3a); color: #d0c070; }
+        .item-status-confirmed        { background: linear-gradient(135deg, #1a3a4a, #2a4a5a); color: #70b0d0; }
+        .item-status-delivered        { background: linear-gradient(135deg, #2a4a3a, #3a5a4a); color: #70c090; }
+        .item-status-cancelled        { background: linear-gradient(135deg, #4a2a2a, #5a3a3a); color: #e07070; }
+        .item-status-return_requested { background: linear-gradient(135deg, #5a4a2a, #6a5a3a); color: #e0c070; }
+        .item-status-return_processing{ background: linear-gradient(135deg, #4a3a1a, #5a4a2a); color: #e0a050; }
+        .item-status-returned         { background: linear-gradient(135deg, #4a3a2a, #5a4a3a); color: #e0a070; }
 
-        .item-status-pending {
-            background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
-            color: #d0c070;
-        }
-
-        .item-status-delivered {
-            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
-            color: #70c090;
-        }
-
-        .item-status-cancelled {
-            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
-            color: #e07070;
-        }
-
-        .item-status-returned {
-            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            color: #e0a070;
-        }
-
-        @media (max-width: 1200px) {
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
+        @media (max-width: 1200px) { .detail-grid { grid-template-columns: 1fr; } }
     </style>
 
     <div class="order-detail-content">
-        <!-- Messages Display -->
+
+        <!-- Messages -->
         <div class="messages-container">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-{{ message.tags }}{% endif %}">
-                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
                         <span>{{ message }}</span>
                         <button class="alert-close" onclick="this.parentElement.remove()">
                             <i class="fas fa-times"></i>
@@ -542,6 +361,9 @@
             <h2 class="page-title">
                 <i class="fas fa-receipt"></i>
                 Order: <span class="order-id-badge">{{ order.order_id }}</span>
+                <span class="order-status-pill pill-{{ order.status|lower }}">
+                    {{ order.get_status_display }}
+                </span>
             </h2>
             <a href="{% url 'custom_admin:orders_admin:admin_order_list' %}" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
@@ -551,17 +373,17 @@
 
         <!-- Detail Grid -->
         <div class="detail-grid">
-            <!-- Customer & Shipping Card -->
+
+            <!-- Left: Customer & Shipping -->
             <div class="info-card">
                 <div class="card-header">
                     <i class="fas fa-user-circle"></i>
-                    <h3>Customer & Shipping Information</h3>
+                    <h3>Customer &amp; Shipping Information</h3>
                 </div>
 
                 <div class="info-section">
                     <div class="section-title">
-                        <i class="fas fa-user"></i>
-                        Customer Details
+                        <i class="fas fa-user"></i> Customer Details
                     </div>
                     <p class="info-text">
                         <strong>{{ order.user.get_full_name|default:order.user.username }}</strong>
@@ -574,24 +396,73 @@
 
                 <div class="info-section">
                     <div class="section-title">
-                        <i class="fas fa-shipping-fast"></i>
-                        Shipping Address
+                        <i class="fas fa-shipping-fast"></i> Shipping Address
                     </div>
-                    <p class="info-text">
-                        <strong>{{ order.shipping_full_name }}</strong>
-                    </p>
-                    <p class="info-text">{{ order.shipping_address_line }}</p>
+                    <p class="info-text"><strong>{{ order.shipping_full_name }}</strong></p>
+                    <p class="info-text">{{ order.shipping_address }}</p>
                     <p class="info-text">
                         {{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}
                     </p>
+                    <p class="info-text">{{ order.shipping_country }}</p>
                     <p class="info-text">
                         <span class="info-label">Phone:</span>
                         <span class="info-value">{{ order.shipping_phone }}</span>
                     </p>
+                    <p class="info-text">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{{ order.shipping_email }}</span>
+                    </p>
                 </div>
+
+                <div class="info-section">
+                    <div class="section-title">
+                        <i class="fas fa-credit-card"></i> Payment
+                    </div>
+                    <p class="info-text">
+                        <span class="info-label">Method:</span>
+                        <span class="info-value">{{ order.payment_method }}</span>
+                    </p>
+                    <p class="info-text">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value">
+                            {% if order.is_paid %}
+                                <span class="paid-badge"><i class="fas fa-check-circle"></i> Paid</span>
+                            {% else %}
+                                <span class="unpaid-badge"><i class="fas fa-clock"></i> Pending</span>
+                            {% endif %}
+                        </span>
+                    </p>
+                    {% if order.coupon %}
+                    <p class="info-text">
+                        <span class="info-label">Coupon:</span>
+                        <span class="info-value" style="color: #9b8bdb; font-family: monospace;">{{ order.coupon }}</span>
+                    </p>
+                    {% endif %}
+                    {% if order.is_refunded %}
+                    <div class="refunded-badge">
+                        <i class="fas fa-undo"></i> Refund Issued — ₹{{ order.total_amount }} credited to wallet
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if order.return_reason %}
+                <div class="return-reason-box">
+                    <div class="reason-label"><i class="fas fa-comment-alt"></i> Return Reason</div>
+                    <div class="reason-text">{{ order.return_reason }}</div>
+                </div>
+                {% endif %}
+
+                {% if order.return_rejection_reason %}
+                <div class="return-reason-box" style="background: linear-gradient(135deg,#3a1a1a,#4a2a2a); border-color: #7a3a3a; margin-top: 12px;">
+                    <div class="reason-label" style="color: #c06060;">
+                        <i class="fas fa-times-circle"></i> Return Rejection Reason
+                    </div>
+                    <div class="reason-text" style="color: #e08080;">{{ order.return_rejection_reason }}</div>
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Order Summary Card -->
+            <!-- Right: Order Summary + Status / Return Actions -->
             <div class="info-card">
                 <div class="card-header">
                     <i class="fas fa-file-invoice-dollar"></i>
@@ -610,87 +481,103 @@
                     <span class="info-label">Shipping:</span>
                     <span class="price">₹{{ order.shipping_charge }}</span>
                 </div>
+                {% if order.discount_amount %}
                 <div class="amount-row">
                     <span class="info-label">Discount:</span>
-                    <span class="price">- ₹{{ order.discount_amount }}</span>
+                    <span style="color: #e07070; font-weight: 600;">- ₹{{ order.discount_amount }}</span>
                 </div>
+                {% endif %}
                 <div class="amount-row total-row">
                     <span class="info-label" style="font-size: 1.2rem; font-weight: 700;">Total:</span>
                     <span class="total-amount">₹{{ order.total_amount }}</span>
                 </div>
 
-                <!-- Status Change Form -->
-                <div class="status-form">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <label class="form-label">
-                            <i class="fas fa-sync-alt"></i>
-                            Change Order Status
-                        </label>
-                        <select name="status" class="status-select">
-                            {% for code, label in status_choices %}
-                                <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            Update Status
-                        </button>
-                    </form>
+                {# Terminal states: lock the form #}
+                {% if order.status == 'CANCELLED' or order.status == 'RETURNED' %}
+                <div class="status-form disabled-form">
+                    <label class="form-label"><i class="fas fa-lock"></i> Order Status</label>
+                    <select class="status-select" disabled>
+                        <option>{{ order.get_status_display }}</option>
+                    </select>
+                    <p class="status-terminal-note">
+                        <i class="fas fa-info-circle"></i>
+                        This order is in a terminal state and cannot be updated further.
+                    </p>
                 </div>
 
-                <!-- Return Management Section -->
-                {% if order.status == "RETURN_REQUESTED" %}
+                {# RETURN_REQUESTED: approve or reject via admin_verify_return #}
+                {% elif order.status == 'RETURN_REQUESTED' %}
                 <div class="return-management">
                     <div class="return-status-badge">
-                        <i class="fas fa-undo-alt"></i>
-                        Return Requested - Action Required
+                        <i class="fas fa-undo-alt"></i> Return Requested — Action Required
                     </div>
-                    <label class="form-label">
-                        <i class="fas fa-clipboard-check"></i>
-                        Review Return Request
-                    </label>
-                    <form method="post" action="{% url 'custom_admin:orders_admin:admin_verify_return' order.order_id %}">
+                    <p>
+                        Review the customer's return request. <strong>Approve</strong> to begin
+                        processing, or <strong>Reject</strong> with a reason — the order reverts
+                        to <strong>Delivered</strong>.
+                    </p>
+                    <form method="POST"
+                          action="{% url 'custom_admin:orders_admin:admin_verify_return' order.order_id %}">
                         {% csrf_token %}
-                        
-                        <label class="form-label" style="margin-top: 15px;">
-                            <i class="fas fa-comment-dots"></i>
-                            Rejection Reason (if rejecting)
+                        <label class="form-label">
+                            <i class="fas fa-comment-dots"></i> Rejection Reason (required if rejecting)
                         </label>
-                        <textarea name="reason" class="rejection-textarea" placeholder="Enter reason for rejection (optional)"></textarea>
-                        
+                        <textarea name="reason" class="rejection-textarea"
+                                  placeholder="Enter reason for rejection (leave blank if approving)"></textarea>
                         <div class="return-actions">
                             <button type="submit" name="action" value="approve" class="btn btn-approve">
-                                <i class="fas fa-check"></i>
-                                Approve Return
+                                <i class="fas fa-check"></i> Approve Return
                             </button>
                             <button type="submit" name="action" value="reject" class="btn btn-reject">
-                                <i class="fas fa-times"></i>
-                                Reject Return
+                                <i class="fas fa-times"></i> Reject Return
                             </button>
                         </div>
                     </form>
                 </div>
-                {% endif %}
 
-                {% if order.status == "RETURN_PROCESSING" %}
+                {# RETURN_PROCESSING: complete the return via admin_complete_return #}
+                {% elif order.status == 'RETURN_PROCESSING' %}
                 <div class="return-management">
                     <div class="return-status-badge">
-                        <i class="fas fa-sync-alt"></i>
-                        Return in Progress
+                        <i class="fas fa-sync-alt"></i> Return In Progress
                     </div>
-                    <label class="form-label">
-                        <i class="fas fa-box-open"></i>
-                        Complete Return Process
-                    </label>
-                    <a href="{% url 'custom_admin:orders_admin:admin_complete_return' order.order_id %}" class="btn btn-complete">
-                        <i class="fas fa-flag-checkered"></i>
-                        Mark as Returned
+                    <p>
+                        Items have been received back. Click below to restore stock, issue a wallet
+                        refund of <strong>₹{{ order.total_amount }}</strong>, and mark the order
+                        as <strong>Returned</strong>.
+                    </p>
+                    <a href="{% url 'custom_admin:orders_admin:admin_complete_return' order.order_id %}"
+                       class="btn btn-complete"
+                       onclick="return confirm('Complete return for {{ order.order_id }}? Stock will be restored and ₹{{ order.total_amount }} refunded to the customer\'s wallet.')">
+                        <i class="fas fa-flag-checkered"></i> Complete Return &amp; Refund
                     </a>
                 </div>
+
+                {# Normal flow (PENDING / CONFIRMED / PROCESSING / SHIPPED / DELIVERED) #}
+                {% else %}
+                <div class="status-form">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <label class="form-label">
+                            <i class="fas fa-sync-alt"></i> Change Order Status
+                        </label>
+                        <select name="status" class="status-select">
+                            {% for code, label in status_choices %}
+                                {% if code != 'RETURN_REQUESTED' and code != 'RETURN_PROCESSING' and code != 'RETURNED' and code != 'CANCELLED' %}
+                                    <option value="{{ code }}"
+                                        {% if order.status == code %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Status
+                        </button>
+                    </form>
+                </div>
                 {% endif %}
+
             </div>
         </div>
 
@@ -713,50 +600,50 @@
                 </thead>
                 <tbody>
                     {% for item in items %}
-                        <tr>
-                            <td>
-                                <span class="product-name">{{ item.product_name }}</span>
-                            </td>
-                            <td>
-                                <span class="variant-badge">
-                                    <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
-                                    {{ item.variant_color }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="price">₹{{ item.unit_price }}</span>
-                            </td>
-                            <td>{{ item.quantity }}</td>
-                            <td>
-                                <span class="price">₹{{ item.item_total }}</span>
-                            </td>
-                            <td>
-                                <span class="item-status-badge item-status-{{ item.item_status|lower }}">
-                                    <i class="fas fa-circle"></i>
-                                    {{ item.get_item_status_display }}
-                                </span>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>
+                            <span class="product-name">{{ item.product_name }}</span>
+                            {% if item.return_reason %}
+                            <div class="item-return-reason">
+                                <i class="fas fa-comment-alt"></i> {{ item.return_reason }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="variant-badge">
+                                <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                                {{ item.variant_color|default:"—" }}
+                            </span>
+                        </td>
+                        <td><span class="price">₹{{ item.unit_price }}</span></td>
+                        <td>{{ item.quantity }}</td>
+                        <td><span class="price">₹{{ item.item_total }}</span></td>
+                        <td>
+                            <span class="item-status-badge item-status-{{ item.item_status|lower }}">
+                                <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                                {{ item.get_item_status_display }}
+                            </span>
+                        </td>
+                    </tr>
                     {% empty %}
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px; color: #606060;">
-                                <i class="fas fa-box-open" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
-                                No items found in this order.
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #606060;">
+                            <i class="fas fa-box-open" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
+                            No items found in this order.
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Auto-dismiss alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                setTimeout(function() {
                     alert.style.animation = 'slideOutRight 0.4s ease';
                     setTimeout(() => alert.remove(), 400);
                 }, 5000);

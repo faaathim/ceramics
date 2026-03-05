@@ -1,3 +1,5 @@
+# cart/views.py
+
 from decimal import Decimal
 
 from django.shortcuts import render, redirect, get_object_or_404
