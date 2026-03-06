@@ -9,6 +9,7 @@ from django.http import Http404, JsonResponse
 
 from .models import Product, ProductImage, Variant, VariantImage, product_average_rating, get_related_products
 from .forms import ProductForm, ProductSearchForm, VariantForm
+import os
 
 def superuser_check(user):
     return user.is_active and user.is_superuser
