@@ -20,21 +20,41 @@ User = get_user_model()
 
 
 def process_cropped_image(request):
-    """Convert base64 cropped image to ContentFile for CloudinaryField."""
-    cropped_data = request.POST.get('cropped_image')
+    """
+    Convert base64 cropped image into InMemoryUploadedFile
+    so it behaves like a normal uploaded file.
+    """
+
+    cropped_data = request.POST.get("cropped_image")
+
     if not cropped_data:
         return None
 
-    if ';base64,' not in cropped_data:
+    if ";base64," not in cropped_data:
         raise ValueError("Invalid image format")
 
-    format_part, imgstr = cropped_data.split(';base64,')
-    ext = format_part.split('/')[-1].lower()
-    if ext not in ['jpeg', 'jpg', 'png']:
+    format_part, imgstr = cropped_data.split(";base64,")
+
+    ext = format_part.split("/")[-1].lower()
+
+    if ext not in ["jpeg", "jpg", "png"]:
         raise ValueError("Only JPEG or PNG images are allowed")
 
+    # Decode base64
     image_data = base64.b64decode(imgstr)
-    return ContentFile(image_data, name=f'profile_{request.user.id}.{ext}')
+
+    file_buffer = BytesIO(image_data)
+
+    file_size = sys.getsizeof(file_buffer)
+
+    return InMemoryUploadedFile(
+        file_buffer,
+        field_name="profile_image",
+        name=f"profile_{request.user.id}.{ext}",
+        content_type=f"image/{ext}",
+        size=file_size,
+        charset=None,
+    )
 
 
 @login_required
@@ -48,16 +68,22 @@ def profile_edit(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # Step 1: process cropped image safely
         try:
             image_file = process_cropped_image(request)
-            if image_file:
-                request.FILES['profile_image'] = image_file  # Works with CloudinaryField
         except Exception as e:
             messages.error(request, f"Image error: {str(e)}")
             return redirect('user_profile:profile_edit')
 
-        form = ProfileForm(request.POST, request.FILES, instance=profile, user=request.user)
+        # Step 2: copy request.FILES and add the processed image
+        files = request.FILES.copy()
+        if image_file:
+            files['profile_image'] = image_file
 
+        # Step 3: initialize form with POST data and files
+        form = ProfileForm(request.POST, files, instance=profile, user=request.user)
+
+        # Step 4: validate form
         if not form.is_valid():
             for field, errors in form.errors.items():
                 for error in errors:
@@ -65,8 +91,8 @@ def profile_edit(request):
                     messages.error(request, f"{label}: {error}" if label else error)
             return render(request, 'user_profile/profile_edit.html', {'form': form, 'profile': profile})
 
+        # Step 5: handle email change OTP flow
         new_email = form.cleaned_data.get('email')
-
         if new_email and new_email.lower() != request.user.email.lower():
             if User.objects.filter(email__iexact=new_email).exclude(pk=request.user.pk).exists():
                 form.add_error('email', "This email is already registered with another account.")
@@ -82,13 +108,16 @@ def profile_edit(request):
                     [new_email],
                 )
                 request.session['pending_email'] = new_email
-                form.save(commit=False).save()
+                # Save profile without changing email yet
+                profile = form.save(commit=False)
+                profile.save()
                 messages.info(request, f"An OTP has been sent to {new_email}. Please verify it.")
                 return redirect('user_profile:verify_email_otp')
             except Exception as e:
                 messages.error(request, f"Failed to send verification email: {str(e)}")
                 return redirect('user_profile:profile_edit')
 
+        # Step 6: save profile normally if email is unchanged
         try:
             form.save()
             messages.success(request, "Profile updated successfully!")

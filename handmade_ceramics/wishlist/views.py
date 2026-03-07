@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from product_management.models import Variant
 from .models import Wishlist
+from user_profile.models import Profile
 
 
 @login_required
@@ -54,9 +55,12 @@ def wishlist_page(request):
         .filter(user=request.user)
         .select_related('variant__product')
     )
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = None
 
     return render(request, 'wishlist/wishlist_page.html', {
-        'items': items
+        'items': items,
+        'profile':profile
     })
-
-

@@ -8,6 +8,7 @@ from django.contrib import messages
 from wallet.models import Wallet, WalletTransaction
 from orders.models import Order
 from cart.models import CartItem
+from user_profile.models import Profile
 
 
 @login_required
@@ -83,9 +84,15 @@ def wallet_dashboard(request):
 
     transactions = wallet.transactions.order_by('-created_at')
 
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        profile = None
+        
     context = {
         'wallet': wallet,
         'transactions': transactions,
+        'profile': profile
     }
 
     return render(request, 'wallet/dashboard.html', context)
