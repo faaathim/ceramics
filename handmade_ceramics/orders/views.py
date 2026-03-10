@@ -15,7 +15,7 @@ from .models import Order, OrderItem
 from user_profile.models import Profile
 from coupons.models import CouponUsage
 from wallet.models import Wallet, WalletTransaction
-
+from orders.services.order_service import OrderService
 
 @login_required
 def order_list(request):
@@ -122,58 +122,20 @@ def cancel_order(request, order_id):
 
 @login_required
 @require_POST
-@transaction.atomic
 def cancel_order_item(request, order_id, item_id):
 
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    item = get_object_or_404(OrderItem, id=item_id, order=order)
+    item = get_object_or_404(
+        OrderItem,
+        id=item_id,
+        order__order_id=order_id,
+        order__user=request.user
+    )
 
-    if item.item_status not in ['PENDING', 'CONFIRMED']:
-        messages.error(request, "Item cannot be cancelled.")
-        return redirect('orders:order_detail', order_id=order_id)
-
-    old_total = order.total_amount
-
-    item.cancel_item()
-
-    order.refresh_from_db()
-
-    refund_amount = old_total - order.total_amount
-
-    if order.is_paid and refund_amount > 0:
-
-        wallet, _ = Wallet.objects.select_for_update().get_or_create(
-            user=request.user,
-            defaults={'balance': 0}
-        )
-
-        wallet.balance = F('balance') + refund_amount
-        wallet.save()
-        wallet.refresh_from_db()
-
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type=WalletTransaction.CREDIT,
-            source='CANCEL_REFUND',
-            amount=refund_amount,
-            description=f"Refund for cancelled item in order {order.order_id}",
-            order=order
-        )
-
-    if not order.items.exclude(item_status='CANCELLED').exists():
-
-        order.status = 'CANCELLED'
-        order.save()
-
-        if order.coupon:
-            CouponUsage.objects.filter(
-                user=request.user,
-                coupon=order.coupon,
-                order=order
-            ).delete()
+    OrderService.cancel_item(item)
 
     messages.success(request, "Item cancelled successfully.")
-    return redirect('orders:order_detail', order_id=order_id)
+
+    return redirect(item.order.get_absolute_url())
 
 
 @login_required
@@ -193,14 +155,21 @@ def return_order(request, order_id):
         messages.error(request, "Please provide return reason.")
         return redirect('orders:order_detail', order_id=order_id)
 
-    order.status = 'RETURN_REQUESTED'
-    order.return_reason = reason
-    order.save()
+    # Only update delivered items
+    delivered_items = order.items.filter(item_status='DELIVERED')
 
-    order.items.update(
+    if not delivered_items.exists():
+        messages.error(request, "No delivered items available for return.")
+        return redirect('orders:order_detail', order_id=order_id)
+
+    delivered_items.update(
         item_status='RETURN_REQUESTED',
         return_reason=reason
     )
+
+    order.status = 'RETURN_REQUESTED'
+    order.return_reason = reason
+    order.save()
 
     messages.success(request, "Return request submitted successfully.")
     return redirect('orders:order_detail', order_id=order_id)
@@ -222,6 +191,7 @@ def download_invoice(request, order_id):
 
 @login_required
 @require_POST
+@transaction.atomic
 def request_item_return(request, item_id):
 
     item = get_object_or_404(
@@ -240,9 +210,18 @@ def request_item_return(request, item_id):
     item.return_reason = reason
     item.save()
 
-    item.order.status = 'RETURN_REQUESTED'
-    item.order.save()
+    order = item.order
+
+    delivered_items = order.items.filter(item_status='DELIVERED')
+    requested_items = order.items.filter(item_status='RETURN_REQUESTED')
+
+    if delivered_items.count() == requested_items.count():
+        order.status = 'RETURN_REQUESTED'
+    else:
+        order.status = 'PARTIAL_RETURN_REQUESTED'
+
+    order.save()
 
     messages.success(request, "Return request submitted.")
 
-    return redirect(item.order.get_absolute_url())
+    return redirect(order.get_absolute_url())

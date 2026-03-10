@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.crypto import get_random_string
 from coupons.models import Coupon
 from product_management.models import Variant, Product
+from decimal import Decimal
 
 User = get_user_model()
 
@@ -16,10 +17,19 @@ ORDER_STATUS_CHOICES = [
     ('SHIPPED', 'Shipped'),
     ('OUT_FOR_DELIVERY', 'Out for delivery'),
     ('DELIVERED', 'Delivered'),
+    ('CANCELLED', 'Cancelled'),
+]
+
+
+ITEM_STATUS_CHOICES = [
+    ('PENDING', 'Pending'),
+    ('CONFIRMED', 'Confirmed'),
+    ('SHIPPED', 'Shipped'),
+    ('DELIVERED', 'Delivered'),
+    ('CANCELLED', 'Cancelled'),
     ('RETURN_REQUESTED', 'Return requested'),
     ('RETURN_PROCESSING', 'Return processing'),
     ('RETURNED', 'Returned'),
-    ('CANCELLED', 'Cancelled'),
 ]
 
 
@@ -63,15 +73,18 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     ORDER_STATUS_FLOW = {
-        'PENDING': ['CONFIRMED', 'CANCELLED'],
-        'CONFIRMED': ['SHIPPED', 'CANCELLED'],
-        'SHIPPED': ['OUT_FOR_DELIVERY'],
-        'OUT_FOR_DELIVERY': ['DELIVERED'],
-        'DELIVERED': ['RETURN_REQUESTED'],
-        'RETURN_REQUESTED': ['RETURN_PROCESSING', 'DELIVERED'],
-        'RETURN_PROCESSING': ['RETURNED'],
-        'RETURNED': [],
-        'CANCELLED': [],
+    'PENDING': ['CONFIRMED', 'CANCELLED'],
+    'CONFIRMED': ['SHIPPED', 'CANCELLED'],
+    'SHIPPED': ['OUT_FOR_DELIVERY'],
+    'OUT_FOR_DELIVERY': ['DELIVERED'],
+    'DELIVERED': ['RETURN_REQUESTED', 'PARTIAL_RETURN_REQUESTED'],
+    'RETURN_REQUESTED': ['RETURN_PROCESSING'],
+    'PARTIAL_RETURN_REQUESTED': ['PARTIAL_RETURN_PROCESSING'],
+    'RETURN_PROCESSING': ['RETURNED'],
+    'PARTIAL_RETURN_PROCESSING': ['PARTIALLY_RETURNED'],
+    'RETURNED': [],
+    'PARTIALLY_RETURNED': [],
+    'CANCELLED': [],
     }
 
     coupon = models.ForeignKey(
@@ -95,34 +108,30 @@ class Order(models.Model):
             item_status__in=['CANCELLED', 'RETURNED']
         )
 
-        new_subtotal = sum(item.item_total for item in active_items)
+        new_subtotal = sum((item.item_total for item in active_items), Decimal("0.00"))
 
         # Coupon handling
-        discount = 0
+        discount = Decimal("0.00")
         if self.coupon and new_subtotal > 0:
 
             # Check minimum order condition
             if new_subtotal >= self.coupon.min_order_amount:
                 discount = (
-                    self.coupon.discount_percentage / 100
+                    Decimal(self.coupon.discount_percentage) / Decimal("100")
                 ) * new_subtotal
             else:
                 # Coupon becomes invalid
                 self.coupon = None
-                discount = 0
+                discount = Decimal("0.00")
 
         # Shipping rule
-        if new_subtotal >= 1000:
-            shipping = 0
+        if new_subtotal >= Decimal("1000"):
+            shipping = Decimal("0.00")
         elif new_subtotal > 0:
-            shipping = 50
+            shipping = Decimal("50.00")
         else:
-            shipping = 0
+            shipping = Decimal("0.00")
 
-        # If all items cancelled/returned
-        if not active_items.exists():
-            self.status = 'CANCELLED'
-            self.coupon = None
 
         self.subtotal = new_subtotal
         self.discount_amount = discount
@@ -174,7 +183,7 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     item_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    item_status = models.CharField(max_length=30, choices=ORDER_STATUS_CHOICES, default='PENDING')
+    item_status = models.CharField(max_length=30,choices=ITEM_STATUS_CHOICES,default='PENDING')
 
     cancellation_reason = models.TextField(blank=True, null=True)
     return_reason = models.TextField(blank=True, null=True)

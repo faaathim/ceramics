@@ -13,16 +13,21 @@ from .models import Order, OrderItem
 from product_management.models import Variant
 from wallet.models import Wallet, WalletTransaction
 
+from orders.services.return_service import ReturnService
+from orders.services.order_service import OrderService
+
+
 def superuser_check(user):
     return user.is_active and user.is_superuser
 
 
-# admin order list
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def admin_order_list(request):
+
     orders = Order.objects.select_related('user').all()
 
+    # Search
     q = request.GET.get('q', '').strip()
     if q:
         orders = orders.filter(
@@ -32,10 +37,12 @@ def admin_order_list(request):
             Q(user__last_name__icontains=q)
         )
 
+    # Status filter
     status = request.GET.get('status', '')
     if status:
         orders = orders.filter(status=status)
 
+    # Date filters
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
 
@@ -53,14 +60,21 @@ def admin_order_list(request):
         except ValueError:
             pass
 
+    # Sorting
     sort = request.GET.get('sort', '-created_at')
-    allowed_sorts = ['created_at', '-created_at', 'total_amount', '-total_amount']
+    allowed_sorts = [
+        'created_at',
+        '-created_at',
+        'total_amount',
+        '-total_amount'
+    ]
 
     if sort not in allowed_sorts:
         sort = '-created_at'
 
     orders = orders.order_by(sort)
 
+    # Pagination
     paginator = Paginator(orders, 10)
     page = request.GET.get('page', 1)
 
@@ -91,10 +105,12 @@ def admin_order_list(request):
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 @transaction.atomic
 def admin_order_detail(request, order_id):
+
     order = get_object_or_404(Order, order_id=order_id)
     items = order.items.select_related('variant', 'product')
 
     if request.method == 'POST':
+
         new_status = request.POST.get('status')
 
         if not order.can_change_status(new_status):
@@ -104,45 +120,49 @@ def admin_order_detail(request, order_id):
                 f"{order.get_status_display()} to "
                 f"{new_status.replace('_', ' ').title()}."
             )
+
             return redirect(
-                reverse('custom_admin:orders_admin:admin_order_detail',
-                        args=[order.order_id])
+                reverse(
+                    'custom_admin:orders_admin:admin_order_detail',
+                    args=[order.order_id]
+                )
             )
 
         old_status = order.status
         order.status = new_status
 
-        # ✅ If order is delivered → update items
+        # If order delivered
         if new_status == 'DELIVERED':
+
             # Mark COD as paid
             if order.payment_method == 'COD':
                 order.is_paid = True
 
-            # ✅ Update only active items
-            order.items.exclude(item_status__in=['CANCELLED', 'RETURNED']).update(item_status='DELIVERED')
+            # Update only active items
+            order.items.exclude(
+                item_status__in=['CANCELLED', 'RETURNED']
+            ).update(item_status='DELIVERED')
 
-            # ✅ Recalculate totals (optional but safe)
+            # Recalculate totals
             order.recalculate_totals()
 
-
-        # 🔥 When admin marks RETURN_PROCESSING
+        # Return processing
         if new_status == 'RETURN_PROCESSING':
             order.items.update(item_status='RETURN_PROCESSING')
 
-
-        # 🔥 When admin marks RETURNED
+        # Returned
         if new_status == 'RETURNED':
 
-            # 1️⃣ Increase stock back
+            # Increase stock
             for item in order.items.select_related('variant'):
                 if item.variant:
                     item.variant.stock += item.quantity
                     item.variant.save()
 
-            # 2️⃣ Update all items to RETURNED
+            # Update item status
             order.items.update(item_status='RETURNED')
 
-            # 3️⃣ Refund if eligible and not already refunded
+            # Refund wallet
             if (order.is_paid or order.payment_method == 'COD') and not order.is_refunded:
 
                 wallet, _ = Wallet.objects.select_for_update().get_or_create(
@@ -172,8 +192,10 @@ def admin_order_detail(request, order_id):
         )
 
         return redirect(
-            reverse('custom_admin:orders_admin:admin_order_detail',
-                    args=[order.order_id])
+            reverse(
+                'custom_admin:orders_admin:admin_order_detail',
+                args=[order.order_id]
+            )
         )
 
     context = {
@@ -185,7 +207,6 @@ def admin_order_detail(request, order_id):
     return render(request, 'orders/admin_order_detail.html', context)
 
 
-# admin inventory
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def admin_inventory(request):
@@ -214,129 +235,59 @@ def admin_verify_return(request, order_id):
 
     order = get_object_or_404(Order, order_id=order_id)
 
-    if order.status != 'RETURN_REQUESTED':
-        messages.error(request, "No return request found.")
-        return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+    if request.method == "POST":
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
+        action = request.POST.get("action")
 
-        # ✅ APPROVE
-        if action == 'approve':
-            order.status = 'RETURN_PROCESSING'
-            order.items.update(item_status='RETURN_PROCESSING')
-            order.save()
+        if action == "approve":
 
+            ReturnService.approve_order_return(order)
             messages.success(request, "Return approved.")
 
-        # ❌ REJECT
-        elif action == 'reject':
-            rejection_reason = request.POST.get('reason', '').strip()
+        elif action == "reject":
 
-            order.status = 'DELIVERED'
-            order.return_rejection_reason = rejection_reason
-            order.save()
-
-            # Restore items to delivered
-            order.items.update(item_status='DELIVERED')
+            reason = request.POST.get("reason", "")
+            ReturnService.reject_order_return(order, reason)
 
             messages.success(request, "Return rejected.")
 
-    return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+    return redirect(
+        "custom_admin:orders_admin:admin_order_detail",
+        order_id
+    )
 
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
-@transaction.atomic
 def admin_complete_return(request, order_id):
 
     order = get_object_or_404(Order, order_id=order_id)
 
-    if order.status != 'RETURN_PROCESSING':
-        messages.error(request, "Return not in processing state.")
-        return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
+    success = ReturnService.complete_order_return(order)
 
-    # 1️⃣ Restore stock
-    for item in order.items.select_related('variant'):
-        if item.variant:
-            item.variant.stock += item.quantity
-            item.variant.save()
+    if success:
+        messages.success(request, "Return completed and refund processed.")
+    else:
+        messages.error(request, "Invalid return state.")
 
-        item.item_status = 'RETURNED'
-        item.save()
-
-    # 2️⃣ Refund wallet
-    if (order.is_paid or order.payment_method == 'COD') and not order.is_refunded:
-
-        wallet, _ = Wallet.objects.select_for_update().get_or_create(
-            user=order.user,
-            defaults={'balance': 0}
-        )
-
-        wallet.balance += order.total_amount
-        wallet.save()
-
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type=WalletTransaction.CREDIT,
-            source='RETURN_REFUND',
-            amount=order.total_amount,
-            description=f"Refund for returned order {order.order_id}",
-            order=order
-        )
-
-        order.is_refunded = True
-
-    order.status = 'RETURNED'
-    order.save()
-
-    messages.success(request, "Return completed and refund processed.")
-
-    return redirect('custom_admin:orders_admin:admin_order_detail', order_id)
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-
-from orders.models import OrderItem
-from wallet.models import Wallet, WalletTransaction
+    return redirect(
+        'custom_admin:orders_admin:admin_order_detail',
+        order_id
+    )
 
 
 def approve_item_return(request, item_id):
 
     item = get_object_or_404(OrderItem, id=item_id)
-    order = item.order
 
-    if item.item_status != 'RETURN_REQUESTED':
-        messages.error(request, "Invalid return request.")
-        return redirect('custom_admin:orders_admin:admin_order_detail', order.order_id)
-
-    old_total = order.total_amount
-
-    item.process_return()
-
-    order.refresh_from_db()
-
-    refund = old_total - order.total_amount
-
-    if refund > 0:
-
-        wallet, created = Wallet.objects.get_or_create(
-            user=order.user
-        )
-
-        wallet.balance += refund
-        wallet.save()
-
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            amount=refund,
-            transaction_type='CREDIT',
-            description=f"Refund for return: {order.order_id}"
-        )
+    OrderService.process_item_return(item)
 
     messages.success(request, "Return approved and refund processed.")
 
-    return redirect('custom_admin:orders_admin:admin_order_detail', order.order_id)
+    return redirect(
+        'custom_admin:orders_admin:admin_order_detail',
+        item.order.order_id
+    )
 
 
 def reject_item_return(request, item_id):
@@ -348,4 +299,7 @@ def reject_item_return(request, item_id):
 
     messages.info(request, "Return request rejected.")
 
-    return redirect('custom_admin:orders_admin:admin_order_detail', item.order.order_id)
+    return redirect(
+        'custom_admin:orders_admin:admin_order_detail',
+        item.order.order_id
+    )
