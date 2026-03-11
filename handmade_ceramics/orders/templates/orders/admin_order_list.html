@@ -24,7 +24,7 @@
             min-height: calc(100vh - 70px);
         }
 
-        /* Enhanced Messages Container */
+        /* ── Messages ── */
         .messages-container {
             position: fixed;
             top: 90px;
@@ -44,7 +44,7 @@
             align-items: flex-start;
             gap: 12px;
             animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
             backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
@@ -53,538 +53,206 @@
         .alert::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            left: 0; top: 0; bottom: 0;
             width: 4px;
             background: currentColor;
         }
 
         @keyframes slideInRight {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(120%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
         }
-
         @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(120%);
-                opacity: 0;
-            }
+            from { transform: translateX(0);    opacity: 1; }
+            to   { transform: translateX(120%); opacity: 0; }
+        }
+        @keyframes progressShrink {
+            from { width: 100%; }
+            to   { width: 0%;   }
         }
 
-        .alert.hiding {
-            animation: slideOutRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-        }
+        .alert.hiding { animation: slideOutRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55) forwards; }
 
-        .alert-success {
-            background: linear-gradient(135deg, rgba(42, 74, 58, 0.95), rgba(58, 90, 74, 0.95));
-            border-color: #4a6a5a;
-            color: #70c090;
-        }
+        .alert-success  { background: linear-gradient(135deg,rgba(42,74,58,.95),rgba(58,90,74,.95));  border-color:#4a6a5a; color:#70c090; }
+        .alert-error,
+        .alert-danger   { background: linear-gradient(135deg,rgba(74,42,42,.95),rgba(90,58,58,.95));  border-color:#6a4a4a; color:#e07070; }
+        .alert-warning  { background: linear-gradient(135deg,rgba(74,74,42,.95),rgba(90,90,58,.95));  border-color:#6a6a4a; color:#d0c070; }
+        .alert-info     { background: linear-gradient(135deg,rgba(42,58,74,.95),rgba(58,74,90,.95));  border-color:#4a5a6a; color:#70a0c0; }
 
-        .alert-error, .alert-danger {
-            background: linear-gradient(135deg, rgba(74, 42, 42, 0.95), rgba(90, 58, 58, 0.95));
-            border-color: #6a4a4a;
-            color: #e07070;
-        }
-
-        .alert-warning {
-            background: linear-gradient(135deg, rgba(74, 74, 42, 0.95), rgba(90, 90, 58, 0.95));
-            border-color: #6a6a4a;
-            color: #d0c070;
-        }
-
-        .alert-info {
-            background: linear-gradient(135deg, rgba(42, 58, 74, 0.95), rgba(58, 74, 90, 0.95));
-            border-color: #4a5a6a;
-            color: #70a0c0;
-        }
-
-        .alert-icon {
-            font-size: 1.3rem;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .alert-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .alert-message {
-            display: block;
-            color: inherit;
-            font-weight: 500;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
+        .alert-icon    { font-size:1.3rem; flex-shrink:0; margin-top:2px; }
+        .alert-content { flex:1; min-width:0; }
+        .alert-message { display:block; color:inherit; font-weight:500; font-size:.95rem; line-height:1.5; word-wrap:break-word; }
 
         .alert-close {
-            flex-shrink: 0;
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            opacity: 0.7;
-            transition: all 0.2s ease;
-            margin-top: 2px;
+            flex-shrink:0; background:none; border:none; color:inherit; cursor:pointer;
+            font-size:1.1rem; padding:0; width:24px; height:24px;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:4px; opacity:.7; transition:all .2s ease; margin-top:2px;
         }
-
-        .alert-close:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .alert-close:active {
-            transform: scale(0.9);
-        }
+        .alert-close:hover  { opacity:1; background:rgba(255,255,255,.1); }
+        .alert-close:active { transform:scale(.9); }
 
         .alert-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: currentColor;
-            opacity: 0.4;
-            animation: progressShrink 5s linear forwards;
+            position:absolute; bottom:0; left:0; height:3px;
+            background:currentColor; opacity:.4;
+            animation:progressShrink 5s linear forwards;
         }
 
-        @keyframes progressShrink {
-            from {
-                width: 100%;
-            }
-            to {
-                width: 0%;
-            }
-        }
-
-        /* Filters Section */
+        /* ── Filters ── */
         .filters-container {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: 15px;
-            padding: 20px 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            margin-bottom: 30px;
-            border: 1px solid #333333;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg,#1a1a1a,#2a2a2a);
+            border-radius:15px; padding:20px 25px;
+            box-shadow:0 5px 20px rgba(0,0,0,.5);
+            margin-bottom:30px; border:1px solid #333;
+            transition:all .3s ease;
         }
-
-        .filters-container:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-            border-color: #404040;
-        }
-
-        .filters-container:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-            border-color: #404040;
-        }
+        .filters-container:hover { box-shadow:0 8px 30px rgba(0,0,0,.7); border-color:#404040; }
 
         .filters-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+            gap:12px;
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .filter-group   { display:flex; flex-direction:column; gap:8px; }
+        .filter-label   { color:#b0b0b0; font-size:.85rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:6px; }
+        .filter-input,
+        .filter-select  { padding:14px 20px; border:2px solid #404040; border-radius:12px; background:#0f0f0f; color:#e8e8e8; font-size:.95rem; transition:all .3s ease; }
+        .filter-input:focus,
+        .filter-select:focus { outline:none; border-color:#9b8bdb; background:#1a1a1a; box-shadow:0 0 0 4px rgba(155,139,219,.1); }
+        .filter-input::placeholder { color:#606060; }
 
-        .filter-label {
-            color: #b0b0b0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .filter-actions { grid-column:1/-1; display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
 
-        .filter-input, .filter-select {
-            padding: 14px 20px;
-            border: 2px solid #404040;
-            border-radius: 12px;
-            background: #0f0f0f;
-            color: #e8e8e8;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        .filter-input:focus, .filter-select:focus {
-            outline: none;
-            border-color: #9b8bdb;
-            background: #1a1a1a;
-            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
-        }
-
-        .filter-input::placeholder {
-            color: #606060;
-        }
-
-        .filter-actions {
-            grid-column: 1 / -1;
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
+        /* ── Buttons ── */
         .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            white-space: nowrap;
+            padding:14px 28px; border:none; border-radius:12px;
+            font-weight:600; font-size:.9rem; cursor:pointer;
+            transition:all .3s ease; display:inline-flex; align-items:center;
+            gap:8px; text-decoration:none; white-space:nowrap;
         }
+        .btn-primary        { background:linear-gradient(135deg,#9b8bdb,#8b7bcb); color:#fff; border:2px solid transparent; }
+        .btn-primary:hover  { background:linear-gradient(135deg,#ab9beb,#9b8bdb); transform:translateY(-2px); box-shadow:0 5px 20px rgba(155,139,219,.5); }
+        .btn-secondary      { background:transparent; color:#909090; border:2px solid #404040; }
+        .btn-secondary:hover{ background:#2a2a2a; color:#e8e8e8; border-color:#505050; transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.5); }
+        .btn-outline-info   { background:transparent; color:#70a0c0; border:2px solid #4a5a6a; }
+        .btn-outline-info:hover { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#80b0d0; border-color:#5a6a7a; transform:translateY(-2px); box-shadow:0 5px 20px rgba(112,160,192,.3); }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            color: #ffffff;
-            border: 2px solid transparent;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #909090;
-            border: 2px solid #404040;
-        }
-
-        .btn-secondary:hover {
-            background: #2a2a2a;
-            color: #e8e8e8;
-            border-color: #505050;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-outline-info {
-            background: transparent;
-            color: #70a0c0;
-            border: 2px solid #4a5a6a;
-        }
-
-        .btn-outline-info:hover {
-            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
-            color: #80b0d0;
-            border-color: #5a6a7a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(112, 160, 192, 0.3);
-        }
-
-        /* Table Container */
+        /* ── Table ── */
         .table-container {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: 15px;
-            padding: 0;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            border: 1px solid #333333;
-            transition: all 0.3s ease;
+            background:linear-gradient(135deg,#1a1a1a,#2a2a2a);
+            border-radius:15px; padding:0;
+            box-shadow:0 5px 20px rgba(0,0,0,.5);
+            overflow:hidden; border:1px solid #333;
         }
 
-        .orders-table {
-            width: 100%;
-            margin: 0;
-            border-collapse: collapse;
-        }
-
-        .orders-table thead {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-        }
-
+        .orders-table { width:100%; margin:0; border-collapse:collapse; }
+        .orders-table thead { background:linear-gradient(135deg,#2a2a2a,#3a3a3a); }
         .orders-table th {
-            padding: 20px 25px;
-            text-align: left;
-            font-weight: 600;
-            color: #b0b0b0;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #404040;
+            padding:20px 25px; text-align:left; font-weight:600;
+            color:#b0b0b0; text-transform:uppercase; font-size:.85rem;
+            letter-spacing:.5px; border-bottom:2px solid #404040;
         }
+        .orders-table tbody tr { border-bottom:1px solid #2a2a2a; transition:all .3s ease; }
+        .orders-table tbody tr:hover { background:linear-gradient(135deg,#252525,#303030); }
+        .orders-table td { padding:20px 25px; color:#e8e8e8; font-size:.95rem; vertical-align:middle; }
 
-        .orders-table tbody tr {
-            border-bottom: 1px solid #2a2a2a;
-            transition: all 0.3s ease;
-        }
+        .order-id { font-weight:700; color:#9b8bdb; font-family:'Courier New',monospace; }
 
-        .orders-table tbody tr:hover {
-            background: linear-gradient(135deg, #252525, #303030);
-        }
+        .user-info  { display:flex; flex-direction:column; gap:4px; }
+        .user-name  { font-weight:600; color:#e8e8e8; }
+        .user-email { font-size:.85rem; color:#909090; }
 
-        .orders-table td {
-            padding: 20px 25px;
-            color: #e8e8e8;
-            font-size: 0.95rem;
-            vertical-align: middle;
-        }
-
-        .order-id {
-            font-weight: 700;
-            color: #9b8bdb;
-            font-family: 'Courier New', monospace;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #e8e8e8;
-        }
-
-        .user-email {
-            font-size: 0.85rem;
-            color: #909090;
-        }
-
+        /* ── Status badges — all possible order statuses ── */
         .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            display:inline-flex; align-items:center; gap:6px;
+            padding:6px 14px; border-radius:20px; font-size:.85rem; font-weight:600;
         }
-
-        .status-pending {
-            background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
-            color: #d0c070;
-        }
-
-        .status-confirmed {
-            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
-            color: #70a0c0;
-        }
-
-        .status-shipped {
-            background: linear-gradient(135deg, #3a3a4a, #4a4a5a);
-            color: #9b8bdb;
-        }
-
-        .status-out_for_delivery {
-            background: linear-gradient(135deg, #3a4a5a, #4a5a6a);
-            color: #80b0d0;
-        }
-
-        .status-delivered {
-            background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
-            color: #70c090;
-        }
-
-        .status-return_requested {
-            background: linear-gradient(135deg, #4a3a4a, #5a4a5a);
-            color: #c080c0;
-        }
-
-        .status-return_processing {
-            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            color: #e0a070;
-        }
-
-        .status-returned {
-            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            color: #d08050;
-        }
-
-        .status-cancelled {
-            background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
-            color: #e07070;
-        }
+        .status-pending            { background:linear-gradient(135deg,#4a4a2a,#5a5a3a); color:#d0c070; }
+        .status-confirmed          { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#70a0c0; }
+        .status-processing         { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#70a0c0; }
+        .status-shipped            { background:linear-gradient(135deg,#3a3a4a,#4a4a5a); color:#9b8bdb; }
+        .status-out_for_delivery   { background:linear-gradient(135deg,#3a4a5a,#4a5a6a); color:#80b0d0; }
+        .status-delivered          { background:linear-gradient(135deg,#2a4a3a,#3a5a4a); color:#70c090; }
+        .status-return_requested   { background:linear-gradient(135deg,#4a3a4a,#5a4a5a); color:#c080c0; }
+        .status-return_processing  { background:linear-gradient(135deg,#4a3a2a,#5a4a3a); color:#e0a070; }
+        .status-returned           { background:linear-gradient(135deg,#4a3a2a,#5a4a3a); color:#d08050; }
+        .status-cancelled          { background:linear-gradient(135deg,#4a2a2a,#5a3a3a); color:#e07070; }
+        /* fallback for any unknown status */
+        .status-badge:not([class*="status-"]) { background:rgba(80,80,80,.4); color:#aaa; }
 
         .payment-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: rgba(155, 139, 219, 0.15);
-            color: #9b8bdb;
+            display:inline-flex; align-items:center; gap:6px;
+            padding:6px 12px; border-radius:8px; font-size:.85rem; font-weight:600;
+            background:rgba(155,139,219,.15); color:#9b8bdb;
         }
 
-        .amount {
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: #70c090;
-        }
+        .amount { font-weight:700; font-size:1.05rem; color:#70c090; }
 
         .btn-view {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
-            color: #70a0c0;
-            border: 1px solid #4a5a6a;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            padding:8px 16px;
+            background:linear-gradient(135deg,#2a3a4a,#3a4a5a);
+            color:#70a0c0; border:1px solid #4a5a6a; border-radius:8px;
+            text-decoration:none; font-weight:600; font-size:.85rem;
+            transition:all .3s ease; display:inline-flex; align-items:center; gap:6px;
         }
+        .btn-view:hover { background:linear-gradient(135deg,#3a4a5a,#4a5a6a); color:#80b0d0; transform:translateY(-2px); box-shadow:0 5px 15px rgba(112,160,192,.4); }
 
-        .btn-view:hover {
-            background: linear-gradient(135deg, #3a4a5a, #4a5a6a);
-            color: #80b0d0;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(112, 160, 192, 0.4);
-        }
+        .empty-state { text-align:center; padding:60px 20px; color:#606060; }
+        .empty-state i { font-size:4rem; margin-bottom:20px; opacity:.3; display:block; }
+        .empty-state p { font-size:1.2rem; font-weight:600; margin-bottom:10px; }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #606060;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .empty-state p {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        /* Pagination */
+        /* ── Pagination ── */
         .pagination-container {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #333333;
-            flex-wrap: wrap;
-            gap: 15px;
+            background:linear-gradient(135deg,#1a1a1a,#2a2a2a);
+            border-radius:15px; padding:25px; margin-top:25px;
+            box-shadow:0 5px 20px rgba(0,0,0,.5);
+            display:flex; justify-content:space-between; align-items:center;
+            border:1px solid #333; flex-wrap:wrap; gap:15px;
         }
 
-        .pagination-info {
-            color: #b0b0b0;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .pagination-info { color:#b0b0b0; font-weight:600; display:flex; align-items:center; gap:8px; }
+        .pagination-links { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 
-        .pagination-links {
-            display: flex;
-            gap: 10px;
+        .pagination-links a,
+        .pagination-links span {
+            padding:10px 16px;
+            background:linear-gradient(135deg,#2a2a2a,#3a3a3a);
+            color:#e8e8e8; text-decoration:none; border-radius:10px;
+            font-weight:600; transition:all .3s ease; border:1px solid #404040;
+            display:inline-flex; align-items:center; gap:6px;
+            min-width:42px; justify-content:center;
         }
-
-        .pagination-links a, .pagination-links span {
-            padding: 10px 18px;
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            color: #e8e8e8;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid #404040;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
         .pagination-links a:hover:not(.disabled) {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            transform: translateY(-2px);
-            border-color: #9b8bdb;
+            background:linear-gradient(135deg,#9b8bdb,#8b7bcb);
+            transform:translateY(-2px); border-color:#9b8bdb;
         }
+        .pagination-links .current { background:linear-gradient(135deg,#9b8bdb,#8b7bcb); border-color:#9b8bdb; }
+        .pagination-links .disabled { opacity:.4; cursor:not-allowed; }
+        .pagination-links .ellipsis { background:transparent; border-color:transparent; cursor:default; color:#606060; }
 
-        .pagination-links .active {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            border-color: #9b8bdb;
-        }
-
-        .pagination-links .disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .messages-container {
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .alert {
-                padding: 12px 16px;
-            }
-
-            .order-management-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-
-            .filters-form {
-                grid-template-columns: 1fr;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            .pagination-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        /* ── Responsive ── */
+        @media (max-width:768px) {
+            .messages-container { right:10px; left:10px; max-width:none; }
+            .order-management-content { margin-left:0; padding:20px; }
+            .filters-form { grid-template-columns:1fr; }
+            .table-container { overflow-x:auto; }
+            .pagination-container { flex-direction:column; align-items:flex-start; }
         }
     </style>
 
     <div class="order-management-content">
-        <!-- Enhanced Messages Display -->
+
+        <!-- Messages -->
         <div class="messages-container" id="messagesContainer">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
-                        <i class="alert-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <i class="alert-icon fas
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                            {% else %}fa-info-circle{% endif %}"></i>
                         <div class="alert-content">
                             <span class="alert-message">{{ message }}</span>
                         </div>
@@ -597,20 +265,16 @@
             {% endif %}
         </div>
 
-        <!-- Filters Section -->
+        <!-- Filters -->
         <div class="filters-container">
             <form method="GET" class="filters-form">
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-search"></i> Search
-                    </label>
+                    <label class="filter-label"><i class="fas fa-search"></i> Search</label>
                     <input type="text" name="q" value="{{ q }}" class="filter-input" placeholder="Order ID, email or name">
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-info-circle"></i> Status
-                    </label>
+                    <label class="filter-label"><i class="fas fa-info-circle"></i> Status</label>
                     <select name="status" class="filter-select">
                         <option value="">All Statuses</option>
                         {% for code, label in status_choices %}
@@ -620,43 +284,34 @@
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-calendar-alt"></i> Date From
-                    </label>
+                    <label class="filter-label"><i class="fas fa-calendar-alt"></i> Date From</label>
                     <input type="date" name="date_from" value="{{ date_from }}" class="filter-input">
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-calendar-alt"></i> Date To
-                    </label>
+                    <label class="filter-label"><i class="fas fa-calendar-alt"></i> Date To</label>
                     <input type="date" name="date_to" value="{{ date_to }}" class="filter-input">
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-sort"></i> Sort By
-                    </label>
+                    <label class="filter-label"><i class="fas fa-sort"></i> Sort By</label>
                     <select name="sort" class="filter-select">
-                        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
-                        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                        <option value="-created_at"   {% if sort == '-created_at'   %}selected{% endif %}>Newest First</option>
+                        <option value="created_at"    {% if sort == 'created_at'    %}selected{% endif %}>Oldest First</option>
                         <option value="-total_amount" {% if sort == '-total_amount' %}selected{% endif %}>Total (High → Low)</option>
-                        <option value="total_amount" {% if sort == 'total_amount' %}selected{% endif %}>Total (Low → High)</option>
+                        <option value="total_amount"  {% if sort == 'total_amount'  %}selected{% endif %}>Total (Low → High)</option>
                     </select>
                 </div>
 
                 <div class="filter-actions">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i>
-                        Apply Filters
+                        <i class="fas fa-filter"></i> Apply Filters
                     </button>
                     <a href="{% url 'custom_admin:orders_admin:admin_order_list' %}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        Clear Filters
+                        <i class="fas fa-times"></i> Clear Filters
                     </a>
                     <a href="{% url 'custom_admin:orders_admin:admin_inventory' %}" class="btn btn-outline-info">
-                        <i class="fas fa-boxes"></i>
-                        View Inventory
+                        <i class="fas fa-boxes"></i> View Inventory
                     </a>
                 </div>
             </form>
@@ -672,175 +327,152 @@
                         <th><i class="fas fa-user"></i> User</th>
                         <th><i class="fas fa-credit-card"></i> Payment</th>
                         <th><i class="fas fa-info-circle"></i> Status</th>
-                        <th><i class="fas fa-dollar-sign"></i> Total</th>
+                        <th><i class="fas fa-rupee-sign"></i> Total</th>
                         <th><i class="fas fa-cog"></i> Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                        <tr>
-                            <td>
-                                <span class="order-id">{{ order.order_id }}</span>
-                            </td>
-                            <td>{{ order.created_at|date:"d M Y H:i" }}</td>
-                            <td>
-                                <div class="user-info">
-                                    <span class="user-name">{{ order.user.get_full_name|default:order.user.username }}</span>
-                                    <span class="user-email">{{ order.user.email }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="payment-badge">
-                                    <i class="fas fa-wallet"></i>
-                                    {{ order.payment_method }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-{{ order.status|lower }}">
-                                    <i class="fas fa-circle"></i>
-                                    {{ order.get_status_display }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="amount">₹{{ order.total_amount }}</span>
-                            </td>
-                            <td>
-                                <a href="{% url 'custom_admin:orders_admin:admin_order_detail' order.order_id %}" class="btn-view">
-                                    <i class="fas fa-eye"></i>
-                                    View Details
-                                </a>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td><span class="order-id">{{ order.order_id }}</span></td>
+                        <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+                        <td>
+                            <div class="user-info">
+                                <span class="user-name">{{ order.user.get_full_name|default:order.user.username }}</span>
+                                <span class="user-email">{{ order.user.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="payment-badge">
+                                <i class="fas fa-wallet"></i>
+                                {{ order.payment_method }}
+                            </span>
+                        </td>
+                        <td>
+                            {# Build class from lowercased status so CSS matches correctly #}
+                            <span class="status-badge status-{{ order.status|lower }}">
+                                <i class="fas fa-circle" style="font-size:.5rem;"></i>
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td><span class="amount">₹{{ order.total_amount }}</span></td>
+                        <td>
+                            <a href="{% url 'custom_admin:orders_admin:admin_order_detail' order.order_id %}" class="btn-view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
                     {% empty %}
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <p>No orders found.</p>
-                                    {% if q or status or date_from or date_to %}
-                                        <small style="color: #909090;">Try adjusting your filters.</small>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-shopping-cart"></i>
+                                <p>No orders found.</p>
+                                {% if q or status or date_from or date_to %}
+                                    <small style="color:#909090;">Try adjusting your filters.</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Pagination (smart — shows ellipsis instead of all page numbers) -->
         {% if orders.paginator.num_pages > 1 %}
         <div class="pagination-container">
             <div class="pagination-info">
                 <i class="fas fa-file-alt"></i>
-                <span>Page {{ orders.number }} of {{ orders.paginator.num_pages }}</span>
+                <span>
+                    Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+                    &nbsp;·&nbsp; {{ orders.paginator.count }} order{{ orders.paginator.count|pluralize }}
+                </span>
             </div>
+
             <div class="pagination-links">
+                {# Prev controls #}
                 {% if orders.has_previous %}
-                    <a href="?page=1&{{ query_params }}">
-                        <i class="fas fa-angle-double-left"></i> First
+                    <a href="?page=1&{{ query_params }}" title="First">
+                        <i class="fas fa-angle-double-left"></i>
                     </a>
-                    <a href="?page={{ orders.previous_page_number }}&{{ query_params }}">
-                        <i class="fas fa-angle-left"></i> Previous
+                    <a href="?page={{ orders.previous_page_number }}&{{ query_params }}" title="Previous">
+                        <i class="fas fa-angle-left"></i>
                     </a>
                 {% else %}
-                    <span class="disabled">
-                        <i class="fas fa-angle-double-left"></i> First
-                    </span>
-                    <span class="disabled">
-                        <i class="fas fa-angle-left"></i> Previous
-                    </span>
+                    <span class="disabled"><i class="fas fa-angle-double-left"></i></span>
+                    <span class="disabled"><i class="fas fa-angle-left"></i></span>
                 {% endif %}
 
+                {# Smart page numbers: always show first, last, current ±2, with ellipsis #}
                 {% for p in orders.paginator.page_range %}
-                    <a href="?page={{ p }}&{{ query_params }}" class="{% if orders.number == p %}active{% endif %}">
-                        {{ p }}
-                    </a>
+                    {% if p == 1 or p == orders.paginator.num_pages or p >= orders.number|add:"-2" and p <= orders.number|add:"2" %}
+                        {% if p == orders.number %}
+                            <span class="current">{{ p }}</span>
+                        {% else %}
+                            <a href="?page={{ p }}&{{ query_params }}">{{ p }}</a>
+                        {% endif %}
+                    {% elif p == orders.number|add:"-3" or p == orders.number|add:"3" %}
+                        <span class="ellipsis">…</span>
+                    {% endif %}
                 {% endfor %}
 
+                {# Next controls #}
                 {% if orders.has_next %}
-                    <a href="?page={{ orders.next_page_number }}&{{ query_params }}">
-                        Next <i class="fas fa-angle-right"></i>
+                    <a href="?page={{ orders.next_page_number }}&{{ query_params }}" title="Next">
+                        <i class="fas fa-angle-right"></i>
                     </a>
-                    <a href="?page={{ orders.paginator.num_pages }}&{{ query_params }}">
-                        Last <i class="fas fa-angle-double-right"></i>
+                    <a href="?page={{ orders.paginator.num_pages }}&{{ query_params }}" title="Last">
+                        <i class="fas fa-angle-double-right"></i>
                     </a>
                 {% else %}
-                    <span class="disabled">
-                        Next <i class="fas fa-angle-right"></i>
-                    </span>
-                    <span class="disabled">
-                        Last <i class="fas fa-angle-double-right"></i>
-                    </span>
+                    <span class="disabled"><i class="fas fa-angle-right"></i></span>
+                    <span class="disabled"><i class="fas fa-angle-double-right"></i></span>
                 {% endif %}
             </div>
         </div>
         {% endif %}
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>{# /order-management-content #}
+
     <script>
-        // Enhanced Message Handling System
         const MessageHandler = {
             alerts: new Map(),
             autoDismissDelay: 5000,
 
             init() {
-                this.setupAlerts();
-            },
-
-            setupAlerts() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    const alertId = alert.getAttribute('data-alert-id');
-                    const timeoutId = setTimeout(() => {
-                        this.dismissAlert(alert);
-                    }, this.autoDismissDelay);
-                    
-                    this.alerts.set(alertId, timeoutId);
+                document.querySelectorAll('.alert').forEach(alert => {
+                    const id = alert.dataset.alertId;
+                    const tid = setTimeout(() => this.dismiss(alert), this.autoDismissDelay);
+                    this.alerts.set(id, tid);
                 });
             },
 
-            dismissAlert(alertElement) {
-                if (!alertElement || !alertElement.parentElement) return;
-                
-                alertElement.classList.add('hiding');
-                
-                setTimeout(() => {
-                    if (alertElement.parentElement) {
-                        alertElement.remove();
-                    }
-                }, 400);
+            dismiss(el) {
+                if (!el || !el.parentElement) return;
+                el.classList.add('hiding');
+                setTimeout(() => el.remove(), 400);
             },
 
-            clearTimeout(alertElement) {
-                const alertId = alertElement.getAttribute('data-alert-id');
-                if (this.alerts.has(alertId)) {
-                    clearTimeout(this.alerts.get(alertId));
-                    this.alerts.delete(alertId);
-                }
+            cancelTimer(el) {
+                const id = el.dataset.alertId;
+                if (this.alerts.has(id)) { clearTimeout(this.alerts.get(id)); this.alerts.delete(id); }
             }
         };
 
-        // Dismiss alert function (called by close button)
-        function dismissAlert(button) {
-            const alert = button.closest('.alert');
-            MessageHandler.clearTimeout(alert);
-            MessageHandler.dismissAlert(alert);
+        function dismissAlert(btn) {
+            const alert = btn.closest('.alert');
+            MessageHandler.cancelTimer(alert);
+            MessageHandler.dismiss(alert);
         }
 
-        // Initialize message handler on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            MessageHandler.init();
-        });
+        document.addEventListener('DOMContentLoaded', () => MessageHandler.init());
 
-        // Keyboard support - ESC to close alerts
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    MessageHandler.clearTimeout(alert);
-                    MessageHandler.dismissAlert(alert);
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.alert').forEach(a => {
+                    MessageHandler.cancelTimer(a);
+                    MessageHandler.dismiss(a);
                 });
             }
         });

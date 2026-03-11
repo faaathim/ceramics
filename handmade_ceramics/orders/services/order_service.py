@@ -16,7 +16,6 @@ class OrderService:
 
         old_total = order.total_amount
 
-        # restore stock
         if item.variant:
             item.variant.stock += item.quantity
             item.variant.save()
@@ -36,34 +35,33 @@ class OrderService:
                 source="CANCEL_REFUND"
             )
 
+    @staticmethod
+    @transaction.atomic
+    def process_item_return(item):
 
-@staticmethod
-@transaction.atomic
-def process_item_return(item):
+        order = item.order
 
-    order = item.order
+        if item.item_status != "RETURN_REQUESTED":
+            return
 
-    if item.item_status != "RETURN_REQUESTED":
-        return
+        old_total = order.total_amount
 
-    old_total = order.total_amount
+        # restore stock
+        if item.variant:
+            item.variant.stock += item.quantity
+            item.variant.save()
 
-    # restore stock
-    if item.variant:
-        item.variant.stock += item.quantity
-        item.variant.save()
+        item.item_status = "RETURNED"
+        item.save()
 
-    item.item_status = "RETURNED"
-    item.save()
+        order.recalculate_totals()
 
-    order.recalculate_totals()
+        refund_amount = old_total - order.total_amount
 
-    refund_amount = old_total - order.total_amount
-
-    if refund_amount > 0 and order.is_paid:
-        RefundService.refund_to_wallet(
-            user=order.user,
-            amount=refund_amount,
-            order=order,
-            source="RETURN_REFUND"
-        )
+        if refund_amount > 0 and order.is_paid:
+            RefundService.refund_to_wallet(
+                user=order.user,
+                amount=refund_amount,
+                order=order,
+                source="RETURN_REFUND"
+            )

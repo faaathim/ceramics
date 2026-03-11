@@ -1,5 +1,3 @@
-# orders/admin_views.py
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -27,7 +25,6 @@ def admin_order_list(request):
 
     orders = Order.objects.select_related('user').all()
 
-    # Search
     q = request.GET.get('q', '').strip()
     if q:
         orders = orders.filter(
@@ -37,12 +34,10 @@ def admin_order_list(request):
             Q(user__last_name__icontains=q)
         )
 
-    # Status filter
     status = request.GET.get('status', '')
     if status:
         orders = orders.filter(status=status)
 
-    # Date filters
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
 
@@ -60,8 +55,8 @@ def admin_order_list(request):
         except ValueError:
             pass
 
-    # Sorting
     sort = request.GET.get('sort', '-created_at')
+
     allowed_sorts = [
         'created_at',
         '-created_at',
@@ -74,7 +69,6 @@ def admin_order_list(request):
 
     orders = orders.order_by(sort)
 
-    # Pagination
     paginator = Paginator(orders, 10)
     page = request.GET.get('page', 1)
 
@@ -114,6 +108,7 @@ def admin_order_detail(request, order_id):
         new_status = request.POST.get('status')
 
         if not order.can_change_status(new_status):
+
             messages.error(
                 request,
                 f"Invalid status change from "
@@ -131,38 +126,30 @@ def admin_order_detail(request, order_id):
         old_status = order.status
         order.status = new_status
 
-        # If order delivered
         if new_status == 'DELIVERED':
 
-            # Mark COD as paid
             if order.payment_method == 'COD':
                 order.is_paid = True
 
-            # Update only active items
             order.items.exclude(
                 item_status__in=['CANCELLED', 'RETURNED']
             ).update(item_status='DELIVERED')
 
-            # Recalculate totals
             order.recalculate_totals()
 
-        # Return processing
         if new_status == 'RETURN_PROCESSING':
             order.items.update(item_status='RETURN_PROCESSING')
 
-        # Returned
         if new_status == 'RETURNED':
 
-            # Increase stock
             for item in order.items.select_related('variant'):
+
                 if item.variant:
                     item.variant.stock += item.quantity
                     item.variant.save()
 
-            # Update item status
             order.items.update(item_status='RETURNED')
 
-            # Refund wallet
             if (order.is_paid or order.payment_method == 'COD') and not order.is_refunded:
 
                 wallet, _ = Wallet.objects.select_for_update().get_or_create(
@@ -276,6 +263,9 @@ def admin_complete_return(request, order_id):
     )
 
 
+@login_required(login_url='custom_admin:login')
+@user_passes_test(superuser_check, login_url='custom_admin:login')
+@transaction.atomic
 def approve_item_return(request, item_id):
 
     item = get_object_or_404(OrderItem, id=item_id)
@@ -290,6 +280,9 @@ def approve_item_return(request, item_id):
     )
 
 
+@login_required(login_url='custom_admin:login')
+@user_passes_test(superuser_check, login_url='custom_admin:login')
+@transaction.atomic
 def reject_item_return(request, item_id):
 
     item = get_object_or_404(OrderItem, id=item_id)

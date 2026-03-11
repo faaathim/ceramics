@@ -319,20 +319,6 @@
         .ib-return_processing  { background: linear-gradient(135deg,#3d2e10,#4d3a18); color: #e0a050; }
         .ib-returned           { background: linear-gradient(135deg,#3d2e20,#4d3a28); color: #e0a070; }
 
-        /* Per-item action buttons */
-        .item-actions-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .iab-approve, .iab-reject {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 13px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
-            cursor: pointer; transition: all 0.22s ease; white-space: nowrap;
-            text-decoration: none;
-        }
-        .iab-approve { background: linear-gradient(135deg,#1e4a2e,#2a5a3a); color: #70c090; border: 1px solid #3a6a4a; }
-        .iab-approve:hover { background: linear-gradient(135deg,#2a5a3a,#3a6a4a); box-shadow: 0 3px 12px rgba(112,192,144,0.3); transform: translateY(-1px); }
-        .iab-reject  { background: linear-gradient(135deg,#4a1e1e,#5a2a2a); color: #e07070; border: 1px solid #6a3a3a; }
-        .iab-reject:hover  { background: linear-gradient(135deg,#5a2a2a,#6a3a3a); box-shadow: 0 3px 12px rgba(224,112,112,0.3); transform: translateY(-1px); }
-        .no-action { color: #484848; font-size: 1rem; }
-
         @media (max-width: 1100px) { .detail-grid { grid-template-columns: 1fr; } }
         @media (max-width: 700px)  { .order-detail-content { margin-left: 0; padding: 20px; } }
     </style>
@@ -517,16 +503,31 @@
                 {% elif order.status == 'PARTIAL_RETURN_REQUESTED' %}
                 <div class="return-panel partial">
                     <div class="return-badge partial">
-                        <i class="fas fa-layer-group"></i> Partial Return Requested
+                        <i class="fas fa-layer-group"></i> Partial Return Requested — Action Required
                     </div>
                     <p>
                         The customer has requested a <strong>partial return</strong> on select items.
-                        Use the <strong>Approve / Reject</strong> buttons next to each item in the table below.
+                        <strong>Approve</strong> to move it into Return Processing, or
+                        <strong>Reject</strong> with a reason — the order reverts to <strong>Delivered</strong>.
                     </p>
-                    <div class="hint-banner">
-                        <i class="fas fa-arrow-down"></i>
-                        Scroll down to the <strong>Order Items</strong> table to review each item's return request.
-                    </div>
+                    <form method="POST" action="{% url 'custom_admin:orders_admin:admin_verify_return' order.order_id %}">
+                        {% csrf_token %}
+                        <label class="form-label">
+                            <i class="fas fa-comment-dots"></i> Rejection Reason
+                            <span style="color:#686868;font-size:0.8rem;font-weight:400;text-transform:none;letter-spacing:0;">&nbsp;(required only when rejecting)</span>
+                        </label>
+                        <textarea name="reason" class="rejection-textarea"
+                                  placeholder="Enter reason for rejection (leave blank if approving)…"></textarea>
+                        <div class="return-actions">
+                            <button type="submit" name="action" value="approve" class="btn btn-approve">
+                                <i class="fas fa-check-double"></i> Approve Return
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-reject"
+                                    onclick="return confirm('Reject this return request?')">
+                                <i class="fas fa-times"></i> Reject Return
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 {% elif order.status == 'RETURN_PROCESSING' %}
@@ -585,7 +586,6 @@
                         <th><i class="fas fa-sort-numeric-up"></i> Qty</th>
                         <th><i class="fas fa-dollar-sign"></i> Total</th>
                         <th><i class="fas fa-info-circle"></i> Status</th>
-                        <th><i class="fas fa-cog"></i> Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -615,28 +615,10 @@
                                 {{ item.get_item_status_display }}
                             </span>
                         </td>
-                        <td>
-                            {% if item.item_status == 'RETURN_REQUESTED' %}
-                            <div class="item-actions-cell">
-                                <a href="{% url 'custom_admin:orders_admin:approve_item_return' item.id %}"
-                                   class="iab-approve"
-                                   onclick="return confirm('Approve return for \'{{ item.product_name }}\'?\nA proportional refund will be issued.')">
-                                    <i class="fas fa-check"></i> Approve
-                                </a>
-                                <a href="{% url 'custom_admin:orders_admin:reject_item_return' item.id %}"
-                                   class="iab-reject"
-                                   onclick="return confirm('Reject return for \'{{ item.product_name }}\'?\nItem will revert to Delivered.')">
-                                    <i class="fas fa-times"></i> Reject
-                                </a>
-                            </div>
-                            {% else %}
-                            <span class="no-action">—</span>
-                            {% endif %}
-                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" style="text-align:center;padding:44px;color:#555;">
+                        <td colspan="6" style="text-align:center;padding:44px;color:#555;">
                             <i class="fas fa-box-open" style="font-size:2.6rem;opacity:0.2;display:block;margin-bottom:14px;"></i>
                             No items found in this order.
                         </td>
