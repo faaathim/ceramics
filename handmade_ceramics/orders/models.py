@@ -18,6 +18,8 @@ ORDER_STATUS_CHOICES = [
     ('OUT_FOR_DELIVERY', 'Out for delivery'),
     ('DELIVERED', 'Delivered'),
     ('CANCELLED', 'Cancelled'),
+    ('RETURN_REQUESTED', 'Return requested'),
+    ('PARTIAL_RETURN_REQUESTED', 'Partial return requested')
 ]
 
 

@@ -14,7 +14,8 @@ class ReturnService:
         Admin approves a full order return
         """
 
-        if order.status != "RETURN_REQUESTED":
+        if order.status != "RETURN_REQUESTED" and order.status != "PARTIAL_RETURN_REQUESTED":
+            print(f"status:{order.status}")
             return False
 
         order.status = "RETURN_PROCESSING"
@@ -56,7 +57,7 @@ class ReturnService:
         Admin completes the return
         """
 
-        if order.status != "RETURN_PROCESSING":
+        if order.status != "RETURN_PROCESSING" and order.status != "PARTIAL_RETURN_REQUESTED":
             return False
 
         refund_total = 0
