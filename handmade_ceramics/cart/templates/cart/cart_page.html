@@ -494,6 +494,21 @@
         <p class="items-count" id="cart-item-count">{{ items|length }} Item{% if items|length != 1 %}s{% endif %}</p>
     </div>
 
+    <!-- Messages Display -->
+    {% if messages %}
+    <div class="messages-container" id="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+        <span class="alert-icon">
+            {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✅{% else %}ℹ️{% endif %}
+        </span>
+        <span class="alert-text">{{ message }}</span>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">×</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if items %}
 
         <!-- CART TABLE -->
