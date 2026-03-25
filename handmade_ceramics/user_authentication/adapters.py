@@ -1,3 +1,5 @@
+# user_authentication/adapters.py
+
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib.auth import get_user_model
 

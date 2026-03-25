@@ -61,7 +61,6 @@ def order_detail(request, order_id):
         "profile": profile,
     })
 
-
 @login_required
 @require_POST
 @transaction.atomic

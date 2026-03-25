@@ -411,55 +411,40 @@
 </style>
 {% endblock %}
 
-{% block top %}
-  {% include "user_navbar.html" %}
-{% endblock %}
+{% block top %}{% include "user_navbar.html" %}{% endblock %}
 
 {% block content %}
 <div class="signup-page">
-  <!-- Left side - Image Gallery -->
   <div class="gallery-section">
     <div class="gallery-grid">
-      <div class="gallery-item gallery-item-1">
-        <img src="{% static 'images/IMG.png' %}" alt="Pottery work">
-      </div>
-      <div class="gallery-item gallery-item-2">
-        <img src="{% static 'images/IMG (1).png' %}" alt="Ceramic cylinders">
-      </div>
-      <div class="gallery-item gallery-item-3">
-        <img src="{% static 'images/IMG (2).png' %}" alt="Ceramic collection">
-      </div>
-      <div class="gallery-item gallery-item-4">
-        <img src="{% static 'images/IMG (3).png' %}" alt="Pottery wheel">
-      </div>
+      <div class="gallery-item"><img src="{% static 'images/IMG.png' %}" alt="Pottery work"></div>
+      <div class="gallery-item"><img src="{% static 'images/IMG (1).png' %}" alt="Ceramic cylinders"></div>
+      <div class="gallery-item"><img src="{% static 'images/IMG (2).png' %}" alt="Ceramic collection"></div>
+      <div class="gallery-item"><img src="{% static 'images/IMG (3).png' %}" alt="Pottery wheel"></div>
     </div>
   </div>
 
-  <!-- Right side - Signup Form -->
   <div class="form-section">
     <div class="signup-container">
       <h1 class="signup-title">Create Account</h1>
 
-      <!-- Display Django Messages -->
       {% if messages %}
         <div class="alert-messages">
           {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-              {{ message }}
-            </div>
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
           {% endfor %}
         </div>
       {% endif %}
 
       <form method="POST" action="{% url 'user_authentication:signup' %}" novalidate>
         {% csrf_token %}
-        
+
         <div class="form-group">
           <label class="form-label">First Name</label>
-          <input type="text" 
-                 name="first_name" 
+          <input type="text"
+                 name="first_name"
                  value="{{ form.first_name.value|default:'' }}"
-                 placeholder="Enter your first name" 
+                 placeholder="Enter your first name"
                  class="{% if form.first_name.errors %}is-invalid{% endif %}"
                  required>
           {% for error in form.first_name.errors %}
@@ -469,8 +454,8 @@
 
         <div class="form-group">
           <label class="form-label">Last Name</label>
-          <input type="text" 
-                 name="last_name" 
+          <input type="text"
+                 name="last_name"
                  value="{{ form.last_name.value|default:'' }}"
                  placeholder="Enter your last name"
                  class="{% if form.last_name.errors %}is-invalid{% endif %}">
@@ -481,10 +466,10 @@
 
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" 
-                 name="email" 
+          <input type="email"
+                 name="email"
                  value="{{ form.email.value|default:'' }}"
-                 placeholder="Enter your email" 
+                 placeholder="Enter your email"
                  class="{% if form.email.errors %}is-invalid{% endif %}"
                  required>
           {% for error in form.email.errors %}
@@ -494,9 +479,9 @@
 
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" 
-                 name="password1" 
-                 placeholder="Enter your password" 
+          <input type="password"
+                 name="password1"
+                 placeholder="Enter your password"
                  class="{% if form.password1.errors %}is-invalid{% endif %}"
                  required>
           {% for error in form.password1.errors %}
@@ -506,9 +491,9 @@
 
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
-          <input type="password" 
-                 name="password2" 
-                 placeholder="Confirm your password" 
+          <input type="password"
+                 name="password2"
+                 placeholder="Confirm your password"
                  class="{% if form.password2.errors %}is-invalid{% endif %}"
                  required>
           {% for error in form.password2.errors %}
@@ -516,20 +501,15 @@
           {% endfor %}
         </div>
 
-        <!-- Display non-field errors -->
         {% if form.non_field_errors %}
           <div class="alert alert-error">
-            {% for error in form.non_field_errors %}
-              {{ error }}
-            {% endfor %}
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
           </div>
         {% endif %}
 
         <button type="submit" class="btn-signup">Create Account</button>
 
-        <div class="divider">
-          <span>or</span>
-        </div>
+        <div class="divider"><span>or</span></div>
 
         <a href="{% provider_login_url 'google' %}" class="btn-google">
           <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

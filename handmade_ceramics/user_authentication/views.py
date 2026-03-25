@@ -1,381 +1,219 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model, login, authenticate, logout
 from django.contrib import messages
-from django.conf import settings
-from django.contrib.auth import (
-    get_user_model, login, authenticate, logout
-)
-from django.contrib.auth.password_validation import validate_password
-from django.core.mail import send_mail
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.cache import never_cache
-
-from .forms import SignupForm, OTPForm, LoginForm,ForgotPasswordForm
-from .models import OTP
+from django.utils import timezone
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 
+from .models import OTP
+from .forms import SignupForm, OTPForm, LoginForm, ResetPasswordForm
 
 User = get_user_model()
+OTP_EXPIRY_SECONDS = 180  # 3 minutes
 
+# ── Helper: Create & Send OTP ────────────────────────────────────────────────
 
-# -------------------------------------------------
-# Helper: Send OTP Email
-# -------------------------------------------------
+def create_and_send_otp(email, purpose, user=None, first_name=""):
+    """Creates an OTP record and attempts to send it via email."""
+    # 1. Invalidate old OTPs for this purpose
+    OTP.objects.filter(email=email, purpose=purpose, is_used=False).update(is_used=True)
 
-def send_otp_email(email, code):
-    subject = "Your OTP Code"
-    message = (
-        f"Your 4-digit OTP is: {code}\n"
-        f"This OTP is valid for 60seconds"
+    # 2. Generate and Save the OTP
+    otp_code = OTP.generate_otp()
+    hashed_code = OTP.hash_otp(otp_code)
+    
+    OTP.objects.create(
+        user=user,
+        email=email,
+        code_hash=hashed_code,
+        purpose=purpose,
     )
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [email],
-        fail_silently=False,
-    )
 
+    # 3. Send Email
+    try:
+        subject = "Your Verification Code"
+        text_content = f"Hi {first_name}, Your OTP is: {otp_code}"
+        
+        email_msg = EmailMultiAlternatives(
+            subject,
+            text_content,
+            settings.EMAIL_HOST_USER,
+            [email],
+        )
+        email_msg.send()
+        print(f"Successfully sent email to {email}")
+    except Exception as e:
+        print(f"EMAIL SENDING FAILED: {e}")
+        # Logged for terminal testing if SMTP is blocked
+        print(f"CRITICAL: Testing OTP is: {otp_code}")
 
-# -------------------------------------------------
-# SIGNUP
-# -------------------------------------------------
+# ── Signup Logic ─────────────────────────────────────────────────────────────
 
-@never_cache
-@require_http_methods(["GET", "POST"])
 def signup_view(request):
     form = SignupForm(request.POST or None)
-
-    if request.method == "POST" and form.is_valid():
-        user = User.objects.create_user(
-            username=form.cleaned_data["email"],
-            email=form.cleaned_data["email"],
-            first_name=form.cleaned_data["first_name"],
-            last_name=form.cleaned_data.get("last_name", ""),
-            password=form.cleaned_data["password1"],
-            is_active=False,  # activate after OTP
+    if request.method == 'POST' and form.is_valid():
+        request.session['signup_data'] = {
+            'email': form.cleaned_data['email'],
+            'password': form.cleaned_data['password1'],
+            'first_name': form.cleaned_data['first_name'],
+            'last_name': form.cleaned_data.get('last_name', ''),
+        }
+        create_and_send_otp(
+            email=form.cleaned_data['email'],
+            purpose='signup',
+            first_name=form.cleaned_data['first_name']
         )
+        return redirect('user_authentication:verify_otp')
+    return render(request, 'user_authentication/signup.html', {'form': form})
 
-        otp_code = OTP.generate_otp()
-        OTP.objects.create(
-            user=user,
-            code=otp_code,
-            purpose="signup"
-        )
+def verify_otp(request):
+    signup_data = request.session.get('signup_data')
+    if not signup_data:
+        messages.error(request, "Session expired. Please sign up again.")
+        return redirect('user_authentication:signup')
 
-        send_otp_email(user.email, otp_code)
-        request.session["verify_user_id"] = user.id
+    email = signup_data['email']
+    otp = OTP.objects.filter(email=email, purpose='signup', is_used=False).last()
 
-        messages.success(request, "OTP sent to your email.")
-        return redirect("user_authentication:verify_signup_otp")
+    remaining = 0
+    if otp and not otp.is_expired():
+        elapsed = (timezone.now() - otp.created_at).total_seconds()
+        remaining = max(0, int(OTP_EXPIRY_SECONDS - elapsed))
 
-    return render(
-        request,
-        "user_authentication/signup.html",
-        {"form": form},
-    )
+    return render(request, 'user_authentication/verify_otp.html', {
+        'form': OTPForm(), 
+        'remaining_time': remaining
+    })
 
-# -------------------------------------------------
-# SIGNUP OTP VERIFY
-# -------------------------------------------------
+@require_POST
+def ajax_verify_signup_otp(request):
+    signup_data = request.session.get('signup_data')
+    if not signup_data:
+        return JsonResponse({'error': 'Session expired.'}, status=400)
 
-@never_cache
-@require_http_methods(["GET", "POST"])
-def verify_signup_otp(request):
-    user_id = request.session.get("verify_user_id")
+    code = request.POST.get('code', '').strip()
+    otp = OTP.objects.filter(email=signup_data['email'], purpose='signup', is_used=False).last()
 
-    if not user_id:
-        messages.error(request, "Signup session expired.")
-        return redirect("user_authentication:signup")
+    if not otp or otp.is_expired():
+        return JsonResponse({'error': 'OTP expired.'}, status=400)
 
-    user = get_object_or_404(User, id=user_id)
-    form = OTPForm(request.POST or None)
-
-    if request.method == "POST" and form.is_valid():
-        otp = OTP.objects.filter(
-            user=user,
-            code=form.cleaned_data["code"],
-            purpose="signup",
-            is_used=False
-        ).last()
-
-        if not otp or otp.is_expired():
-            messages.error(request, "Invalid or expired OTP.")
-            return redirect("user_authentication:verify_signup_otp")
-
-        otp.is_used = True
+    if not otp.verify(code):
+        otp.attempts += 1
         otp.save()
+        return JsonResponse({'error': 'Incorrect OTP.'}, status=400)
 
-        user.is_active = True
-        user.save()
-
-        # ✅ IMPORTANT FIX
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(request, user)
-
-        request.session.pop("verify_user_id", None)
-
-        messages.success(request, "Account verified successfully!")
-        return redirect("user_side:home")
-
-    return render(
-        request,
-        "user_authentication/verify_otp.html",
-        {"form": form},
+    # Success Logic
+    otp.is_used = True
+    otp.save()
+    user = User.objects.create_user(
+        username=signup_data['email'],
+        email=signup_data['email'],
+        password=signup_data['password'],
+        first_name=signup_data['first_name'],
+        last_name=signup_data['last_name']
     )
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    del request.session['signup_data']
+    return JsonResponse({'success': True})
 
+@require_POST
+def ajax_resend_signup_otp(request):
+    signup_data = request.session.get('signup_data')
+    if not signup_data:
+        return JsonResponse({'error': 'Session expired.'}, status=400)
 
-
-# -------------------------------------------------
-# LOGIN
-# -------------------------------------------------
-
-@never_cache
-@require_http_methods(["GET", "POST"])
-def user_login(request):
-    if request.user.is_authenticated:
-        return redirect("user_side:home")
-
-    form = LoginForm(request.POST or None)
-
-    if request.method == "POST" and form.is_valid():
-        email = form.cleaned_data["email"]
-        password = form.cleaned_data["password"]
-        remember_me = form.cleaned_data.get("remember_me")
-
-        try:
-            user_obj = User.objects.get(email__iexact=email)  # case-insensitive
-        except User.DoesNotExist:
-            messages.error(request, "Invalid credentials.")  # avoid email enumeration
-            return redirect("user_authentication:login")
-
-        user = authenticate(request, username=user_obj.username, password=password)
-        if not user:
-            messages.error(request, "Invalid credentials.")
-            return redirect("user_authentication:login")
-
-
-        login(request, user)
-
-        if remember_me:
-            request.session.set_expiry(60 * 60 * 24 * 7)  # 7 days
-        else:
-            request.session.set_expiry(0)
-
-        messages.success(request, "Welcome back!")
-        return redirect("user_side:home")
-
-    return render(
-        request,
-        "user_authentication/login.html",
-        {"form": form},
+    create_and_send_otp(
+        email=signup_data['email'],
+        purpose='signup',
+        first_name=signup_data['first_name']
     )
+    return JsonResponse({'success': True, 'expiry': OTP_EXPIRY_SECONDS})
 
+# ── Password Reset Logic ─────────────────────────────────────────────────────
 
-# -------------------------------------------------
-# LOGOUT
-# -------------------------------------------------
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()
+        if user:
+            request.session['reset_email'] = email
+            request.session['otp_verified_for_reset'] = False
+            create_and_send_otp(
+                email=email, 
+                purpose='reset', 
+                user=user, 
+                first_name=user.first_name
+            )
+            return redirect('user_authentication:verify_reset_otp')
+        messages.error(request, "No account found with that email.")
+    return render(request, 'user_authentication/forgot_password.html')
 
-@never_cache
-def user_logout(request):
-    logout(request)
-    messages.success(request, "Logged out successfully.")
-    return redirect("user_authentication:login")
-
-
-# -------------------------------------------------
-# FORGOT PASSWORD (SEND OTP)
-# -------------------------------------------------
-
-@never_cache
-@require_http_methods(["GET", "POST"])
-def forgot_password(request):
-    if request.method == "POST":
-        form = ForgotPasswordForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data["email"]
-            try:
-                user = User.objects.get(email__iexact=email)
-            except User.DoesNotExist:
-                messages.success(
-                    request,
-                    "If this email exists, an OTP has been sent."
-                )
-                return redirect("user_authentication:forgot_password")
-
-            OTP.objects.filter(
-                user=user, purpose="reset", is_used=False
-            ).update(is_used=True)
-
-            otp_code = OTP.generate_otp()
-            OTP.objects.create(user=user, code=otp_code, purpose="reset")
-            send_otp_email(user.email, otp_code)
-
-            request.session["reset_user_id"] = user.id
-            messages.success(request, "OTP sent to your email.")
-            return redirect("user_authentication:verify_reset_otp")
-    else:
-        form = ForgotPasswordForm()   # ✅ CREATE FORM FOR GET REQUEST
-
-    return render(
-        request,
-        "user_authentication/forgot_password.html",
-        {"form": form}                # ✅ PASS FORM TO TEMPLATE
-    )
-
-
-
-# -------------------------------------------------
-# VERIFY RESET OTP
-# -------------------------------------------------
-
-@never_cache
-@require_http_methods(["GET", "POST"])
 def verify_reset_otp(request):
-    user_id = request.session.get("reset_user_id")
+    if not request.session.get('reset_email'):
+        return redirect('user_authentication:forgot_password')
+    return render(request, 'user_authentication/verify_reset_otp.html')
 
-    if not user_id:
-        messages.error(request, "Session expired.")
-        return redirect("user_authentication:forgot_password")
+@require_POST
+def ajax_verify_reset_otp(request):
+    email = request.session.get('reset_email')
+    code = request.POST.get('code', '').strip()
+    
+    otp = OTP.objects.filter(email=email, purpose='reset', is_used=False).last()
+    if not otp or otp.is_expired():
+        return JsonResponse({'error': 'OTP expired.'}, status=400)
 
-    user = get_object_or_404(User, id=user_id)
-
-    if request.method == "POST":
-        code = request.POST.get("code")
-
-        otp = OTP.objects.filter(
-            user=user,
-            code=code,
-            purpose="reset",
-            is_used=False
-        ).last()
-
-        if not otp or otp.is_expired():
-            messages.error(request, "Invalid or expired OTP.")
-            return redirect("user_authentication:verify_reset_otp")
-
-        otp.is_used = True
+    if not otp.verify(code):
+        otp.attempts += 1
         otp.save()
+        return JsonResponse({'error': 'Invalid code.'}, status=400)
 
-        request.session["reset_verified"] = True
-        messages.success(request, "OTP verified. Set a new password.")
-        return redirect("user_authentication:reset_password")
+    otp.is_used = True
+    otp.save()
+    request.session['otp_verified_for_reset'] = True
+    return JsonResponse({'success': True})
 
-    return render(request, "user_authentication/verify_reset_otp.html")
+@require_POST
+def ajax_resend_reset_otp(request):
+    email = request.session.get('reset_email')
+    user = User.objects.filter(email=email).first()
+    if email:
+        create_and_send_otp(email=email, purpose='reset', user=user, first_name=user.first_name if user else "")
+        return JsonResponse({'success': True, 'expiry': OTP_EXPIRY_SECONDS})
+    return JsonResponse({'error': 'Session error.'}, status=400)
 
-
-# -------------------------------------------------
-# RESET PASSWORD
-# -------------------------------------------------
-
-@never_cache
-@require_http_methods(["GET", "POST"])
 def reset_password(request):
-    user_id = request.session.get("reset_user_id")
-    verified = request.session.get("reset_verified")
+    if not request.session.get('otp_verified_for_reset'):
+        messages.error(request, "Please verify OTP first.")
+        return redirect('user_authentication:forgot_password')
 
-    if not user_id or not verified:
-        messages.error(request, "Unauthorized access.")
-        return redirect("user_authentication:forgot_password")
-
-    user = get_object_or_404(User, id=user_id)
-
-    if request.method == "POST":
-        password1 = request.POST.get("password1")
-        password2 = request.POST.get("password2")
-
-        if password1 != password2:
-            messages.error(request, "Passwords do not match.")
-            return redirect("user_authentication:reset_password")
-
-        try:
-            validate_password(password1, user)
-        except Exception as e:
-            messages.error(request, e.messages[0])
-            return redirect("user_authentication:reset_password")
-
-        user.set_password(password1)
+    email = request.session.get('reset_email')
+    user = User.objects.get(email=email)
+    form = ResetPasswordForm(request.POST or None)
+    
+    if request.method == 'POST' and form.is_valid():
+        user.set_password(form.cleaned_data['password1'])
         user.save()
-
-        request.session.pop("reset_user_id", None)
-        request.session.pop("reset_verified", None)
+        request.session.flush()
         messages.success(request, "Password reset successfully.")
-        return redirect("user_authentication:login")
+        return redirect('user_authentication:login')
+    return render(request, 'user_authentication/reset.html', {'form': form})
 
-    return render(request, "user_authentication/reset_password.html")
+# ── Login / Logout ───────────────────────────────────────────────────────────
 
+def login_view(request):
+    form = LoginForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user_obj = User.objects.filter(email=form.cleaned_data['email']).first()
+        if user_obj:
+            user = authenticate(request, username=user_obj.username, password=form.cleaned_data['password'])
+            if user:
+                login(request, user)
+                return redirect('user_side:home')
+        messages.error(request, "Invalid credentials.")
+    return render(request, 'user_authentication/login.html', {'form': form})
 
-@never_cache
-@require_http_methods(["GET", "POST"])
-def resend_signup_otp(request):
-    user_id = request.session.get("verify_user_id")
-
-    if not user_id:
-        messages.error(request, "Signup session expired.")
-        return redirect("user_authentication:signup")
-
-    user = get_object_or_404(User, id=user_id)
-
-    OTP.objects.filter(
-        user=user,
-        purpose="signup",
-        is_used=False
-    ).update(is_used=True)
-
-    otp_code = OTP.generate_otp()
-    OTP.objects.create(
-        user=user,
-        code=otp_code,
-        purpose="signup"
-    )
-
-    send_otp_email(user.email, otp_code)
-
-    messages.success(request, "New OTP sent to your email.")
-    return redirect("user_authentication:verify_signup_otp")
-
-
-# -------------------------------------------------
-# RESEND RESET OTP
-# -------------------------------------------------
-
-@never_cache
-@require_http_methods(["POST"])
-def resend_reset_otp(request):
-    print("# 1. Get user ID from session")
-    user_id = request.session.get("reset_user_id")
-
-    print("# If session expired, stop here")
-    if not user_id:
-        return JsonResponse(
-            {"error": "Session expired. Please try again."},
-            status=400
-        )
-
-    print("# 2. Get user object")
-    user = get_object_or_404(User, id=user_id)
-
-    print("# 3. Invalidate any previous unused reset OTPs")
-    OTP.objects.filter(
-        user=user,
-        purpose="reset",
-        is_used=False
-    ).update(is_used=True)
-
-    print("# 4. Generate a new OTP")
-    new_otp = OTP.generate_otp()
-
-    print("# 5. Save new OTP in database")
-    OTP.objects.create(
-        user=user,
-        code=new_otp,
-        purpose="reset"
-    )
-
-    print("# 6. Send OTP to user's email")
-    send_otp_email(user.email, new_otp)
-
-    print("# 7. Optional success message (for frontend)")
-    messages.success(request, "A new OTP has been sent to your email.")
-
-    print("# 8. Return success response")
-    return JsonResponse({"success": True})
+def logout_view(request):
+    logout(request)
+    return redirect('user_authentication:login')
