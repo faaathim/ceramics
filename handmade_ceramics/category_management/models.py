@@ -16,7 +16,7 @@ class CategoryManager(models.Manager):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=150, unique=True)  # ✅ DB-level unique
+    name = models.CharField(max_length=150)  # ✅ DB-level unique
     description = models.TextField(blank=True)
     image = CloudinaryField('category_image', blank=True, null=True)
 
