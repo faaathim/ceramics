@@ -122,8 +122,8 @@ def place_order(request):
         return redirect("checkout:checkout")
 
     if payment_method == "COD":
-        order_status = "CONFIRMED"
-        is_paid = True
+        order_status = "PENDING"   
+        is_paid = False            
     else:
         order_status = "PENDING"
         is_paid = False

@@ -86,7 +86,7 @@ def cancel_order(request, order_id):
     order.status = 'CANCELLED'
     order.save()
 
-    if order.is_paid and not order.is_refunded:
+    if order.is_paid and not order.is_refunded and order.payment_method != "COD":
 
         wallet, _ = Wallet.objects.select_for_update().get_or_create(
             user=request.user,
@@ -173,20 +173,6 @@ def return_order(request, order_id):
     messages.success(request, "Return request submitted successfully.")
     return redirect('orders:order_detail', order_id=order_id)
 
-@login_required
-def download_invoice(request, order_id):
-
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
-
-    html = render_to_string("orders/invoice.html", {"order": order})
-
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="invoice_{order.order_id}.pdf"'
-
-    weasyprint.HTML(string=html).write_pdf(response)
-
-    return response
-
 
 @login_required
 @require_POST
@@ -224,3 +210,19 @@ def request_item_return(request, item_id):
     messages.success(request, "Return request submitted.")
 
     return redirect(order.get_absolute_url())
+
+
+@login_required
+def download_invoice(request, order_id):
+
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+
+    html = render_to_string("orders/invoice.html", {"order": order})
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="invoice_{order.order_id}.pdf"'
+
+    weasyprint.HTML(string=html).write_pdf(response)
+
+    return response
+
