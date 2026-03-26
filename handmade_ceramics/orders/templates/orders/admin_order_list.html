@@ -31,19 +31,21 @@
             right: 30px;
             z-index: 9999;
             max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             pointer-events: none;
         }
 
         .alert {
             pointer-events: all;
             padding: 16px 20px;
-            margin-bottom: 12px;
             border-radius: 12px;
             border: 1px solid;
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
             box-shadow: 0 8px 25px rgba(0,0,0,0.6);
             backdrop-filter: blur(10px);
             position: relative;
@@ -56,6 +58,7 @@
             left: 0; top: 0; bottom: 0;
             width: 4px;
             background: currentColor;
+            opacity: 0.6;
         }
 
         @keyframes slideInRight {
@@ -71,17 +74,27 @@
             to   { width: 0%;   }
         }
 
-        .alert.hiding { animation: slideOutRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55) forwards; }
+        .alert.hiding {
+            animation: slideOutRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55) forwards;
+        }
 
+        /* Django message tag mappings:
+           success → success
+           error   → error  (Django uses 'error', not 'danger')
+           warning → warning
+           info    → info
+           debug   → info (fallback)
+        */
         .alert-success  { background: linear-gradient(135deg,rgba(42,74,58,.95),rgba(58,90,74,.95));  border-color:#4a6a5a; color:#70c090; }
         .alert-error,
         .alert-danger   { background: linear-gradient(135deg,rgba(74,42,42,.95),rgba(90,58,58,.95));  border-color:#6a4a4a; color:#e07070; }
         .alert-warning  { background: linear-gradient(135deg,rgba(74,74,42,.95),rgba(90,90,58,.95));  border-color:#6a6a4a; color:#d0c070; }
-        .alert-info     { background: linear-gradient(135deg,rgba(42,58,74,.95),rgba(58,74,90,.95));  border-color:#4a5a6a; color:#70a0c0; }
+        .alert-info,
+        .alert-debug    { background: linear-gradient(135deg,rgba(42,58,74,.95),rgba(58,74,90,.95));  border-color:#4a5a6a; color:#70a0c0; }
 
-        .alert-icon    { font-size:1.3rem; flex-shrink:0; margin-top:2px; }
-        .alert-content { flex:1; min-width:0; }
-        .alert-message { display:block; color:inherit; font-weight:500; font-size:.95rem; line-height:1.5; word-wrap:break-word; }
+        .alert-icon     { font-size:1.3rem; flex-shrink:0; margin-top:2px; }
+        .alert-content  { flex:1; min-width:0; }
+        .alert-message  { display:block; color:inherit; font-weight:500; font-size:.95rem; line-height:1.5; word-wrap:break-word; }
 
         .alert-close {
             flex-shrink:0; background:none; border:none; color:inherit; cursor:pointer;
@@ -163,23 +176,22 @@
         .user-name  { font-weight:600; color:#e8e8e8; }
         .user-email { font-size:.85rem; color:#909090; }
 
-        /* ── Status badges — all possible order statuses ── */
+        /* ── Status badges ── */
         .status-badge {
             display:inline-flex; align-items:center; gap:6px;
             padding:6px 14px; border-radius:20px; font-size:.85rem; font-weight:600;
         }
-        .status-pending            { background:linear-gradient(135deg,#4a4a2a,#5a5a3a); color:#d0c070; }
-        .status-confirmed          { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#70a0c0; }
-        .status-processing         { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#70a0c0; }
-        .status-shipped            { background:linear-gradient(135deg,#3a3a4a,#4a4a5a); color:#9b8bdb; }
-        .status-out_for_delivery   { background:linear-gradient(135deg,#3a4a5a,#4a5a6a); color:#80b0d0; }
-        .status-delivered          { background:linear-gradient(135deg,#2a4a3a,#3a5a4a); color:#70c090; }
-        .status-return_requested   { background:linear-gradient(135deg,#4a3a4a,#5a4a5a); color:#c080c0; }
-        .status-return_processing  { background:linear-gradient(135deg,#4a3a2a,#5a4a3a); color:#e0a070; }
-        .status-returned           { background:linear-gradient(135deg,#4a3a2a,#5a4a3a); color:#d08050; }
-        .status-cancelled          { background:linear-gradient(135deg,#4a2a2a,#5a3a3a); color:#e07070; }
-        /* fallback for any unknown status */
-        .status-badge:not([class*="status-"]) { background:rgba(80,80,80,.4); color:#aaa; }
+        .status-pending                 { background:linear-gradient(135deg,#4a4a2a,#5a5a3a); color:#d0c070; }
+        .status-confirmed               { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#70a0c0; }
+        .status-processing              { background:linear-gradient(135deg,#2a3a4a,#3a4a5a); color:#70a0c0; }
+        .status-shipped                 { background:linear-gradient(135deg,#3a3a4a,#4a4a5a); color:#9b8bdb; }
+        .status-out_for_delivery        { background:linear-gradient(135deg,#3a4a5a,#4a5a6a); color:#80b0d0; }
+        .status-delivered               { background:linear-gradient(135deg,#2a4a3a,#3a5a4a); color:#70c090; }
+        .status-return_requested        { background:linear-gradient(135deg,#4a3a4a,#5a4a5a); color:#c080c0; }
+        .status-partial_return_requested{ background:linear-gradient(135deg,#4a3a3a,#5a4a4a); color:#e0a060; }
+        .status-return_processing       { background:linear-gradient(135deg,#4a3a2a,#5a4a3a); color:#e0a070; }
+        .status-returned                { background:linear-gradient(135deg,#4a3a2a,#5a4a3a); color:#d08050; }
+        .status-cancelled               { background:linear-gradient(135deg,#4a2a2a,#5a3a3a); color:#e07070; }
 
         .payment-badge {
             display:inline-flex; align-items:center; gap:6px;
@@ -244,26 +256,27 @@
     <div class="order-management-content">
 
         <!-- Messages -->
+        {# Django message tags: success, error, warning, info, debug #}
+        {% if messages %}
         <div class="messages-container" id="messagesContainer">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
-                        <i class="alert-icon fas
-                            {% if message.tags == 'success' %}fa-check-circle
-                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                            {% else %}fa-info-circle{% endif %}"></i>
-                        <div class="alert-content">
-                            <span class="alert-message">{{ message }}</span>
-                        </div>
-                        <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <div class="alert-progress"></div>
-                    </div>
-                {% endfor %}
-            {% endif %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
+                <i class="alert-icon fas
+                    {% if 'success' in message.tags %}fa-check-circle
+                    {% elif 'error' in message.tags or 'danger' in message.tags %}fa-exclamation-circle
+                    {% elif 'warning' in message.tags %}fa-exclamation-triangle
+                    {% else %}fa-info-circle{% endif %}"></i>
+                <div class="alert-content">
+                    <span class="alert-message">{{ message }}</span>
+                </div>
+                <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="alert-progress"></div>
+            </div>
+            {% endfor %}
         </div>
+        {% endif %}
 
         <!-- Filters -->
         <div class="filters-container">
@@ -349,7 +362,6 @@
                             </span>
                         </td>
                         <td>
-                            {# Build class from lowercased status so CSS matches correctly #}
                             <span class="status-badge status-{{ order.status|lower }}">
                                 <i class="fas fa-circle" style="font-size:.5rem;"></i>
                                 {{ order.get_status_display }}
@@ -379,7 +391,7 @@
             </table>
         </div>
 
-        <!-- Pagination (smart — shows ellipsis instead of all page numbers) -->
+        <!-- Pagination -->
         {% if orders.paginator.num_pages > 1 %}
         <div class="pagination-container">
             <div class="pagination-info">
@@ -391,20 +403,14 @@
             </div>
 
             <div class="pagination-links">
-                {# Prev controls #}
                 {% if orders.has_previous %}
-                    <a href="?page=1&{{ query_params }}" title="First">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                    <a href="?page={{ orders.previous_page_number }}&{{ query_params }}" title="Previous">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
+                    <a href="?page=1&{{ query_params }}" title="First"><i class="fas fa-angle-double-left"></i></a>
+                    <a href="?page={{ orders.previous_page_number }}&{{ query_params }}" title="Previous"><i class="fas fa-angle-left"></i></a>
                 {% else %}
                     <span class="disabled"><i class="fas fa-angle-double-left"></i></span>
                     <span class="disabled"><i class="fas fa-angle-left"></i></span>
                 {% endif %}
 
-                {# Smart page numbers: always show first, last, current ±2, with ellipsis #}
                 {% for p in orders.paginator.page_range %}
                     {% if p == 1 or p == orders.paginator.num_pages or p >= orders.number|add:"-2" and p <= orders.number|add:"2" %}
                         {% if p == orders.number %}
@@ -417,14 +423,9 @@
                     {% endif %}
                 {% endfor %}
 
-                {# Next controls #}
                 {% if orders.has_next %}
-                    <a href="?page={{ orders.next_page_number }}&{{ query_params }}" title="Next">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                    <a href="?page={{ orders.paginator.num_pages }}&{{ query_params }}" title="Last">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
+                    <a href="?page={{ orders.next_page_number }}&{{ query_params }}" title="Next"><i class="fas fa-angle-right"></i></a>
+                    <a href="?page={{ orders.paginator.num_pages }}&{{ query_params }}" title="Last"><i class="fas fa-angle-double-right"></i></a>
                 {% else %}
                     <span class="disabled"><i class="fas fa-angle-right"></i></span>
                     <span class="disabled"><i class="fas fa-angle-double-right"></i></span>
@@ -456,7 +457,10 @@
 
             cancelTimer(el) {
                 const id = el.dataset.alertId;
-                if (this.alerts.has(id)) { clearTimeout(this.alerts.get(id)); this.alerts.delete(id); }
+                if (this.alerts.has(id)) {
+                    clearTimeout(this.alerts.get(id));
+                    this.alerts.delete(id);
+                }
             }
         };
 

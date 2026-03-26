@@ -4,18 +4,16 @@ from . import admin_views
 app_name = 'orders_admin'
 
 urlpatterns = [
-    # ── Fixed: all static/prefix paths MUST come before <str:order_id>/ ──
-    # Otherwise Django matches "inventory", "return" etc. as order_ids.
-
     path('', admin_views.admin_order_list, name='admin_order_list'),
 
-    # Static prefix routes first
+    # Static routes
     path('inventory/list/', admin_views.admin_inventory, name='admin_inventory'),
     path('return/approve/<int:item_id>/', admin_views.approve_item_return, name='approve_item_return'),
     path('return/reject/<int:item_id>/',  admin_views.reject_item_return,  name='reject_item_return'),
 
-    # Dynamic <order_id> routes after all static prefixes
+    # Dynamic routes
     path('<str:order_id>/',                 admin_views.admin_order_detail,   name='admin_order_detail'),
     path('<str:order_id>/verify-return/',   admin_views.admin_verify_return,  name='admin_verify_return'),
     path('<str:order_id>/complete-return/', admin_views.admin_complete_return,name='admin_complete_return'),
+    path('<str:order_id>/cancel/',          admin_views.admin_cancel_order,   name='admin_cancel_order'),
 ]

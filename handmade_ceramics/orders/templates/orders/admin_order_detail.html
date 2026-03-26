@@ -23,7 +23,7 @@
             min-height: calc(100vh - 70px);
         }
 
-        /* Messages */
+        /* ── Messages ── */
         .messages-container {
             position: fixed;
             top: 90px;
@@ -33,16 +33,28 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            pointer-events: none;
         }
         .alert {
+            pointer-events: all;
             padding: 15px 20px;
             border-radius: 12px;
             border: 1px solid;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
-            animation: slideInRight 0.4s ease forwards;
+            animation: slideInRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55) both;
             box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+        }
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: currentColor;
+            opacity: 0.5;
         }
         @keyframes slideInRight {
             from { transform: translateX(110%); opacity: 0; }
@@ -52,18 +64,34 @@
             from { transform: translateX(0);    opacity: 1; }
             to   { transform: translateX(110%); opacity: 0; }
         }
-        .alert-success { background: linear-gradient(135deg,#1e3d2e,#2a5040); border-color: #3a6a50; color: #70c090; }
-        .alert-error   { background: linear-gradient(135deg,#3d1e1e,#502a2a); border-color: #6a3a3a; color: #e07070; }
-        .alert-warning { background: linear-gradient(135deg,#3d321e,#503e2a); border-color: #6a5a3a; color: #e0b870; }
-        .alert-info    { background: linear-gradient(135deg,#1e303d,#2a3e50); border-color: #3a5a6a; color: #70b8d0; }
-        .alert-icon { font-size: 1rem; flex-shrink: 0; }
-        .alert-text { flex: 1; font-size: 0.93rem; font-weight: 500; }
-        .alert-close {
-            background: transparent; border: none; color: inherit;
-            cursor: pointer; opacity: 0.6; font-size: 0.85rem; flex-shrink: 0;
-            padding: 2px 4px; border-radius: 4px; transition: opacity 0.2s;
+        @keyframes progressShrink {
+            from { width: 100%; }
+            to   { width: 0%;   }
         }
-        .alert-close:hover { opacity: 1; }
+        .alert.hiding { animation: slideOutRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55) forwards; }
+
+        /* Django message tag classes */
+        .alert-success  { background: linear-gradient(135deg,#1e3d2e,#2a5040); border-color: #3a6a50; color: #70c090; }
+        .alert-error,
+        .alert-danger   { background: linear-gradient(135deg,#3d1e1e,#502a2a); border-color: #6a3a3a; color: #e07070; }
+        .alert-warning  { background: linear-gradient(135deg,#3d321e,#503e2a); border-color: #6a5a3a; color: #e0b870; }
+        .alert-info,
+        .alert-debug    { background: linear-gradient(135deg,#1e303d,#2a3e50); border-color: #3a5a6a; color: #70b8d0; }
+
+        .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+        .alert-content { flex: 1; min-width: 0; }
+        .alert-text { display: block; color: inherit; font-size: 0.93rem; font-weight: 500; line-height: 1.5; word-wrap: break-word; }
+        .alert-close {
+            flex-shrink: 0; background: transparent; border: none; color: inherit;
+            cursor: pointer; opacity: 0.6; font-size: 0.85rem;
+            padding: 2px 4px; border-radius: 4px; transition: opacity 0.2s; margin-top: 1px;
+        }
+        .alert-close:hover { opacity: 1; background: rgba(255,255,255,.1); }
+        .alert-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: currentColor; opacity: .4;
+            animation: progressShrink 5s linear forwards;
+        }
 
         /* Page Header */
         .page-header {
@@ -91,22 +119,24 @@
         }
         .order-id-badge { font-family: 'Courier New', monospace; color: #9b8bdb; font-weight: 700; }
 
+        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
         /* Status Pills */
         .order-status-pill {
             display: inline-flex; align-items: center; gap: 7px;
             padding: 5px 14px; border-radius: 20px;
             font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
         }
-        .pill-pending                 { background: rgba(208,192,112,0.15); color: #d0c070; border: 1px solid #d0c070; }
-        .pill-confirmed               { background: rgba(112,176,208,0.15); color: #70b0d0; border: 1px solid #70b0d0; }
-        .pill-processing              { background: rgba(112,176,208,0.15); color: #70b0d0; border: 1px solid #70b0d0; }
-        .pill-shipped                 { background: rgba(155,139,219,0.15); color: #9b8bdb; border: 1px solid #9b8bdb; }
-        .pill-delivered               { background: rgba(112,192,144,0.15); color: #70c090; border: 1px solid #70c090; }
-        .pill-cancelled               { background: rgba(224,112,112,0.15); color: #e07070; border: 1px solid #e07070; }
-        .pill-return_requested        { background: rgba(224,192,112,0.15); color: #e0c070; border: 1px solid #e0c070; }
-        .pill-partial_return_requested{ background: rgba(224,160,80,0.15);  color: #e0a050; border: 1px solid #e0a050; }
-        .pill-return_processing       { background: rgba(224,160,80,0.15);  color: #e0a050; border: 1px solid #e0a050; }
-        .pill-returned                { background: rgba(224,160,112,0.15); color: #e0a070; border: 1px solid #e0a070; }
+        .pill-pending                  { background: rgba(208,192,112,0.15); color: #d0c070; border: 1px solid #d0c070; }
+        .pill-confirmed                { background: rgba(112,176,208,0.15); color: #70b0d0; border: 1px solid #70b0d0; }
+        .pill-processing               { background: rgba(112,176,208,0.15); color: #70b0d0; border: 1px solid #70b0d0; }
+        .pill-shipped                  { background: rgba(155,139,219,0.15); color: #9b8bdb; border: 1px solid #9b8bdb; }
+        .pill-delivered                { background: rgba(112,192,144,0.15); color: #70c090; border: 1px solid #70c090; }
+        .pill-cancelled                { background: rgba(224,112,112,0.15); color: #e07070; border: 1px solid #e07070; }
+        .pill-return_requested         { background: rgba(224,192,112,0.15); color: #e0c070; border: 1px solid #e0c070; }
+        .pill-partial_return_requested { background: rgba(224,160,80,0.15);  color: #e0a050; border: 1px solid #e0a050; }
+        .pill-return_processing        { background: rgba(224,160,80,0.15);  color: #e0a050; border: 1px solid #e0a050; }
+        .pill-returned                 { background: rgba(224,160,112,0.15); color: #e0a070; border: 1px solid #e0a070; }
 
         .back-btn {
             padding: 11px 22px;
@@ -118,6 +148,22 @@
             white-space: nowrap;
         }
         .back-btn:hover { background: #2a2a2a; color: #e8e8e8; border-color: #555; transform: translateY(-2px); }
+
+        /* Cancel button in header */
+        .btn-cancel-order {
+            padding: 11px 22px;
+            background: linear-gradient(135deg,#4a1e1e,#5a2a2a);
+            color: #e07070; border: 2px solid #6a3a3a; border-radius: 10px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex; align-items: center; gap: 8px;
+            white-space: nowrap;
+        }
+        .btn-cancel-order:hover {
+            background: linear-gradient(135deg,#5a2a2a,#6a3a3a);
+            box-shadow: 0 4px 16px rgba(224,112,112,0.35);
+            transform: translateY(-2px);
+        }
 
         /* Grid */
         .detail-grid {
@@ -238,13 +284,6 @@
         .return-badge.processing { background: linear-gradient(135deg,#2a4a3a,#3a5a4a); color: #70c090; }
         .return-panel p { color: #b0b0b0; font-size: 0.92rem; margin-bottom: 14px; line-height: 1.65; }
         .return-panel p strong { color: #e0e0e0; }
-        .hint-banner {
-            display: flex; align-items: center; gap: 10px;
-            padding: 11px 15px;
-            background: rgba(155,139,219,0.08); border: 1px solid #404060;
-            border-radius: 10px; color: #9b8bdb; font-size: 0.88rem; margin-top: 6px;
-        }
-        .hint-banner strong { color: #b0a0e8; margin: 0 3px; }
         .rejection-textarea {
             width: 100%; padding: 12px 15px; border: 2px solid #404040; border-radius: 10px;
             background: #0f0f0f; color: #e8e8e8; font-size: 0.93rem;
@@ -309,36 +348,68 @@
             display: inline-flex; align-items: center; gap: 6px;
             padding: 5px 13px; border-radius: 20px; font-size: 0.83rem; font-weight: 600;
         }
-        .ib-pending            { background: linear-gradient(135deg,#3d3d1e,#4a4a28); color: #d0c070; }
-        .ib-confirmed          { background: linear-gradient(135deg,#1a3040,#24404e); color: #70b0d0; }
-        .ib-processing         { background: linear-gradient(135deg,#1a3040,#24404e); color: #70b0d0; }
-        .ib-shipped            { background: linear-gradient(135deg,#2a2540,#33304e); color: #9b8bdb; }
-        .ib-delivered          { background: linear-gradient(135deg,#1e3a2a,#284a36); color: #70c090; }
-        .ib-cancelled          { background: linear-gradient(135deg,#3a1e1e,#4a2828); color: #e07070; }
-        .ib-return_requested   { background: linear-gradient(135deg,#3d3210,#4d3f18); color: #e0c070; }
-        .ib-return_processing  { background: linear-gradient(135deg,#3d2e10,#4d3a18); color: #e0a050; }
-        .ib-returned           { background: linear-gradient(135deg,#3d2e20,#4d3a28); color: #e0a070; }
+        .ib-pending           { background: linear-gradient(135deg,#3d3d1e,#4a4a28); color: #d0c070; }
+        .ib-confirmed         { background: linear-gradient(135deg,#1a3040,#24404e); color: #70b0d0; }
+        .ib-processing        { background: linear-gradient(135deg,#1a3040,#24404e); color: #70b0d0; }
+        .ib-shipped           { background: linear-gradient(135deg,#2a2540,#33304e); color: #9b8bdb; }
+        .ib-delivered         { background: linear-gradient(135deg,#1e3a2a,#284a36); color: #70c090; }
+        .ib-cancelled         { background: linear-gradient(135deg,#3a1e1e,#4a2828); color: #e07070; }
+        .ib-return_requested  { background: linear-gradient(135deg,#3d3210,#4d3f18); color: #e0c070; }
+        .ib-return_processing { background: linear-gradient(135deg,#3d2e10,#4d3a18); color: #e0a050; }
+        .ib-returned          { background: linear-gradient(135deg,#3d2e20,#4d3a28); color: #e0a070; }
+
+        /* Item-level return action buttons */
+        .item-return-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .btn-item-approve {
+            padding: 6px 14px; border: 1px solid #3a6a4a; border-radius: 8px;
+            background: linear-gradient(135deg,#1e4a2e,#2a5a3a); color: #70c090;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+            text-decoration: none;
+        }
+        .btn-item-approve:hover { background: linear-gradient(135deg,#2a5a3a,#3a6a4a); box-shadow: 0 3px 12px rgba(112,192,144,0.3); transform: translateY(-1px); }
+        .btn-item-reject {
+            padding: 6px 14px; border: 1px solid #6a3a3a; border-radius: 8px;
+            background: linear-gradient(135deg,#4a1e1e,#5a2a2a); color: #e07070;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+            text-decoration: none;
+        }
+        .btn-item-reject:hover { background: linear-gradient(135deg,#5a2a2a,#6a3a3a); box-shadow: 0 3px 12px rgba(224,112,112,0.3); transform: translateY(-1px); }
 
         @media (max-width: 1100px) { .detail-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 700px)  { .order-detail-content { margin-left: 0; padding: 20px; } }
+        @media (max-width: 700px)  {
+            .order-detail-content { margin-left: 0; padding: 20px; }
+            .messages-container { right: 10px; left: 10px; max-width: none; }
+        }
     </style>
 
     <div class="order-detail-content">
 
+        <!-- Messages -->
+        {# Handles Django tags: success, error, warning, info, debug #}
         {% if messages %}
-        <div class="messages-container">
+        <div class="messages-container" id="messagesContainer">
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}" role="alert">
-                <i class="alert-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
-                <span class="alert-text">{{ message }}</span>
+            <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
+                <i class="alert-icon fas
+                    {% if 'success' in message.tags %}fa-check-circle
+                    {% elif 'error' in message.tags or 'danger' in message.tags %}fa-exclamation-circle
+                    {% elif 'warning' in message.tags %}fa-exclamation-triangle
+                    {% else %}fa-info-circle{% endif %}"></i>
+                <div class="alert-content">
+                    <span class="alert-text">{{ message }}</span>
+                </div>
                 <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
+                <div class="alert-progress"></div>
             </div>
             {% endfor %}
         </div>
         {% endif %}
 
+        <!-- Page Header -->
         <div class="page-header">
             <h2 class="page-title">
                 <i class="fas fa-receipt"></i>
@@ -347,13 +418,33 @@
                     {{ order.get_status_display }}
                 </span>
             </h2>
-            <a href="{% url 'custom_admin:orders_admin:admin_order_list' %}" class="back-btn">
-                <i class="fas fa-arrow-left"></i> Back to Orders
-            </a>
+
+            <div class="header-actions">
+                {# Show Cancel button only for cancellable statuses (matches view logic) #}
+                {% if order.status in 'PENDING,CONFIRMED,SHIPPED' %}
+                    {# Split check — Django template doesn't support `in` on a list, use individual checks #}
+                {% endif %}
+                {% if order.status == 'PENDING' or order.status == 'CONFIRMED' or order.status == 'SHIPPED' %}
+                <form method="POST"
+                      action="{% url 'custom_admin:orders_admin:admin_cancel_order' order.order_id %}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Cancel order {{ order.order_id }}?\n\nStock will be restored and a refund issued if applicable.')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-cancel-order">
+                        <i class="fas fa-ban"></i> Cancel Order
+                    </button>
+                </form>
+                {% endif %}
+
+                <a href="{% url 'custom_admin:orders_admin:admin_order_list' %}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Orders
+                </a>
+            </div>
         </div>
 
         <div class="detail-grid">
 
+            <!-- Left: Customer & Shipping -->
             <div class="info-card">
                 <div class="card-header">
                     <i class="fas fa-user-circle"></i>
@@ -429,6 +520,7 @@
                 {% endif %}
             </div>
 
+            <!-- Right: Order Summary & Status Actions -->
             <div class="info-card">
                 <div class="card-header">
                     <i class="fas fa-file-invoice-dollar"></i>
@@ -458,7 +550,10 @@
                     <span class="total-amount">₹{{ order.total_amount }}</span>
                 </div>
 
+                {# ── Status Action Area ── #}
+
                 {% if order.status == 'CANCELLED' or order.status == 'RETURNED' %}
+                {# Terminal state — no changes allowed #}
                 <div class="status-form locked">
                     <label class="form-label"><i class="fas fa-lock"></i> Order Status</label>
                     <select class="status-select" disabled>
@@ -471,6 +566,7 @@
                 </div>
 
                 {% elif order.status == 'RETURN_REQUESTED' %}
+                {# Full return verification #}
                 <div class="return-panel">
                     <div class="return-badge requested">
                         <i class="fas fa-undo-alt"></i> Return Requested — Action Required
@@ -501,14 +597,15 @@
                 </div>
 
                 {% elif order.status == 'PARTIAL_RETURN_REQUESTED' %}
+                {# Partial return verification — item-level actions are in the table below #}
                 <div class="return-panel partial">
                     <div class="return-badge partial">
                         <i class="fas fa-layer-group"></i> Partial Return Requested — Action Required
                     </div>
                     <p>
                         The customer has requested a <strong>partial return</strong> on select items.
-                        <strong>Approve</strong> to move it into Return Processing, or
-                        <strong>Reject</strong> with a reason — the order reverts to <strong>Delivered</strong>.
+                        Use <strong>Approve</strong> or <strong>Reject</strong> on individual items in the
+                        table below, or act on the whole order here.
                     </p>
                     <form method="POST" action="{% url 'custom_admin:orders_admin:admin_verify_return' order.order_id %}">
                         {% csrf_token %}
@@ -531,6 +628,7 @@
                 </div>
 
                 {% elif order.status == 'RETURN_PROCESSING' %}
+                {# Return approved — waiting for items, then complete #}
                 <div class="return-panel processing">
                     <div class="return-badge processing">
                         <i class="fas fa-sync-alt fa-spin"></i> Return In Progress
@@ -547,6 +645,7 @@
                 </div>
 
                 {% else %}
+                {# Normal status change form — excludes return/cancel statuses (those go via dedicated views) #}
                 <div class="status-form">
                     <form method="POST">
                         {% csrf_token %}
@@ -572,6 +671,7 @@
             </div>
         </div>
 
+        <!-- Order Items Table -->
         <div class="items-card">
             <div class="items-header">
                 <i class="fas fa-box-open"></i>
@@ -597,6 +697,30 @@
                             <div class="item-return-reason">
                                 <i class="fas fa-comment-alt" style="margin-top:2px;flex-shrink:0;"></i>
                                 {{ item.return_reason }}
+                            </div>
+                            {% endif %}
+
+                            {# Item-level return approve/reject — shown when this specific item has RETURN_REQUESTED status #}
+                            {% if item.item_status == 'RETURN_REQUESTED' %}
+                            <div class="item-return-actions">
+                                <form method="POST"
+                                      action="{% url 'custom_admin:orders_admin:approve_item_return' item.id %}"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Approve return for this item? Stock will be restored and a refund issued.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-item-approve">
+                                        <i class="fas fa-check"></i> Approve Return
+                                    </button>
+                                </form>
+                                <form method="POST"
+                                      action="{% url 'custom_admin:orders_admin:reject_item_return' item.id %}"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Reject the return request for this item? It will revert to Delivered.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-item-reject">
+                                        <i class="fas fa-times"></i> Reject Return
+                                    </button>
+                                </form>
                             </div>
                             {% endif %}
                         </td>
@@ -628,22 +752,52 @@
             </table>
         </div>
 
-    </div>
+    </div>{# /order-detail-content #}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const MessageHandler = {
+            alerts: new Map(),
+            autoDismissDelay: 5000,
+
+            init() {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    const id = alert.dataset.alertId;
+                    const tid = setTimeout(() => this.dismiss(alert), this.autoDismissDelay);
+                    this.alerts.set(id, tid);
+                });
+            },
+
+            dismiss(el) {
+                if (!el || !el.parentElement) return;
+                el.classList.add('hiding');
+                setTimeout(() => el.remove(), 400);
+            },
+
+            cancelTimer(el) {
+                const id = el.dataset.alertId;
+                if (this.alerts.has(id)) {
+                    clearTimeout(this.alerts.get(id));
+                    this.alerts.delete(id);
+                }
+            }
+        };
+
         function dismissAlert(btn) {
             const alert = btn.closest('.alert');
-            alert.style.animation = 'slideOutRight 0.4s ease forwards';
-            setTimeout(() => alert.remove(), 400);
+            MessageHandler.cancelTimer(alert);
+            MessageHandler.dismiss(alert);
         }
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.alert').forEach(function (alert) {
-                setTimeout(function () {
-                    alert.style.animation = 'slideOutRight 0.4s ease forwards';
-                    setTimeout(() => alert.remove(), 400);
-                }, 5000);
-            });
+
+        document.addEventListener('DOMContentLoaded', () => MessageHandler.init());
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.alert').forEach(a => {
+                    MessageHandler.cancelTimer(a);
+                    MessageHandler.dismiss(a);
+                });
+            }
         });
     </script>
   </section>

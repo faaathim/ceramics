@@ -296,3 +296,80 @@ def reject_item_return(request, item_id):
         'custom_admin:orders_admin:admin_order_detail',
         item.order.order_id
     )
+
+
+from django.views.decorators.http import require_POST
+from coupons.models import CouponUsage
+from django.db.models import F
+
+@login_required(login_url='custom_admin:login')
+@user_passes_test(superuser_check, login_url='custom_admin:login')
+@require_POST
+@transaction.atomic
+def admin_cancel_order(request, order_id):
+
+    order = get_object_or_404(Order, order_id=order_id)
+
+    # Allow only safe statuses
+    if order.status not in ['PENDING', 'CONFIRMED', 'SHIPPED']:
+        messages.error(request, "Order cannot be cancelled at this stage.")
+        return redirect(
+            'custom_admin:orders_admin:admin_order_detail',
+            order_id=order.order_id
+        )
+
+    # Cancel all items and restore stock
+    for item in order.items.select_related('variant'):
+
+        if item.item_status not in ['CANCELLED', 'RETURNED']:
+
+            if item.variant:
+                item.variant.stock += item.quantity
+                item.variant.save()
+
+            item.item_status = 'CANCELLED'
+            item.save()
+
+    # Update order status
+    order.status = 'CANCELLED'
+    order.save()
+
+
+    # Refund to wallet (ONLY for prepaid orders)
+    if order.is_paid and order.payment_method != "COD" and not order.is_refunded:
+
+        wallet, _ = Wallet.objects.select_for_update().get_or_create(
+            user=order.user,
+            defaults={'balance': 0}
+        )
+
+        wallet.balance = F('balance') + order.total_amount
+        wallet.save()
+        wallet.refresh_from_db()
+
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type=WalletTransaction.CREDIT,
+            source='ADMIN_CANCEL_REFUND',
+            amount=order.total_amount,
+            description=f"Admin cancelled order {order.order_id}",
+            order=order
+        )
+
+        order.is_refunded = True
+        order.save()
+
+    # Remove coupon usage
+    if order.coupon:
+        CouponUsage.objects.filter(
+            user=order.user,
+            coupon=order.coupon,
+            order=order
+        ).delete()
+
+    messages.success(request, "Order cancelled successfully by admin.")
+
+    return redirect(
+        'custom_admin:orders_admin:admin_order_detail',
+        order_id=order.order_id
+    )

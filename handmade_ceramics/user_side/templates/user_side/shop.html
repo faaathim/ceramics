@@ -509,6 +509,8 @@
     transition: all 0.3s ease;
     flex-shrink: 0;
     padding: 0;
+    font-size: 1.2rem;
+    text-decoration: none;
   }
 
   .wishlist-btn:hover {
@@ -517,28 +519,10 @@
     transform: scale(1.05);
   }
 
-  .wishlist-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: #e8e8e8;
-    fill: none;
-    stroke-width: 2;
-    transition: all 0.3s ease;
-  }
-
-  .wishlist-btn:hover svg { stroke: #fff; }
-
   .wishlist-btn.active {
     background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
     border-color: #6a4a4a;
   }
-
-  .wishlist-btn.active svg {
-    fill: #e07070;
-    stroke: #e07070;
-  }
-
-  a.wishlist-btn { text-decoration: none; }
 
   /* ===== PAGINATION ===== */
   .pagination-container {
@@ -658,7 +642,8 @@
 </style>
 
 <div class="shop-container">
-  <!-- Messages Display -->
+
+  <!-- ===== MESSAGES ===== -->
   <div class="messages-container" id="messagesContainer">
     {% if messages %}
       {% for message in messages %}
@@ -676,7 +661,7 @@
     {% endif %}
   </div>
 
-  <!-- Sidebar -->
+  <!-- ===== SIDEBAR ===== -->
   <aside class="filter-sidebar">
     <div class="sidebar-brand">
       <h1>SHOP</h1>
@@ -713,7 +698,7 @@
     </form>
   </aside>
 
-  <!-- Main Content -->
+  <!-- ===== MAIN CONTENT ===== -->
   <main class="main-content">
     <div class="content-header">
       <h2>PRODUCTS</h2>
@@ -727,100 +712,103 @@
 
     {% if products_page and products_page.object_list %}
       <div class="products-grid">
+
         {% for product in products_page.object_list %}
           {% with v=product.listed_variants.0 %}
-            {% if v %}
-              <article class="product-card">
-                <a href="{% url 'custom_admin:product_management:product_detail' product.id %}?variant={{ v.id }}">
-                  <div class="product-image-wrapper">
-                    {% if v.main_image %}
-                      <img src="{{ v.main_image.url }}" alt="{{ product.name }}">
-                    {% elif v.images.first %}
-                      <img src="{{ v.images.first.image.url }}" alt="{{ product.name }}">
-                    {% elif product.images.first %}
-                      <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
-                    {% else %}
-                      <div class="no-image">
-                        <i class="fas fa-image"></i> No Image
-                      </div>
-                    {% endif %}
+            <article class="product-card">
 
-                    {# ===== DISCOUNT BADGE ON IMAGE ===== #}
-                    {% if product.get_best_discount_percentage > 0 %}
-                      <div class="image-discount-badge">-{{ product.get_best_discount_percentage }}%</div>
-                    {% endif %}
+              <!-- PRODUCT LINK (image + details) -->
+              <a href="{% url 'custom_admin:product_management:product_detail' product.id %}?variant={{ v.id }}">
+
+                <!-- IMAGE -->
+                <div class="product-image-wrapper">
+                  {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}">
+                  {% else %}
+                    <div class="no-image">
+                      <i class="fas fa-image"></i> No Image
+                    </div>
+                  {% endif %}
+
+                  <!-- DISCOUNT BADGE -->
+                  {% if product.get_best_discount_percentage > 0 %}
+                    <div class="image-discount-badge">
+                      -{{ product.get_best_discount_percentage }}%
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- DETAILS -->
+                <div class="product-details">
+                  <div class="product-category">
+                    <i class="fas fa-tag"></i>
+                    {{ product.category.name|default:"Category" }}
                   </div>
 
-                  <div class="product-details">
-                    <div class="product-category">
-                      <i class="fas fa-tag"></i>
-                      {{ product.category.name|default:"Ceramics" }}
-                    </div>
+                  <h3 class="product-name">{{ product.name }}</h3>
 
-                    <h3 class="product-name">{{ product.name }}</h3>
-
-                    {# ===== UPDATED PRICE BLOCK ===== #}
-                    <div class="product-price">
-                      {% with best_discount=product.get_best_discount_percentage %}
-                        {% if best_discount > 0 %}
-                          ₹{{ product.get_discounted_price }}
-                          <span class="product-price-original">₹{{ product.price }}</span>
-                          <span class="price-discount-badge">-{{ best_discount }}%</span>
-                        {% else %}
-                          ₹{{ product.price }}
-                        {% endif %}
-                      {% endwith %}
-                    </div>
-                  </div>
-                </a>
-
-                <div class="product-details" style="padding-top: 0;">
-                  <div class="product-actions">
-                    <form method="POST" action="{% url 'cart:add_to_cart' %}" class="add-to-cart-form">
-                      {% csrf_token %}
-                      <input type="hidden" name="variant_id" value="{{ v.id }}">
-                      <button type="submit" class="add-to-cart-btn">
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                      </button>
-                    </form>
-
-                    {% if user.is_authenticated %}
-                      {% if v.id in wishlist_variant_ids %}
-                        <form method="POST" action="{% url 'wishlist:remove' v.id %}">
-                          {% csrf_token %}
-                          <button type="submit" class="wishlist-btn active" title="Remove from Wishlist">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                            </svg>
-                          </button>
-                        </form>
+                  <!-- PRICE -->
+                  <div class="product-price">
+                    {% with best_discount=product.get_best_discount_percentage %}
+                      {% if best_discount > 0 %}
+                        ₹{{ product.get_discounted_price }}
+                        <span class="product-price-original">₹{{ product.price }}</span>
+                        <span class="price-discount-badge">-{{ best_discount }}%</span>
                       {% else %}
-                        <form method="POST" action="{% url 'wishlist:add' %}">
-                          {% csrf_token %}
-                          <input type="hidden" name="variant_id" value="{{ v.id }}">
-                          <button type="submit" class="wishlist-btn" title="Add to Wishlist">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                            </svg>
-                          </button>
-                        </form>
+                        ₹{{ product.price }}
                       {% endif %}
-                    {% else %}
-                      <a href="{% url 'user_auth:login' %}?next={{ request.path }}" class="wishlist-btn" title="Login to add to wishlist">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                      </a>
-                    {% endif %}
+                    {% endwith %}
                   </div>
                 </div>
-              </article>
-            {% endif %}
+              </a>
+
+              <!-- ACTIONS (cart + wishlist — outside the link) -->
+              <div class="product-details" style="padding-top: 0;">
+                <div class="product-actions">
+
+                  <!-- ADD TO CART -->
+                  <form method="POST" action="{% url 'cart:add_to_cart' %}" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="variant_id" value="{{ v.id }}">
+                    <button type="submit" class="add-to-cart-btn">
+                      <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                  </form>
+
+                  <!-- WISHLIST -->
+                  {% if user.is_authenticated %}
+                    {% if v.id in wishlist_variant_ids %}
+                      <form method="POST" action="{% url 'wishlist:remove' v.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="wishlist-btn active" title="Remove from Wishlist">
+                          ❤️
+                        </button>
+                      </form>
+                    {% else %}
+                      <form method="POST" action="{% url 'wishlist:add' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="variant_id" value="{{ v.id }}">
+                        <button type="submit" class="wishlist-btn" title="Add to Wishlist">
+                          🤍
+                        </button>
+                      </form>
+                    {% endif %}
+                  {% else %}
+                    <a href="{% url 'user_auth:login' %}?next={{ request.path }}" class="wishlist-btn" title="Login to wishlist">
+                      🤍
+                    </a>
+                  {% endif %}
+
+                </div>
+              </div>
+
+            </article>
           {% endwith %}
         {% endfor %}
+
       </div>
 
-      <!-- Pagination -->
+      <!-- ===== PAGINATION ===== -->
       {% if products_page.paginator.num_pages > 1 %}
         <div class="pagination-container">
           <div class="pagination-info">
@@ -844,7 +832,7 @@
                 Next <i class="fas fa-angle-right"></i>
               </a>
               <a href="?page={{ products_page.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
-                Last <i class="fas fa-angle-double-right"></i>
+                Last <i class="fas fa-angle-double-double-right"></i>
               </a>
             {% endif %}
           </div>
@@ -860,6 +848,7 @@
         {% endif %}
       </div>
     {% endif %}
+
   </main>
 </div>
 
