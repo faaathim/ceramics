@@ -9,1056 +9,1129 @@
 <div class="layout">
   {% include "admin_sidebar.html" %}
   <section class="main-area">
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ action }} Category</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-        <style>
-            body {
-                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
-
-            .form-content {
-                margin-left: 250px;
-                margin-top: 70px;
-                padding: 40px;
-                min-height: calc(100vh - 70px);
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-            }
-
-            .form-container {
-                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-                border-radius: 20px;
-                padding: 0;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-                max-width: 800px;
-                width: 100%;
-                border: 1px solid #333333;
-                overflow: hidden;
-                animation: formSlideIn 0.4s ease;
-            }
-
-            @keyframes formSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .form-header {
-                background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-                padding: 30px 40px;
-                border-bottom: 2px solid #404040;
-                position: relative;
-                overflow: hidden;
-            }
-
-            .form-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, #9b8bdb, #8b7bcb);
-            }
-
-            .form-title {
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: #e8e8e8;
-                margin: 0;
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
-
-            .form-icon {
-                width: 55px;
-                height: 55px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                color: #9b8bdb;
-            }
-
-            .messages-container {
-                padding: 20px 40px;
-                background: #1a1a1a;
-            }
-
-            .alert-message {
-                padding: 16px 20px;
-                border-radius: 12px;
-                margin-bottom: 12px;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                animation: slideInDown 0.4s ease;
-                transition: all 0.3s ease;
-                font-size: 0.95rem;
-                font-weight: 500;
-            }
-
-            .alert-message:last-child {
-                margin-bottom: 0;
-            }
-
-            .alert-message:hover {
-                transform: translateX(5px);
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            }
-
-            .alert-success {
-                background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
-                border-left: 4px solid #70c090;
-                color: #70c090;
-            }
-
-            .alert-error {
-                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-                border-left: 4px solid #e07070;
-                color: #e07070;
-            }
-
-            .alert-warning {
-                background: linear-gradient(135deg, #4a4a2a, #3a3a2a);
-                border-left: 4px solid #e0c070;
-                color: #e0c070;
-            }
-
-            .alert-info {
-                background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
-                border-left: 4px solid #70a0e0;
-                color: #70a0e0;
-            }
-
-            @keyframes slideInDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .message-icon {
-                font-size: 1.2rem;
-                flex-shrink: 0;
-            }
-
-            .message-text {
-                flex: 1;
-            }
-
-            .message-close-btn {
-                background: transparent;
-                border: none;
-                color: inherit;
-                opacity: 0.7;
-                cursor: pointer;
-                padding: 5px;
-                font-size: 1.1rem;
-                transition: opacity 0.3s ease;
-                flex-shrink: 0;
-            }
-
-            .message-close-btn:hover {
-                opacity: 1;
-            }
-
-            .form-body {
-                padding: 40px;
-            }
-
-            .form-group {
-                margin-bottom: 30px;
-            }
-
-            .form-label {
-                display: block;
-                color: #b0b0b0;
-                font-weight: 600;
-                font-size: 0.95rem;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            .form-label i {
-                color: #9b8bdb;
-                margin-right: 8px;
-            }
-
-            .form-input,
-            .form-textarea {
-                width: 100%;
-                padding: 14px 20px;
-                border: 2px solid #404040;
-                border-radius: 12px;
-                background: #0f0f0f;
-                color: #e8e8e8;
-                font-size: 1rem;
-                transition: all 0.3s ease;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
-
-            .form-textarea {
-                resize: vertical;
-                min-height: 120px;
-            }
-
-            .form-input:focus,
-            .form-textarea:focus {
-                outline: none;
-                border-color: #9b8bdb;
-                background: #1a1a1a;
-                box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
-            }
-
-            .form-input::placeholder,
-            .form-textarea::placeholder {
-                color: #606060;
-            }
-
-            .file-upload-area {
-                position: relative;
-                border: 2px dashed #404040;
-                border-radius: 12px;
-                padding: 30px;
-                text-align: center;
-                background: #0f0f0f;
-                transition: all 0.3s ease;
-                cursor: pointer;
-            }
-
-            .file-upload-area:hover {
-                border-color: #9b8bdb;
-                background: #1a1a1a;
-            }
-
-            .file-upload-area.dragover {
-                border-color: #9b8bdb;
-                background: #1a1a1a;
-                transform: scale(1.02);
-            }
-
-            .file-upload-icon {
-                font-size: 3rem;
-                color: #606060;
-                margin-bottom: 15px;
-            }
-
-            .file-upload-text {
-                color: #b0b0b0;
-                font-size: 0.95rem;
-                margin-bottom: 10px;
-            }
-
-            .file-upload-hint {
-                color: #606060;
-                font-size: 0.85rem;
-            }
-
-            .file-input {
-                position: absolute;
-                opacity: 0;
-                width: 100%;
-                height: 100%;
-                top: 0;
-                left: 0;
-                cursor: pointer;
-            }
-
-            .crop-modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.9);
-                z-index: 9999;
-                align-items: center;
-                justify-content: center;
-                animation: fadeIn 0.3s ease;
-            }
-
-            .crop-modal.active {
-                display: flex;
-            }
-
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-
-            .crop-container {
-                background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-                border-radius: 20px;
-                padding: 30px;
-                max-width: 90%;
-                max-height: 90%;
-                width: 700px;
-                border: 1px solid #404040;
-                box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
-            }
-
-            .crop-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 25px;
-                padding-bottom: 20px;
-                border-bottom: 2px solid #404040;
-            }
-
-            .crop-title {
-                font-size: 1.5rem;
-                font-weight: 700;
-                color: #e8e8e8;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .crop-title i {
-                color: #9b8bdb;
-            }
-
-            .crop-close {
-                background: transparent;
-                border: none;
-                color: #909090;
-                font-size: 1.5rem;
-                cursor: pointer;
-                padding: 5px 10px;
-                transition: all 0.3s ease;
-            }
-
-            .crop-close:hover {
-                color: #e07070;
-                transform: rotate(90deg);
-            }
-
-            .crop-image-container {
-                max-height: 400px;
-                margin-bottom: 25px;
-                background: #0f0f0f;
-                border-radius: 12px;
-                overflow: hidden;
-            }
-
-            #cropImage {
-                max-width: 100%;
-                display: block;
-            }
-
-            .crop-controls {
-                display: flex;
-                gap: 15px;
-                margin-bottom: 25px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .crop-btn {
-                padding: 10px 20px;
-                background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-                color: #e8e8e8;
-                border: 1px solid #404040;
-                border-radius: 10px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .crop-btn:hover {
-                background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
-                border-color: #9b8bdb;
-                transform: translateY(-2px);
-            }
-
-            .crop-footer {
-                display: flex;
-                gap: 15px;
-                justify-content: flex-end;
-            }
-
-            .btn-crop-apply {
-                padding: 12px 30px;
-                background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-                color: #ffffff;
-                border: none;
-                border-radius: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .btn-crop-apply:hover {
-                background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-                transform: translateY(-2px);
-                box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
-            }
-
-            .btn-crop-cancel {
-                padding: 12px 30px;
-                background: transparent;
-                color: #909090;
-                border: 2px solid #404040;
-                border-radius: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-
-            .btn-crop-cancel:hover {
-                background: #2a2a2a;
-                border-color: #505050;
-                color: #e8e8e8;
-            }
-
-            .image-preview-container {
-                margin-top: 20px;
-                padding: 20px;
-                background: #0f0f0f;
-                border-radius: 12px;
-                border: 2px solid #2a2a2a;
-                display: none;
-                animation: fadeInPreview 0.3s ease;
-            }
-
-            .image-preview-container.show {
-                display: block;
-            }
-
-            @keyframes fadeInPreview {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .preview-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-            }
-
-            .preview-label {
-                color: #9b8bdb;
-                font-size: 0.9rem;
-                font-weight: 600;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .preview-remove-btn {
-                background: transparent;
-                border: 2px solid #e07070;
-                color: #e07070;
-                padding: 8px 16px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 0.85rem;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            .preview-remove-btn:hover {
-                background: #e07070;
-                color: #ffffff;
-                transform: translateY(-2px);
-            }
-
-            .preview-info {
-                text-align: center;
-                margin-top: 12px;
-                color: #909090;
-                font-size: 0.85rem;
-            }
-
-            .current-image-preview {
-                margin-top: 20px;
-                padding: 20px;
-                background: #0f0f0f;
-                border-radius: 12px;
-                border: 1px solid #2a2a2a;
-            }
-
-            .current-image-label {
-                color: #909090;
-                font-size: 0.9rem;
-                margin-bottom: 12px;
-                display: block;
-            }
-
-            .image-preview {
-                width: 150px;
-                height: 150px;
-                border-radius: 12px;
-                object-fit: cover;
-                border: 2px solid #404040;
-                transition: all 0.3s ease;
-            }
-
-            .image-preview:hover {
-                transform: scale(1.05);
-                border-color: #9b8bdb;
-                box-shadow: 0 5px 20px rgba(155, 139, 219, 0.3);
-            }
-
-            .checkbox-container {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 15px 20px;
-                background: #0f0f0f;
-                border-radius: 12px;
-                border: 2px solid #404040;
-                transition: all 0.3s ease;
-                cursor: pointer;
-            }
-
-            .checkbox-container:hover {
-                border-color: #9b8bdb;
-                background: #1a1a1a;
-            }
-
-            .checkbox-input {
-                width: 20px;
-                height: 20px;
-                cursor: pointer;
-                accent-color: #9b8bdb;
-            }
-
-            .checkbox-label {
-                color: #e8e8e8;
-                font-size: 1rem;
-                cursor: pointer;
-                margin: 0;
-            }
-
-            .error-message {
-                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-                border-left: 4px solid #e07070;
-                padding: 15px 20px;
-                border-radius: 8px;
-                color: #e07070;
-                font-size: 0.9rem;
-                margin-top: 10px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .error-message i {
-                font-size: 1.1rem;
-            }
-
-            .non-field-errors {
-                background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-                border-left: 4px solid #e07070;
-                padding: 20px;
-                border-radius: 12px;
-                margin-bottom: 25px;
-            }
-
-            .non-field-errors ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-            }
-
-            .non-field-errors li {
-                color: #e07070;
-                font-size: 0.95rem;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-bottom: 5px;
-            }
-
-            .non-field-errors li:last-child {
-                margin-bottom: 0;
-            }
-
-            .form-footer {
-                padding: 30px 40px;
-                background: #0f0f0f;
-                border-top: 1px solid #2a2a2a;
-                display: flex;
-                gap: 15px;
-                justify-content: flex-end;
-            }
-
-            .btn-submit, .btn-cancel {
-                padding: 14px 35px;
-                border: none;
-                border-radius: 12px;
-                font-weight: 600;
-                font-size: 1rem;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                text-decoration: none;
-                border: 2px solid transparent;
-            }
-
-            .btn-submit {
-                background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-                color: #ffffff;
-            }
-
-            .btn-submit:hover {
-                background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-                transform: translateY(-3px);
-                box-shadow: 0 8px 25px rgba(155, 139, 219, 0.5);
-            }
-
-            .btn-submit:active {
-                transform: translateY(-1px);
-            }
-
-            .btn-cancel {
-                background: transparent;
-                color: #909090;
-                border-color: #404040;
-            }
-
-            .btn-cancel:hover {
-                background: #2a2a2a;
-                color: #e8e8e8;
-                border-color: #505050;
-                transform: translateY(-3px);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            }
-
-            .btn-cancel:active {
-                transform: translateY(-1px);
-            }
-
-            @media (max-width: 768px) {
-                .form-content {
-                    padding: 20px;
-                    margin-left: 0;
-                }
-                .form-header {
-                    padding: 25px 30px;
-                }
-                .form-body {
-                    padding: 25px;
-                }
-                .messages-container {
-                    padding: 15px 25px;
-                }
-                .form-footer {
-                    padding: 20px 25px;
-                    flex-direction: column-reverse;
-                }
-                .btn-submit, .btn-cancel {
-                    width: 100%;
-                    justify-content: center;
-                }
-                .crop-controls {
-                    gap: 8px;
-                }
-                .crop-btn {
-                    padding: 8px 15px;
-                    font-size: 0.85rem;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="form-content">
-            <div class="form-container">
-                <div class="form-header">
-                    <h2 class="form-title">
-                        <div class="form-icon">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
-                        {{ action }} Category
-                    </h2>
-                </div>
-
-                {% if messages %}
-                <div class="messages-container">
-                    {% for message in messages %}
-                    <div class="alert-message alert-{{ message.tags }}">
-                        <i class="message-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
-                        <span class="message-text">{{ message }}</span>
-                        <button onclick="this.parentElement.remove()" class="message-close-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 40px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .form-container {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid #333333;
+            overflow: hidden;
+            animation: formSlideIn 0.4s ease;
+        }
+
+        @keyframes formSlideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            padding: 30px 40px;
+            border-bottom: 2px solid #404040;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #9b8bdb, #8b7bcb);
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-icon {
+            width: 55px; height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #9b8bdb;
+        }
+
+        /* ── Messages ── */
+        .messages-container {
+            padding: 20px 40px;
+            background: #1a1a1a;
+        }
+
+        .alert-message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInDown 0.4s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .alert-message:last-child { margin-bottom: 0; }
+
+        .alert-message:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        /*
+         * Django message tags from views.py:
+         *   messages.success() → tag: "success"
+         *   messages.error()   → tag: "error"
+         *   messages.warning() → tag: "warning"
+         *   messages.info()    → tag: "info"
+         *
+         * Django also prefixes with level name, e.g. "success" stays "success",
+         * but if MESSAGE_TAGS is overridden it may differ — these cover the defaults.
+         */
+        .alert-success  { background: linear-gradient(135deg,#2a4a3a,#3a5a4a); border-left:4px solid #70c090; color:#70c090; }
+        .alert-error    { background: linear-gradient(135deg,#4a2a2a,#3a2a2a); border-left:4px solid #e07070; color:#e07070; }
+        .alert-warning  { background: linear-gradient(135deg,#4a4a2a,#3a3a2a); border-left:4px solid #e0c070; color:#e0c070; }
+        .alert-info     { background: linear-gradient(135deg,#2a3a4a,#3a4a5a); border-left:4px solid #70a0e0; color:#70a0e0; }
+
+        @keyframes slideInDown {
+            from { opacity:0; transform:translateY(-20px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        .message-icon      { font-size:1.2rem; flex-shrink:0; }
+        .message-text      { flex:1; }
+        .message-close-btn {
+            background:transparent; border:none; color:inherit;
+            opacity:0.7; cursor:pointer; padding:5px; font-size:1.1rem;
+            transition:opacity 0.3s ease; flex-shrink:0;
+        }
+        .message-close-btn:hover { opacity:1; }
+
+        /* ── Form Body ── */
+        .form-body { padding: 40px; }
+        .form-group { margin-bottom: 30px; }
+
+        .form-label {
+            display: block;
+            color: #b0b0b0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-label i { color:#9b8bdb; margin-right:8px; }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            background: #0f0f0f;
+            color: #e8e8e8;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+        }
+
+        .form-textarea { resize:vertical; min-height:120px; }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #9b8bdb;
+            background: #1a1a1a;
+            box-shadow: 0 0 0 4px rgba(155,139,219,0.1);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder { color:#606060; }
+
+        /* ── File Upload ── */
+        .file-upload-area {
+            position: relative;
+            border: 2px dashed #404040;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: #0f0f0f;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: #9b8bdb;
+            background: #1a1a1a;
+        }
+
+        .file-upload-area.dragover { transform: scale(1.02); }
+
+        .file-upload-icon  { font-size:3rem; color:#606060; margin-bottom:15px; }
+        .file-upload-text  { color:#b0b0b0; font-size:0.95rem; margin-bottom:10px; }
+        .file-upload-hint  { color:#606060; font-size:0.85rem; }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            cursor: pointer;
+        }
+
+        /* ── Image Previews ── */
+        .image-preview-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 12px;
+            border: 2px solid #2a2a2a;
+            display: none;
+            animation: fadeInPreview 0.3s ease;
+        }
+
+        .image-preview-container.show { display: block; }
+
+        @keyframes fadeInPreview {
+            from { opacity:0; transform:translateY(-10px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-label {
+            color: #9b8bdb;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-remove-btn {
+            background: transparent;
+            border: 2px solid #e07070;
+            color: #e07070;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-remove-btn:hover {
+            background: #e07070;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .preview-info {
+            text-align: center;
+            margin-top: 12px;
+            color: #909090;
+            font-size: 0.85rem;
+        }
+
+        /* Current image (edit mode) */
+        .current-image-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 12px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .current-image-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .current-image-label {
+            color: #909090;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Badge shown when keeping current image */
+        .keep-badge {
+            font-size: 0.78rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: linear-gradient(135deg,#2a3a4a,#3a4a5a);
+            border: 1px solid #70a0e0;
+            color: #70a0e0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .image-preview {
+            width: 150px; height: 150px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #404040;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .image-preview:hover {
+            transform: scale(1.05);
+            border-color: #9b8bdb;
+            box-shadow: 0 5px 20px rgba(155,139,219,0.3);
+        }
+
+        /* ── Checkbox ── */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            background: #0f0f0f;
+            border-radius: 12px;
+            border: 2px solid #404040;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-container:hover {
+            border-color: #9b8bdb;
+            background: #1a1a1a;
+        }
+
+        .checkbox-input  { width:20px; height:20px; cursor:pointer; accent-color:#9b8bdb; }
+        .checkbox-label  { color:#e8e8e8; font-size:1rem; cursor:pointer; margin:0; }
+
+        /* ── Field Errors ── */
+        .error-message {
+            background: linear-gradient(135deg,#4a2a2a,#3a2a2a);
+            border-left: 4px solid #e07070;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: #e07070;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .non-field-errors {
+            background: linear-gradient(135deg,#4a2a2a,#3a2a2a);
+            border-left: 4px solid #e07070;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .non-field-errors ul  { margin:0; padding:0; list-style:none; }
+        .non-field-errors li  {
+            color: #e07070;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .non-field-errors li:last-child { margin-bottom: 0; }
+
+        /* ── Footer ── */
+        .form-footer {
+            padding: 30px 40px;
+            background: #0f0f0f;
+            border-top: 1px solid #2a2a2a;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn-submit, .btn-cancel {
+            padding: 14px 35px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            border: 2px solid transparent;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg,#9b8bdb,#8b7bcb);
+            color: #ffffff;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg,#ab9beb,#9b8bdb);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(155,139,219,0.5);
+        }
+
+        .btn-submit:active { transform: translateY(-1px); }
+
+        .btn-cancel {
+            background: transparent;
+            color: #909090;
+            border-color: #404040;
+        }
+
+        .btn-cancel:hover {
+            background: #2a2a2a;
+            color: #e8e8e8;
+            border-color: #505050;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .btn-cancel:active { transform: translateY(-1px); }
+
+        /* ── Crop Modal ── */
+        .crop-modal {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .crop-modal.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+        .crop-container {
+            background: linear-gradient(135deg,#1a1a1a,#2a2a2a);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%; max-height: 90%;
+            width: 700px;
+            border: 1px solid #404040;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+        }
+
+        .crop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #404040;
+        }
+
+        .crop-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .crop-title i { color:#9b8bdb; }
+
+        .crop-close {
+            background: transparent; border: none;
+            color: #909090; font-size:1.5rem; cursor:pointer;
+            padding:5px 10px; transition: all 0.3s ease;
+        }
+
+        .crop-close:hover { color:#e07070; transform:rotate(90deg); }
+
+        .crop-image-container {
+            max-height: 400px;
+            margin-bottom: 25px;
+            background: #0f0f0f;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #cropImage { max-width:100%; display:block; }
+
+        .crop-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .crop-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg,#2a2a2a,#3a3a3a);
+            color: #e8e8e8;
+            border: 1px solid #404040;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .crop-btn:hover {
+            background: linear-gradient(135deg,#3a3a3a,#4a4a4a);
+            border-color: #9b8bdb;
+            transform: translateY(-2px);
+        }
+
+        .crop-footer { display:flex; gap:15px; justify-content:flex-end; }
+
+        .btn-crop-apply {
+            padding: 12px 30px;
+            background: linear-gradient(135deg,#9b8bdb,#8b7bcb);
+            color: #ffffff; border:none; border-radius:12px;
+            font-weight:600; cursor:pointer; transition:all 0.3s ease;
+            display:flex; align-items:center; gap:10px;
+        }
+
+        .btn-crop-apply:hover {
+            background: linear-gradient(135deg,#ab9beb,#9b8bdb);
+            transform:translateY(-2px);
+            box-shadow: 0 5px 20px rgba(155,139,219,0.5);
+        }
+
+        .btn-crop-cancel {
+            padding: 12px 30px;
+            background: transparent; color:#909090;
+            border:2px solid #404040; border-radius:12px;
+            font-weight:600; cursor:pointer; transition:all 0.3s ease;
+        }
+
+        .btn-crop-cancel:hover {
+            background:#2a2a2a; border-color:#505050; color:#e8e8e8;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .form-content        { padding:20px; margin-left:0; }
+            .form-header         { padding:25px 30px; }
+            .form-body           { padding:25px; }
+            .messages-container  { padding:15px 25px; }
+            .form-footer         { padding:20px 25px; flex-direction:column-reverse; }
+            .btn-submit,
+            .btn-cancel          { width:100%; justify-content:center; }
+            .crop-controls       { gap:8px; }
+            .crop-btn            { padding:8px 15px; font-size:0.85rem; }
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+    <div class="form-content">
+        <div class="form-container">
+
+            <div class="form-header">
+                <h2 class="form-title">
+                    <div class="form-icon">
+                        <i class="fas fa-layer-group"></i>
                     </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                    {{ action }} Category
+                </h2>
+            </div>
 
-                <div class="form-body">
-                    <form method="post" enctype="multipart/form-data" id="categoryForm" action="{% if action == 'Edit' %}{% url 'custom_admin:category_management:category_edit' category.id %}{% else %}{% url 'custom_admin:category_management:category_create' %}{% endif %}">
-                        {% csrf_token %}
-                        
-                        {% if form.non_field_errors %}
-                        <div class="non-field-errors">
-                            <ul>
-                                {% for error in form.non_field_errors %}
-                                <li>
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </li>
-                                {% endfor %}
-                            </ul>
+            {#
+                Message handling aligned to views.py tags:
+                  category_create  → messages.success / messages.error
+                  category_edit    → messages.success / messages.error
+                  category_delete  → messages.success
+                  category_toggle  → messages.warning / messages.info
+                  (redirected from category_list after toggle/delete,
+                   so messages render here only when returning to this form)
+
+                Django's default MESSAGE_TAGS map:
+                  DEBUG   → "debug"
+                  INFO    → "info"
+                  SUCCESS → "success"
+                  WARNING → "warning"
+                  ERROR   → "error"
+
+                The CSS classes .alert-success / .alert-error / .alert-warning / .alert-info
+                match these tags exactly — no extra mapping needed.
+
+                NOTE: message.tags may contain multiple space-separated values
+                (e.g. "error" from messages.error, or "warning" for messages.warning).
+                We use the first token via a custom approach, but since we only set
+                one level per call in views.py, message.tags is always a single word.
+            #}
+            {% if messages %}
+            <div class="messages-container" id="messagesContainer">
+                {% for message in messages %}
+                <div class="alert-message alert-{{ message.tags }}" role="alert" aria-live="polite">
+                    <i class="message-icon fas
+                        {% if message.tags == 'success' %}fa-check-circle
+                        {% elif message.tags == 'error' %}fa-exclamation-circle
+                        {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                        {% elif message.tags == 'info' %}fa-info-circle
+                        {% else %}fa-bell{% endif %}">
+                    </i>
+                    <span class="message-text">{{ message }}</span>
+                    <button type="button"
+                            onclick="dismissMessage(this)"
+                            class="message-close-btn"
+                            aria-label="Dismiss">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-body">
+                {#
+                    Form action resolves correctly for both modes:
+                    - Create: action context var is "Create", category is not in context
+                    - Edit:   action context var is "Edit",   category is the instance
+                #}
+                <form method="post" enctype="multipart/form-data" id="categoryForm"
+                      action="{% if action == 'Edit' %}{% url 'custom_admin:category_management:category_edit' category.id %}{% else %}{% url 'custom_admin:category_management:category_create' %}{% endif %}">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="non-field-errors" role="alert">
+                        <ul>
+                            {% for error in form.non_field_errors %}
+                            <li>
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ error }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {# ── Name ── #}
+                    <div class="form-group">
+                        <label class="form-label" for="id_name">
+                            <i class="fas fa-tag"></i>Category Name
+                        </label>
+                        {# minlength/maxlength/pattern mirror forms.py clean_name: 3-150 chars, letters/numbers/spaces only #}
+                        <input type="text"
+                               name="{{ form.name.name }}"
+                               id="id_name"
+                               value="{{ form.name.value|default:'' }}"
+                               class="form-input{% if form.name.errors %} input-error{% endif %}"
+                               placeholder="Enter category name..."
+                               minlength="3"
+                               maxlength="150"
+                               pattern="[A-Za-z0-9 ]+"
+                               title="Letters, numbers, and spaces only (3â150 characters)"
+                               required>
+                        {% if form.name.errors %}
+                        <div class="error-message" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ form.name.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Description ── #}
+                    <div class="form-group">
+                        <label class="form-label" for="id_description">
+                            <i class="fas fa-align-left"></i>Description
+                        </label>
+                                                {# maxlength mirrors forms.py clean_description: max 500 chars #}
+                        <textarea name="{{ form.description.name }}"
+                                  id="id_description"
+                                  class="form-textarea{% if form.description.errors %} input-error{% endif %}"
+                                  maxlength="500"
+                                  placeholder="Enter category description (max 500 characters)...">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                        <div class="error-message" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ form.description.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Image ── #}
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-image"></i>Category Image
+                        </label>
+
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                            <div class="file-upload-text">
+                                <strong>Click to upload</strong> or drag and drop
+                            </div>
+                            <div class="file-upload-hint">
+                                Square image recommended &mdash; JPG, PNG, WEBP &mdash; max 2MB
+                            </div>
+                            {#
+                                name="temp_image" — this field is intentionally NOT "image".
+                                The view reads request.POST['image_cropped'] (base64 hidden field below)
+                                and builds a SimpleUploadedFile assigned to files_data['image'].
+                                If image_cropped is empty on edit, the view drops files_data['image']
+                                so the existing model image is preserved (no accidental deletion).
+                                accept= mirrors forms.py clean_image: jpg/jpeg/png/webp only.
+                            #}
+                            <input type="file" name="temp_image" class="file-input"
+                                   id="imageInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                        </div>
+
+                        {#
+                            Hidden field — carries the base64 data URI of the cropped image.
+                            Read by both category_create and category_edit views as:
+                                cropped_data = post_data.get('image_cropped')
+                            Empty value on edit → view skips image update → existing file kept.
+                        #}
+                        <input type="hidden" name="image_cropped" id="croppedImageData">
+
+                        {% if form.image.errors %}
+                        <div class="error-message" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ form.image.errors.0 }}
                         </div>
                         {% endif %}
 
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-tag"></i>
-                                Category Name
-                            </label>
-                            <input type="text" name="{{ form.name.name }}" value="{{ form.name.value|default:'' }}" class="form-input" placeholder="Enter category name..." required>
-                            {% if form.name.errors %}
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ form.name.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-align-left"></i>
-                                Description
-                            </label>
-                            <textarea name="{{ form.description.name }}" class="form-textarea" placeholder="Enter category description...">{{ form.description.value|default:'' }}</textarea>
-                            {% if form.description.errors %}
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ form.description.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-image"></i>
-                                Category Image
-                            </label>
-                            <div class="file-upload-area" id="fileUploadArea">
-                                <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
-                                <div class="file-upload-text">
-                                    <strong>Click to upload</strong> or drag and drop
-                                </div>
-                                <div class="file-upload-hint">
-                                    Recommended: Square image (PNG, JPG, max 5MB)
-                                </div>
-                                <input type="file" name="temp_image" class="file-input" id="imageInput" accept="image/*">
-                            </div>
-                            <!-- FIXED: Changed to use 'image_cropped' to match the view's POST parameter -->
-                            <input type="hidden" name="image_cropped" id="croppedImageData">
-                            
-                            {% if form.image.errors %}
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ form.image.errors.0 }}
-                                </div>
-                            {% endif %}
-
-                            <!-- Image Preview for newly cropped images -->
-                            <div class="image-preview-container" id="imagePreviewContainer">
-                                <div class="preview-header">
-                                    <span class="preview-label">
-                                        <i class="fas fa-check-circle"></i>
-                                        Image Preview
-                                    </span>
-                                    <button type="button" class="preview-remove-btn" id="removePreview">
-                                        <i class="fas fa-trash"></i>
-                                        Remove
-                                    </button>
-                                </div>
-                                <img id="previewImage" class="image-preview" alt="Category preview">
-                                <div class="preview-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    This is how your category image will appear
-                                </div>
-                            </div>
-
-                            {% if category and category.image %}
-                            <div class="current-image-preview">
-                                <span class="current-image-label">
-                                    <i class="fas fa-image"></i> Current Image:
+                        {# Preview for newly cropped image — shown after applyCrop #}
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <div class="preview-header">
+                                <span class="preview-label">
+                                    <i class="fas fa-check-circle"></i>New Image Preview
                                 </span>
-                                <img src="{{ category.image.url }}" class="image-preview" alt="Current category image">
+                                <button type="button" class="preview-remove-btn" id="removePreview">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
                             </div>
-                            {% endif %}
+                            <img id="previewImage" class="image-preview" alt="Category preview">
+                            <div class="preview-info">
+                                <i class="fas fa-info-circle"></i>
+                                This image will replace the current one on save
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-toggle-on"></i>
-                                Visibility
+                        {#
+                            Edit mode only: shows the currently saved image.
+                            Guarded by action == 'Edit' AND category AND category.image
+                            so it never throws a NameError on the create form.
+                            When image_cropped is empty, category_edit does:
+                                files_data.pop('image', None)
+                            which leaves the model's existing ImageField untouched.
+                        #}
+                        {% if action == 'Edit' and category and category.image %}
+                        <div class="current-image-preview" id="currentImagePreview">
+                            <div class="current-image-header">
+                                <span class="current-image-label">
+                                    <i class="fas fa-image"></i> Current Image
+                                </span>
+                                <span class="keep-badge" id="keepBadge">
+                                    <i class="fas fa-lock"></i> Will be kept unless replaced
+                                </span>
+                            </div>
+                            <img src="{{ category.image.url }}"
+                                 class="image-preview"
+                                 alt="Current category image">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Visibility ── #}
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-toggle-on"></i>Visibility
+                        </label>
+                        <div class="checkbox-container">
+                            <input type="checkbox"
+                                   name="{{ form.is_listed.name }}"
+                                   class="checkbox-input"
+                                   id="isListed"
+                                   {% if form.is_listed.value %}checked{% endif %}>
+                            <label for="isListed" class="checkbox-label">
+                                List this category publicly
                             </label>
-                            <div class="checkbox-container">
-                                <input type="checkbox" name="{{ form.is_listed.name }}" class="checkbox-input" id="isListed" {% if form.is_listed.value %}checked{% endif %}>
-                                <label for="isListed" class="checkbox-label">
-                                    List this category publicly
-                                </label>
-                            </div>
                         </div>
-                    </form>
-                </div>
+                        {#
+                            Note: the "no active products" guard for re-listing lives in
+                            category_toggle (views.py) and fires a messages.warning there.
+                            It is a server-side redirect check, not validated in this form.
+                        #}
+                        {% if form.is_listed.errors %}
+                        <div class="error-message" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ form.is_listed.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
 
-                <div class="form-footer">
-                    <button type="submit" form="categoryForm" class="btn-submit">
-                        <i class="fas fa-save"></i>
-                        {{ action }}
-                    </button>
-                    <a href="{% url 'custom_admin:category_management:category_list' %}" class="btn-cancel">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </a>
-                </div>
+                </form>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" form="categoryForm" class="btn-submit">
+                    <i class="fas fa-save"></i> {{ action }}
+                </button>
+                <a href="{% url 'custom_admin:category_management:category_list' %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
             </div>
         </div>
+    </div>
 
-        <div class="crop-modal" id="cropModal">
-            <div class="crop-container">
-                <div class="crop-header">
-                    <h3 class="crop-title">
-                        <i class="fas fa-crop-alt"></i>
-                        Crop & Resize Image
-                    </h3>
-                    <button class="crop-close" id="closeCropModal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <div class="crop-image-container">
-                    <img id="cropImage" src="" alt="Image to crop">
-                </div>
+    {# ── Crop Modal ── #}
+    <div class="crop-modal" id="cropModal" role="dialog" aria-modal="true" aria-labelledby="cropModalTitle">
+        <div class="crop-container">
+            <div class="crop-header">
+                <h3 class="crop-title" id="cropModalTitle">
+                    <i class="fas fa-crop-alt"></i> Crop &amp; Resize Image
+                </h3>
+                <button class="crop-close" id="closeCropModal" aria-label="Close crop modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-                <div class="crop-controls">
-                    <button class="crop-btn" id="zoomIn"><i class="fas fa-search-plus"></i> Zoom In</button>
-                    <button class="crop-btn" id="zoomOut"><i class="fas fa-search-minus"></i> Zoom Out</button>
-                    <button class="crop-btn" id="rotateLeft"><i class="fas fa-rotate-left"></i> Rotate Left</button>
-                    <button class="crop-btn" id="rotateRight"><i class="fas fa-rotate-right"></i> Rotate Right</button>
-                    <button class="crop-btn" id="flipH"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
-                    <button class="crop-btn" id="flipV"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
-                    <button class="crop-btn" id="reset"><i class="fas fa-undo"></i> Reset</button>
-                </div>
+            <div class="crop-image-container">
+                <img id="cropImage" src="" alt="Image to crop">
+            </div>
 
-                <div class="crop-footer">
-                    <button class="btn-crop-apply" id="applyCrop"><i class="fas fa-check"></i> Apply Crop</button>
-                    <button class="btn-crop-cancel" id="cancelCrop"><i class="fas fa-times"></i> Cancel</button>
-                </div>
+            <div class="crop-controls">
+                <button class="crop-btn" id="zoomIn">    <i class="fas fa-search-plus"></i>   Zoom In</button>
+                <button class="crop-btn" id="zoomOut">   <i class="fas fa-search-minus"></i>  Zoom Out</button>
+                <button class="crop-btn" id="rotateLeft"><i class="fas fa-rotate-left"></i>   Rotate Left</button>
+                <button class="crop-btn" id="rotateRight"><i class="fas fa-rotate-right"></i> Rotate Right</button>
+                <button class="crop-btn" id="flipH">     <i class="fas fa-arrows-alt-h"></i>  Flip H</button>
+                <button class="crop-btn" id="flipV">     <i class="fas fa-arrows-alt-v"></i>  Flip V</button>
+                <button class="crop-btn" id="reset">     <i class="fas fa-undo"></i>           Reset</button>
+            </div>
+
+            <div class="crop-footer">
+                <button class="btn-crop-apply"  id="applyCrop">  <i class="fas fa-check"></i> Apply Crop</button>
+                <button class="btn-crop-cancel" id="cancelCrop"> <i class="fas fa-times"></i> Cancel</button>
             </div>
         </div>
+    </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-        <script>
-            let cropper = null;
-            const fileUploadArea = document.getElementById('fileUploadArea');
-            const fileInput = document.getElementById('imageInput');
-            const cropModal = document.getElementById('cropModal');
-            const cropImage = document.getElementById('cropImage');
-            const croppedImageData = document.getElementById('croppedImageData');
-            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-            const previewImage = document.getElementById('previewImage');
-            const removePreviewBtn = document.getElementById('removePreview');
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        let cropper = null;
+        let scaleX  = 1;
+        let scaleY  = 1;
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const successMessages = document.querySelectorAll('.alert-success');
-                successMessages.forEach(function(message) {
-                    setTimeout(function() {
-                        message.style.opacity = '0';
-                        message.style.transform = 'translateX(100%)';
-                        setTimeout(function() {
-                            message.remove();
-                        }, 300);
-                    }, 5000);
-                });
+        const fileUploadArea        = document.getElementById('fileUploadArea');
+        const fileInput             = document.getElementById('imageInput');
+        const cropModal             = document.getElementById('cropModal');
+        const cropImageEl           = document.getElementById('cropImage');
+        const croppedImageData      = document.getElementById('croppedImageData');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const previewImage          = document.getElementById('previewImage');
+        const removePreviewBtn      = document.getElementById('removePreview');
+        const currentImagePreview   = document.getElementById('currentImagePreview'); // null in create mode
+        const keepBadge             = document.getElementById('keepBadge');           // null in create mode
+
+        /* ──────────────────────────────────────────────
+           Message auto-dismiss
+           - success  → auto-dismiss after 5 s  (create/edit success)
+           - info     → auto-dismiss after 5 s  (toggle state change)
+           - warning  → auto-dismiss after 8 s  (no-products warning needs more read time)
+           - error    → stays until manually closed (user must read & act)
+        ────────────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.alert-message').forEach(function (msg) {
+                const isError   = msg.classList.contains('alert-error');
+                const isWarning = msg.classList.contains('alert-warning');
+
+                if (isError) return; // errors stay until the user closes them
+
+                const delay = isWarning ? 8000 : 5000;
+
+                setTimeout(function () {
+                    fadeOutMessage(msg);
+                }, delay);
             });
+        });
 
-            fileUploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                fileUploadArea.classList.add('dragover');
-            });
-
-            fileUploadArea.addEventListener('dragleave', () => {
-                fileUploadArea.classList.remove('dragover');
-            });
-
-            fileUploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                fileUploadArea.classList.remove('dragover');
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    handleFileSelect(e.dataTransfer.files[0]);
+        function fadeOutMessage(el) {
+            el.style.opacity   = '0';
+            el.style.transform = 'translateX(100%)';
+            setTimeout(function () {
+                el.remove();
+                // Remove the container entirely if no messages remain
+                const container = document.getElementById('messagesContainer');
+                if (container && !container.querySelector('.alert-message')) {
+                    container.remove();
                 }
+            }, 300);
+        }
+
+        function dismissMessage(btn) {
+            fadeOutMessage(btn.closest('.alert-message'));
+        }
+
+        /* ── Drag-and-drop ── */
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        /*
+         * Client-side validation mirrors forms.py clean_image:
+         *   allowed MIME types : image/jpeg, image/png, image/webp
+         *   allowed extensions : .jpg .jpeg .png .webp
+         *   max size           : 2 MB (2 * 1024 * 1024 bytes)
+         * These are UI guardrails only — the server always re-validates.
+         */
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+        const ALLOWED_EXTS  = ['.jpg', '.jpeg', '.png', '.webp'];
+        const MAX_SIZE_MB   = 2;
+        const MAX_SIZE_B    = MAX_SIZE_MB * 1024 * 1024;
+
+        function showFileError(msg) {
+            const existing = document.getElementById('clientFileError');
+            if (existing) existing.remove();
+
+            const err = document.createElement('div');
+            err.id        = 'clientFileError';
+            err.className = 'error-message';
+            err.setAttribute('role', 'alert');
+            err.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${msg}</span>`;
+            fileUploadArea.insertAdjacentElement('afterend', err);
+            fileInput.value = '';
+        }
+
+        function clearFileError() {
+            const existing = document.getElementById('clientFileError');
+            if (existing) existing.remove();
+        }
+
+        function handleFileSelect(file) {
+            clearFileError();
+            if (!file) return;
+
+            // Extension check
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            if (!ALLOWED_EXTS.includes(ext)) {
+                showFileError('Invalid file type. Allowed formats: JPG, PNG, WEBP.');
+                return;
+            }
+
+            // MIME type check
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                showFileError('Invalid file type. Allowed formats: JPG, PNG, WEBP.');
+                return;
+            }
+
+            // Size check — matches forms.py: image.size > 2 * 1024 * 1024
+            if (file.size > MAX_SIZE_B) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                showFileError(`File is too large (${sizeMB} MB). Maximum allowed size is ${MAX_SIZE_MB} MB.`);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropImageEl.src = e.target.result;
+                cropModal.classList.add('active');
+                initCropper();
+            };
+            reader.readAsDataURL(file);
+            updateUploadLabel(file.name);
+        }
+
+        function initCropper() {
+            if (cropper) { cropper.destroy(); }
+            cropper = new Cropper(cropImageEl, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        }
+
+        /* ── Crop controls ── */
+        document.getElementById('zoomIn').addEventListener('click',      () => cropper.zoom(0.1));
+        document.getElementById('zoomOut').addEventListener('click',     () => cropper.zoom(-0.1));
+        document.getElementById('rotateLeft').addEventListener('click',  () => cropper.rotate(-45));
+        document.getElementById('rotateRight').addEventListener('click', () => cropper.rotate(45));
+
+        document.getElementById('flipH').addEventListener('click', () => {
+            scaleX = -scaleX;
+            cropper.scaleX(scaleX);
+        });
+
+        document.getElementById('flipV').addEventListener('click', () => {
+            scaleY = -scaleY;
+            cropper.scaleY(scaleY);
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            cropper.reset();
+            scaleX = 1; scaleY = 1;
+        });
+
+        /* ── Apply crop ── */
+        document.getElementById('applyCrop').addEventListener('click', () => {
+            const canvas = cropper.getCroppedCanvas({
+                width: 500,
+                height: 500,
+                imageSmoothingQuality: 'high',
             });
 
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
+            canvas.toBlob((blob) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    // Store base64 in hidden field — views.py reads this as 'image_cropped'
+                    croppedImageData.value = reader.result;
 
-            function handleFileSelect(file) {
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        cropImage.src = e.target.result;
-                        cropModal.classList.add('active');
-                        initCropper();
-                    };
-                    reader.readAsDataURL(file);
-                    updateFileName(file.name);
+                    // Show new-image preview
+                    previewImage.src = reader.result;
+                    imagePreviewContainer.classList.add('show');
+
+                    // Update keep badge to reflect pending replacement
+                    if (keepBadge) {
+                        keepBadge.innerHTML         = '<i class="fas fa-exchange-alt"></i> Will be replaced on save';
+                        keepBadge.style.borderColor = '#e0c070';
+                        keepBadge.style.color       = '#e0c070';
+                        keepBadge.style.background  = 'linear-gradient(135deg,#4a4a2a,#3a3a2a)';
+                    }
+
+                    cropModal.classList.remove('active');
+
+                    fileUploadArea.querySelector('.file-upload-text').innerHTML =
+                        '<strong><i class="fas fa-check-circle" style="color:#70c090;"></i> Image cropped and ready</strong>';
+                };
+                reader.readAsDataURL(blob);
+            });
+        });
+
+        /* ── Remove new preview — restores "keep existing" state ── */
+        removePreviewBtn.addEventListener('click', () => {
+            imagePreviewContainer.classList.remove('show');
+            croppedImageData.value = ''; // empty → category_edit keeps existing image
+            fileInput.value        = '';
+            previewImage.src       = '';
+
+            if (keepBadge) {
+                keepBadge.innerHTML         = '<i class="fas fa-lock"></i> Will be kept unless replaced';
+                keepBadge.style.borderColor = '#70a0e0';
+                keepBadge.style.color       = '#70a0e0';
+                keepBadge.style.background  = 'linear-gradient(135deg,#2a3a4a,#3a4a5a)';
+            }
+
+            fileUploadArea.querySelector('.file-upload-text').innerHTML =
+                '<strong>Click to upload</strong> or drag and drop';
+        });
+
+        /* ── Close crop modal ── */
+        function closeCropModal() {
+            cropModal.classList.remove('active');
+            if (cropper) { cropper.destroy(); cropper = null; }
+            fileInput.value = '';
+        }
+
+        document.getElementById('cancelCrop').addEventListener('click',    closeCropModal);
+        document.getElementById('closeCropModal').addEventListener('click', closeCropModal);
+
+        // Close crop modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && cropModal.classList.contains('active')) {
+                closeCropModal();
+            }
+        });
+
+        function updateUploadLabel(name) {
+            fileUploadArea.querySelector('.file-upload-text').innerHTML =
+                `<strong><i class="fas fa-image" style="color:#9b8bdb;"></i> ${name}</strong>`;
+        }
+
+        /* ── Description character counter (max 500 mirrors forms.py clean_description) ── */
+        (function () {
+            const textarea = document.getElementById('id_description');
+            if (!textarea) return;
+
+            const MAX = 500;
+            const counter = document.createElement('div');
+            counter.id = 'descCharCounter';
+            counter.style.cssText = 'text-align:right;font-size:0.82rem;margin-top:6px;transition:color 0.2s ease;';
+
+            function update() {
+                const remaining = MAX - textarea.value.length;
+                counter.textContent = `${textarea.value.length} / ${MAX} characters`;
+                if (remaining < 0) {
+                    counter.style.color = '#e07070';   // over limit  → red
+                } else if (remaining < 50) {
+                    counter.style.color = '#e0c070';   // near limit  → amber
+                } else {
+                    counter.style.color = '#606060';   // comfortable → muted
                 }
             }
 
-            function initCropper() {
-                if (cropper) {
-                    cropper.destroy();
-                }
-                cropper = new Cropper(cropImage, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 1,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                });
-            }
+            textarea.insertAdjacentElement('afterend', counter);
+            textarea.addEventListener('input', update);
+            update(); // initialise on page load (edit mode pre-fill)
+        })();
+    </script>
 
-            document.getElementById('zoomIn').addEventListener('click', () => {
-                cropper.zoom(0.1);
-            });
-
-            document.getElementById('zoomOut').addEventListener('click', () => {
-                cropper.zoom(-0.1);
-            });
-
-            document.getElementById('rotateLeft').addEventListener('click', () => {
-                cropper.rotate(-45);
-            });
-
-            document.getElementById('rotateRight').addEventListener('click', () => {
-                cropper.rotate(45);
-            });
-
-            let scaleX = 1;
-            document.getElementById('flipH').addEventListener('click', () => {
-                scaleX = -scaleX;
-                cropper.scaleX(scaleX);
-            });
-
-            let scaleY = 1;
-            document.getElementById('flipV').addEventListener('click', () => {
-                scaleY = -scaleY;
-                cropper.scaleY(scaleY);
-            });
-
-            document.getElementById('reset').addEventListener('click', () => {
-                cropper.reset();
-                scaleX = 1;
-                scaleY = 1;
-            });
-
-            document.getElementById('applyCrop').addEventListener('click', () => {
-                const canvas = cropper.getCroppedCanvas({
-                    width: 500,
-                    height: 500,
-                    imageSmoothingQuality: 'high'
-                });
-                canvas.toBlob((blob) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        croppedImageData.value = reader.result;
-                        
-                        // Show preview
-                        previewImage.src = reader.result;
-                        imagePreviewContainer.classList.add('show');
-                        
-                        cropModal.classList.remove('active');
-                        const uploadText = fileUploadArea.querySelector('.file-upload-text');
-                        uploadText.innerHTML = `<strong><i class="fas fa-check-circle" style="color: #70c090;"></i> Image cropped and ready</strong>`;
-                    };
-                    reader.readAsDataURL(blob);
-                });
-            });
-
-            function closeCropModal() {
-                cropModal.classList.remove('active');
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-                fileInput.value = '';
-            }
-
-            // Remove preview handler
-            removePreviewBtn.addEventListener('click', () => {
-                imagePreviewContainer.classList.remove('show');
-                croppedImageData.value = '';
-                fileInput.value = '';
-                previewImage.src = '';
-                
-                const uploadText = fileUploadArea.querySelector('.file-upload-text');
-                uploadText.innerHTML = '<strong>Click to upload</strong> or drag and drop';
-            });
-
-            document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
-            document.getElementById('closeCropModal').addEventListener('click', closeCropModal);
-
-            function updateFileName(name) {
-                const uploadText = fileUploadArea.querySelector('.file-upload-text');
-                uploadText.innerHTML = `<strong><i class="fas fa-image" style="color: #9b8bdb;"></i> ${name}</strong>`;
-            }
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-    </html>
   </section>
 </div>
 {% endblock %}
