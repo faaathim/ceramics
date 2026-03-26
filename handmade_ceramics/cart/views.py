@@ -181,7 +181,6 @@ def update_quantity(request, item_id):
         return JsonResponse({'error': 'No action provided'}, status=400)
 
     new_qty = max(1, min(new_qty, allowed_max))
-
     item.quantity = new_qty
     item.save()
 
@@ -197,16 +196,30 @@ def update_quantity(request, item_id):
     if coupon_id and Coupon:
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
         if coupon and coupon.is_valid():
-            discount = (coupon.discount_percentage / Decimal('100')) * subtotal
+            if subtotal >= coupon.minimum_amount:
+                discount = (coupon.discount_percentage / Decimal('100')) * subtotal
+                request.session['discount_amount'] = float(discount)
+            else:
+                # Remove coupon — minimum amount no longer met
+                request.session.pop('coupon_id', None)
+                request.session.pop('discount_amount', None)
+                return JsonResponse({
+                    'error': f'Coupon removed! Minimum order amount should be ₹{coupon.minimum_amount}',
+                    'coupon_removed': True,
+                    'quantity': item.quantity,
+                    'item_total': float(item.variant.product.get_discounted_price() * item.quantity),
+                    'cart_subtotal': float(subtotal),
+                    'discount': 0,
+                    'cart_total': float(max(subtotal, Decimal('1'))),
+                    'cart_items': cart.total_items(),
+                }, status=200)
 
-    total = subtotal - discount
-    if total < 1:
-        total = Decimal('1')
+    total = max(subtotal - discount, Decimal('1'))
 
     return JsonResponse({
         'item_id': item.id,
         'quantity': item.quantity,
-        'item_total': float(Decimal(item.variant.product.get_discounted_price()) * item.quantity),
+        'item_total': float(item.variant.product.get_discounted_price() * item.quantity),
         'cart_subtotal': float(subtotal),
         'discount': float(discount),
         'cart_total': float(total),
