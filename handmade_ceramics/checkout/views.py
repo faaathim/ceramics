@@ -94,8 +94,28 @@ def place_order(request):
         return redirect("checkout:checkout")
 
     for item in cart_items:
-        if item.quantity > item.variant.stock:
-            messages.error(request, f"Not enough stock for {item.variant.product.name}")
+        variant = item.variant
+        product = variant.product
+        category = getattr(product, "category", None)
+
+        # ❌ Check variant availability
+        if variant.is_deleted or not variant.is_listed:
+            messages.error(request, f"{product.name} is no longer available.")
+            return redirect("cart:cart_page")
+
+        # ❌ Check product availability
+        if product.is_deleted or not product.is_listed:
+            messages.error(request, f"{product.name} is currently unavailable.")
+            return redirect("cart:cart_page")
+
+        # ❌ Check category block
+        if category and getattr(category, "is_blocked", False):
+            messages.error(request, f"{product.name} cannot be ordered right now.")
+            return redirect("cart:cart_page")
+
+        # ❌ Check stock
+        if item.quantity > variant.stock:
+            messages.error(request, f"Only {variant.stock} items available for {product.name}.")
             return redirect("checkout:checkout")
 
     subtotal = sum(
