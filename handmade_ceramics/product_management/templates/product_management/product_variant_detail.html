@@ -7,7 +7,6 @@
 
 {% block content %}
 <style>
-  /* ===== BASE ===== */
   * {
     margin: 0;
     padding: 0;
@@ -20,7 +19,6 @@
     color: #e8e8e8;
   }
 
-  /* ===== HEADER ===== */
   .page-header { display: none; }
 
   .back-link {
@@ -49,14 +47,12 @@
 
   .wishlist-link { display: none; }
 
-  /* ===== CONTAINER ===== */
   .container {
     max-width: 1600px;
     margin: 0 auto;
     padding: 40px 40px 100px 40px;
   }
 
-  /* ===== PRODUCT LAYOUT ===== */
   .product-grid {
     display: grid;
     grid-template-columns: auto 600px 1fr;
@@ -71,7 +67,7 @@
     padding-top: 0;
   }
 
-  /* ===== GALLERY ===== */
+  /* ===== GALLERY & ZOOM ===== */
   .gallery {
     position: sticky;
     top: 100px;
@@ -79,21 +75,82 @@
     width: 600px;
   }
 
-  .main-image {
+  .zoom-wrapper {
+    position: relative;
     width: 100%;
     height: 600px;
-    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
     border-radius: 15px;
     overflow: hidden;
     margin-bottom: 20px;
     border: 1px solid #333;
+    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+    cursor: crosshair;
   }
 
-  .main-image img {
+  .zoom-wrapper img#mainImage {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    user-select: none;
   }
+
+  /* Zoom lens overlay */
+  .zoom-lens {
+    position: absolute;
+    border: 2px solid rgba(232, 232, 232, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    pointer-events: none;
+    display: none;
+    z-index: 5;
+    backdrop-filter: brightness(1.15);
+  }
+
+  /* Zoom result panel — appears to the right of the gallery */
+  .zoom-result {
+    position: absolute;
+    left: calc(100% + 20px);
+    top: 0;
+    width: 480px;
+    height: 600px;
+    border-radius: 15px;
+    border: 1px solid #404040;
+    background: #1a1a1a;
+    background-repeat: no-repeat;
+    display: none;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  }
+
+  .zoom-wrapper:hover .zoom-lens { display: block; }
+  .zoom-wrapper:hover + .zoom-result { display: block; }
+
+  /* Hint badge */
+  .zoom-hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.65);
+    color: #b0b0b0;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+    z-index: 6;
+  }
+
+  .zoom-wrapper:hover .zoom-hint { opacity: 0; }
 
   .thumbnails {
     display: grid;
@@ -131,7 +188,6 @@
     line-height: 1.2;
   }
 
-  /* ===== PRICE STYLES ===== */
   .price {
     font-size: 2rem;
     font-weight: 900;
@@ -187,7 +243,6 @@
     border-color: #6a4a4a;
   }
 
-  /* ===== SECTIONS ===== */
   .section {
     margin-bottom: 40px;
     padding-bottom: 40px;
@@ -210,7 +265,6 @@
     line-height: 1.8;
   }
 
-  /* ===== COLORS ===== */
   .colors {
     display: flex;
     gap: 12px;
@@ -232,7 +286,6 @@
     transform: scale(1.1);
   }
 
-  /* ===== ACTIONS ===== */
   .actions {
     display: flex;
     gap: 12px;
@@ -380,7 +433,6 @@
 
   .card:hover .card-image img { transform: scale(1.05); }
 
-  /* ===== DISCOUNT BADGE FOR SIMILAR CARDS ===== */
   .card-discount-badge {
     position: absolute;
     top: 10px;
@@ -408,7 +460,6 @@
     color: #e8e8e8;
   }
 
-  /* ===== CARD PRICE STYLES ===== */
   .card-price {
     font-size: 1.2rem;
     font-weight: 900;
@@ -427,6 +478,23 @@
   }
 
   /* ===== RESPONSIVE ===== */
+  @media (max-width: 1400px) {
+    .zoom-result {
+      width: 380px;
+      height: 500px;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    /* On narrower screens, show zoom result below instead of beside */
+    .zoom-result {
+      left: 0;
+      top: calc(100% + 16px);
+      width: 100%;
+      height: 400px;
+    }
+  }
+
   @media (max-width: 1024px) {
     .product-grid {
       grid-template-columns: 1fr;
@@ -438,6 +506,16 @@
     .gallery {
       position: relative;
       top: 0;
+      width: 100%;
+    }
+
+    .zoom-wrapper { height: 450px; }
+
+    .zoom-result {
+      left: 0;
+      top: calc(100% + 16px);
+      width: 100%;
+      height: 350px;
     }
 
     .page-header {
@@ -467,7 +545,13 @@
       letter-spacing: 2px;
     }
 
-    .main-image { height: 400px; }
+    .zoom-wrapper { height: 350px; }
+
+    /* Disable zoom result on small screens — too cramped */
+    .zoom-result { display: none !important; }
+    .zoom-lens { display: none !important; }
+    .zoom-wrapper { cursor: default; }
+    .zoom-hint { display: none; }
 
     .similar-grid { grid-template-columns: 1fr; }
 
@@ -498,7 +582,6 @@
 <!-- MAIN CONTENT -->
 <div class="container">
 
-  <!-- PRODUCT GRID -->
   <div class="product-grid">
 
     <!-- BACK BUTTON COLUMN -->
@@ -509,9 +592,9 @@
       </a>
     </div>
 
-    <!-- GALLERY -->
+    <!-- GALLERY WITH ZOOM -->
     <div class="gallery">
-      <div class="main-image">
+      <div class="zoom-wrapper" id="zoomWrapper">
         {% if variant.main_image %}
           <img id="mainImage" src="{{ variant.main_image.url }}" alt="{{ product.name }}">
         {% elif variant.images.first %}
@@ -519,7 +602,12 @@
         {% else %}
           <img id="mainImage" src="https://via.placeholder.com/650x650/2a2a2a/606060?text=No+Image" alt="No Image">
         {% endif %}
+        <div class="zoom-lens" id="zoomLens"></div>
+        <div class="zoom-hint">Hover to zoom</div>
       </div>
+
+      <!-- Zoom result panel sits outside zoom-wrapper but is controlled by JS -->
+      <div class="zoom-result" id="zoomResult"></div>
 
       <div class="thumbnails">
         {% if variant.main_image %}
@@ -536,7 +624,6 @@
 
       <h1 class="product-name">{{ product.name }}</h1>
 
-      {# ===== UPDATED MAIN PRICE BLOCK ===== #}
       <div class="price">
         {% with best_discount=product.get_best_discount_percentage %}
           {% if best_discount > 0 %}
@@ -643,15 +730,12 @@
                 <img src="https://via.placeholder.com/280x280/2a2a2a/606060?text=No+Image" alt="No Image">
               {% endif %}
 
-              {# ===== DISCOUNT BADGE ON SIMILAR CARD IMAGE ===== #}
               {% if p.get_best_discount_percentage > 0 %}
                 <div class="card-discount-badge">-{{ p.get_best_discount_percentage }}%</div>
               {% endif %}
             </div>
             <div class="card-body">
               <h3 class="card-name">{{ p.name }}</h3>
-
-              {# ===== UPDATED SIMILAR ITEM PRICE BLOCK ===== #}
               <div class="card-price">
                 {% with best_discount=p.get_best_discount_percentage %}
                   {% if best_discount > 0 %}
@@ -673,15 +757,95 @@
 
 </div>
 
-<!-- SCRIPT -->
 <script>
-document.querySelectorAll('.thumb').forEach(thumb => {
-  thumb.addEventListener('click', function() {
-    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById('mainImage').src = this.dataset.src;
+(function () {
+  /* ── Thumbnail switcher ── */
+  const mainImg = document.getElementById('mainImage');
+  const thumbs  = document.querySelectorAll('.thumb');
+
+  thumbs.forEach(thumb => {
+    thumb.addEventListener('click', function () {
+      thumbs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      mainImg.src = this.dataset.src;
+      /* Update zoom source when image changes */
+      initZoom();
+    });
   });
-});
+
+  /* ── Zoom logic ── */
+  const wrapper    = document.getElementById('zoomWrapper');
+  const lens       = document.getElementById('zoomLens');
+  const zoomResult = document.getElementById('zoomResult');
+
+  const ZOOM = 2.8;        /* magnification factor */
+  const LENS_W = 120;      /* lens box width  (px) */
+  const LENS_H = 120;      /* lens box height (px) */
+
+  function initZoom () {
+    const src = mainImg.src;
+
+    /* Size the result panel */
+    const rw = zoomResult.offsetWidth  || 480;
+    const rh = zoomResult.offsetHeight || 600;
+
+    /* Calculate bg-size so it fills the result panel at ZOOM level */
+    const wRect = wrapper.getBoundingClientRect();
+    const bgW   = wRect.width  * ZOOM;
+    const bgH   = wRect.height * ZOOM;
+
+    zoomResult.style.backgroundImage    = `url('${src}')`;
+    zoomResult.style.backgroundSize     = `${bgW}px ${bgH}px`;
+    zoomResult.style.backgroundRepeat   = 'no-repeat';
+
+    lens.style.width  = LENS_W + 'px';
+    lens.style.height = LENS_H + 'px';
+  }
+
+  wrapper.addEventListener('mouseenter', initZoom);
+
+  wrapper.addEventListener('mousemove', function (e) {
+    const rect = wrapper.getBoundingClientRect();
+
+    /* Cursor position relative to wrapper */
+    let cx = e.clientX - rect.left;
+    let cy = e.clientY - rect.top;
+
+    /* Clamp lens so it stays inside wrapper */
+    let lx = cx - LENS_W / 2;
+    let ly = cy - LENS_H / 2;
+    lx = Math.max(0, Math.min(lx, rect.width  - LENS_W));
+    ly = Math.max(0, Math.min(ly, rect.height - LENS_H));
+
+    lens.style.left = lx + 'px';
+    lens.style.top  = ly + 'px';
+
+    /* Background position in result panel */
+    const rw = zoomResult.offsetWidth;
+    const rh = zoomResult.offsetHeight;
+
+    /* The fraction of the image the lens is centred on */
+    const fx = cx / rect.width;
+    const fy = cy / rect.height;
+
+    /* Background offset so the zoomed region is centred in result */
+    const bgW = rect.width  * ZOOM;
+    const bgH = rect.height * ZOOM;
+    const bx  = fx * bgW - rw / 2;
+    const by  = fy * bgH - rh / 2;
+
+    zoomResult.style.backgroundPosition =
+      `-${Math.max(0, bx)}px -${Math.max(0, by)}px`;
+
+    zoomResult.style.display = 'block';
+    lens.style.display       = 'block';
+  });
+
+  wrapper.addEventListener('mouseleave', function () {
+    zoomResult.style.display = 'none';
+    lens.style.display       = 'none';
+  });
+})();
 </script>
 
 {% endblock %}
