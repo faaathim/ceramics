@@ -21,10 +21,8 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # ✅ Only active categories
         self.fields['category'].queryset = Category.objects.filter(is_listed=True)
 
-        # ✅ Allow previously selected inactive category (edit case)
         if self.instance.pk and self.instance.category:
             self.fields['category'].queryset = Category.objects.filter(
                 Q(is_listed=True) | Q(pk=self.instance.category.pk)
@@ -35,6 +33,17 @@ class ProductForm(forms.ModelForm):
         if price is None or price <= 0:
             raise forms.ValidationError("Price must be a positive number.")
         return price
+
+    # ✅ ADD THIS
+    def clean(self):
+        cleaned_data = super().clean()
+        main_image = cleaned_data.get('main_image')
+
+        # If editing, check existing instance image
+        if not main_image and not self.instance.main_image:
+            raise forms.ValidationError("Product must have a main image.")
+
+        return cleaned_data
 
 
 # =========================

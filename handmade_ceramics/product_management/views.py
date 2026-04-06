@@ -63,68 +63,90 @@ def product_list(request):
 @admin_required
 @transaction.atomic
 def product_create(request):
+    """
+    Creates a product with a single main_image upload.
+    No gallery images belong to Product — they belong to VariantImage.
+    """
     if request.method == 'POST':
         form = ProductForm(request.POST)
         main_file = request.FILES.get('main_image')
-
+ 
         if not main_file:
-            form.add_error(None, "Main image is required.")
+            # Server-side guard (client also validates, but defence-in-depth)
+            messages.error(request, "A main product image is required.")
             return render(request, 'product_management/product_form.html', {
                 'form': form,
                 'action': 'Create',
-                'product': None
+                'product': None,
             })
-
+ 
         if form.is_valid():
-            product = form.save(commit=False)
-            product.stock = 0
-            product.is_listed = False
+            product            = form.save(commit=False)
+            product.stock      = 0
+            product.is_listed  = False
             product.main_image = main_file
             product.save()
-
+ 
             messages.success(request, f'Product "{product.name}" created. Now add variants.')
-            return redirect(reverse('custom_admin:product_management:variant_list', args=[product.id]))
-
+            return redirect(
+                reverse('custom_admin:product_management:variant_list', args=[product.id])
+            )
+ 
     else:
         form = ProductForm()
-
+ 
     return render(request, 'product_management/product_form.html', {
         'form': form,
         'action': 'Create',
-        'product': None
+        'product': None,
     })
-
-
+ 
+ 
 @admin_required
 @transaction.atomic
 def product_edit(request, pk):
+    """
+    Edits a product.  Only manages main_image (the one CloudinaryField on Product).
+ 
+    POST keys handled:
+      remove_main_image  — if present (any value), nullify current main_image
+      main_image         — optional file; replaces / sets new main_image
+                           (takes priority: if both remove flag and new file
+                            are present the new file wins)
+    """
     product = get_object_or_404(Product.all_objects, pk=pk)
-
+ 
     if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
-        main_file = request.FILES.get("main_image")
+        form        = ProductForm(request.POST, instance=product)
+        main_file   = request.FILES.get("main_image")
         remove_main = "remove_main_image" in request.POST
-
+ 
         if form.is_valid():
             product = form.save(commit=False)
-
-            if remove_main:
+ 
+            if remove_main and not main_file:
+                # Only delete from Cloudinary when not immediately replacing
+                if product.main_image:
+                    try:
+                        product.main_image.delete(save=False)
+                    except Exception:
+                        pass  # don't let Cloudinary errors block a save
                 product.main_image = None
-
+ 
             if main_file:
+                # Cloudinary replaces the old resource automatically on save
                 product.main_image = main_file
-
+ 
             product.save()
-
             messages.success(request, "Product updated successfully!")
             return redirect("custom_admin:product_management:product_list")
-
+ 
     else:
         form = ProductForm(instance=product)
-
+ 
     return render(request, "product_management/product_edit.html", {
         "form": form,
-        "product": product
+        "product": product,
     })
 
 

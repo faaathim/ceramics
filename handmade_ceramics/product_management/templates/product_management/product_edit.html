@@ -12,1370 +12,613 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    
     <style>
         body {
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         .form-content {
-            margin-left: 250px;
-            margin-top: 70px;
-            padding: 40px;
+            margin-left: 250px; margin-top: 70px; padding: 40px;
             min-height: calc(100vh - 70px);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            display: flex; justify-content: center; align-items: flex-start;
         }
-
         .form-container {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: 20px;
-            padding: 0;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-            max-width: 900px;
-            width: 100%;
-            border: 1px solid #333333;
-            overflow: hidden;
+            border-radius: 20px; padding: 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            max-width: 900px; width: 100%;
+            border: 1px solid #333; overflow: hidden;
             animation: formSlideIn 0.4s ease;
         }
-
         @keyframes formSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-30px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-
         .form-header {
             background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            padding: 30px 40px;
-            border-bottom: 2px solid #404040;
-            position: relative;
-            overflow: hidden;
+            padding: 30px 40px; border-bottom: 2px solid #404040;
+            position: relative; overflow: hidden;
         }
-
         .form-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
             background: linear-gradient(90deg, #9b8bdb, #8b7bcb);
         }
-
         .form-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #e8e8e8;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            font-size: 1.8rem; font-weight: 700; color: #e8e8e8;
+            margin: 0; display: flex; align-items: center; gap: 15px;
         }
-
         .form-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
+            width: 55px; height: 55px; border-radius: 50%;
             background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #9b8bdb;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: #9b8bdb;
         }
-
-        .form-body {
-            padding: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 30px;
-        }
-
+        .form-body { padding: 40px; }
+        .form-group { margin-bottom: 30px; }
         .form-label {
-            display: block;
-            color: #b0b0b0;
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: block; color: #b0b0b0; font-weight: 600;
+            font-size: 0.95rem; margin-bottom: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        .form-label i {
-            color: #9b8bdb;
-            margin-right: 8px;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 14px 20px;
-            border: 2px solid #404040;
-            border-radius: 12px;
-            background: #0f0f0f;
-            color: #e8e8e8;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+        .form-label i { color: #9b8bdb; margin-right: 8px; }
+        .form-input, .form-textarea, .form-select {
+            width: 100%; padding: 14px 20px;
+            border: 2px solid #404040; border-radius: 12px;
+            background: #0f0f0f; color: #e8e8e8;
+            font-size: 1rem; transition: all 0.3s ease;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
+        .form-textarea { resize: vertical; min-height: 120px; }
         .form-select {
-            cursor: pointer;
-            appearance: none;
+            cursor: pointer; appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239b8bdb' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 20px center;
+            background-repeat: no-repeat; background-position: right 20px center;
             padding-right: 50px;
         }
-
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: #9b8bdb;
-            background: #1a1a1a;
-            box-shadow: 0 0 0 4px rgba(155, 139, 219, 0.1);
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none; border-color: #9b8bdb; background: #1a1a1a;
+            box-shadow: 0 0 0 4px rgba(155,139,219,0.1);
         }
+        .form-input::placeholder, .form-textarea::placeholder { color: #606060; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        .form-input::placeholder,
-        .form-textarea::placeholder {
-            color: #606060;
+        /* Current image display */
+        .current-image-section {
+            margin-bottom: 24px; padding: 20px;
+            background: #0f0f0f; border-radius: 12px; border: 1px solid #2a2a2a;
         }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .current-image-label {
+            color: #9b8bdb; font-weight: 600; font-size: 0.95rem;
+            margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px;
         }
-
-        .file-upload-area {
-            position: relative;
-            border: 2px dashed #404040;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            background: #0f0f0f;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        .current-image-label span { color: #606060; font-size: 0.82rem; font-weight: 400; }
+        .current-image-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+        .current-img-item {
+            position: relative; width: 160px; height: 160px;
+            border-radius: 12px; overflow: hidden;
+            border: 2px solid #404040; transition: border-color 0.3s ease;
         }
-
-        .file-upload-area:hover {
-            border-color: #9b8bdb;
-            background: #1a1a1a;
+        .current-img-item img { width: 100%; height: 100%; object-fit: cover; }
+        .current-img-item.pending-removal {
+            opacity: 0.4;
+            border-color: #e07070;
         }
-
-        .file-upload-area.dragover {
-            border-color: #9b8bdb;
-            background: #1a1a1a;
-            transform: scale(1.02);
+        .current-img-item.pending-removal::after {
+            content: 'WILL BE REMOVED';
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(224,112,112,0.35);
+            color: #ffcccc; font-size: 0.65rem; font-weight: 800;
+            text-align: center; padding: 8px;
+            pointer-events: none; letter-spacing: 0.5px;
         }
-
-        .file-upload-icon {
-            font-size: 3rem;
-            color: #606060;
-            margin-bottom: 15px;
+        .img-action-btn {
+            position: absolute; top: 6px; right: 6px;
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 2px solid #1a1a1a; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; transition: all 0.2s ease; z-index: 10;
         }
-
-        .file-upload-text {
-            color: #b0b0b0;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-        }
-
-        .file-upload-hint {
-            color: #606060;
-            font-size: 0.85rem;
-        }
-
-        .file-input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            cursor: pointer;
-        }
-
-        .current-images-section {
-            margin: 20px 0;
-            padding: 20px;
-            background: #0f0f0f;
-            border-radius: 12px;
-            border: 1px solid #2a2a2a;
-        }
-
-        .current-images-label {
-            color: #9b8bdb;
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .image-preview-container {
-            margin-top: 20px;
-            padding: 20px;
-            background: #0f0f0f;
-            border-radius: 12px;
-            border: 1px solid #2a2a2a;
-        }
-
-        .preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .preview-item {
-            position: relative;
-            width: 100%;
-            padding-bottom: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid #404040;
-            transition: all 0.3s ease;
-        }
-
-        .preview-item:hover {
-            border-color: #9b8bdb;
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.3);
-        }
-
-        .preview-item img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .preview-remove {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+        .img-remove-btn {
             background: linear-gradient(135deg, #e07070, #d06060);
-            border: 2px solid #1a1a1a;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            z-index: 10;
+        }
+        .img-remove-btn:hover { transform: scale(1.12); }
+        .img-undo-btn {
+            background: linear-gradient(135deg, #70b870, #508050);
+        }
+        .img-undo-btn:hover { transform: scale(1.12); }
+        .img-badge {
+            position: absolute; bottom: 6px; left: 6px;
+            padding: 4px 8px; border-radius: 6px;
+            font-size: 0.68rem; font-weight: 700; color: white;
+            background: rgba(155,139,219,0.9);
+        }
+        .no-image-notice {
+            color: #606060; font-size: 0.9rem; font-style: italic;
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .preview-remove:hover {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #f08080, #e07070);
+        /* Upload area */
+        .file-upload-area {
+            position: relative; border: 2px dashed #404040; border-radius: 12px;
+            padding: 35px 30px; text-align: center;
+            background: #0f0f0f; transition: all 0.3s ease; cursor: pointer;
+        }
+        .file-upload-area:hover, .file-upload-area.dragover {
+            border-color: #9b8bdb; background: #1a1a1a;
+        }
+        .file-upload-area.dragover { transform: scale(1.02); }
+        .file-upload-icon { font-size: 2.5rem; color: #606060; margin-bottom: 12px; }
+        .file-upload-text { color: #b0b0b0; font-size: 0.95rem; margin-bottom: 6px; }
+        .file-upload-hint { color: #606060; font-size: 0.85rem; }
+        .file-input {
+            position: absolute; opacity: 0;
+            width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;
         }
 
-        .preview-badge {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            padding: 4px 8px;
-            background: rgba(155, 139, 219, 0.9);
-            color: white;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
+        /* New image preview */
+        .new-preview-wrap {
+            margin-top: 16px; padding: 16px;
+            background: #0f0f0f; border-radius: 12px; border: 1px solid #2a2a2a;
+            display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+        }
+        .new-preview-info { flex: 1; }
+        .new-preview-info .label {
+            color: #70c090; font-weight: 600; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+        }
+        .new-preview-info .sub {
+            color: #707070; font-size: 0.82rem;
+        }
+        .new-img-thumb {
+            position: relative; width: 120px; height: 120px;
+            border-radius: 10px; overflow: hidden;
+            border: 2px solid #70c090;
+            box-shadow: 0 4px 16px rgba(112,192,112,0.2);
+            flex-shrink: 0;
+        }
+        .new-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .new-img-thumb .preview-remove {
+            position: absolute; top: 5px; right: 5px;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: linear-gradient(135deg, #e07070, #d06060);
+            border: 2px solid #1a1a1a; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; transition: all 0.2s ease; z-index: 10;
+        }
+        .new-img-thumb .preview-remove:hover { transform: scale(1.12); }
+        .new-img-badge {
+            position: absolute; bottom: 5px; left: 5px;
+            padding: 3px 7px; background: rgba(112,192,112,0.9);
+            color: white; border-radius: 5px; font-size: 0.65rem; font-weight: 700;
         }
 
+        /* Crop modal */
         .crop-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            align-items: center; justify-content: center;
         }
-
-        .crop-modal.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
+        .crop-modal.active { display: flex; }
         .crop-container {
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 90%;
-            max-height: 90%;
-            width: 700px;
-            border: 1px solid #404040;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+            border-radius: 20px; padding: 30px;
+            max-width: 90%; width: 700px;
+            border: 1px solid #404040; box-shadow: 0 10px 50px rgba(0,0,0,0.8);
         }
-
         .crop-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #404040;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #404040;
         }
-
         .crop-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #e8e8e8;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 1.4rem; font-weight: 700; color: #e8e8e8;
+            display: flex; align-items: center; gap: 10px;
         }
-
-        .crop-title i {
-            color: #9b8bdb;
-        }
-
+        .crop-title i { color: #9b8bdb; }
         .crop-close {
-            background: transparent;
-            border: none;
-            color: #909090;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px 10px;
-            transition: all 0.3s ease;
+            background: none; border: none; color: #909090;
+            font-size: 1.5rem; cursor: pointer; transition: all 0.3s ease;
         }
-
-        .crop-close:hover {
-            color: #e07070;
-            transform: rotate(90deg);
-        }
-
+        .crop-close:hover { color: #e07070; transform: rotate(90deg); }
         .crop-image-container {
-            max-height: 400px;
-            margin-bottom: 25px;
-            background: #0f0f0f;
-            border-radius: 12px;
-            overflow: hidden;
+            max-height: 400px; margin-bottom: 25px;
+            background: #0f0f0f; border-radius: 12px; overflow: hidden;
         }
-
-        #cropImage {
-            max-width: 100%;
-            display: block;
-        }
-
+        #cropImage { max-width: 100%; display: block; }
         .crop-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center;
         }
-
         .crop-btn {
-            padding: 10px 20px;
+            padding: 9px 18px;
             background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            color: #e8e8e8;
-            border: 1px solid #404040;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #e8e8e8; border: 1px solid #404040; border-radius: 10px;
+            cursor: pointer; transition: all 0.3s ease; font-size: 0.88rem;
+            display: flex; align-items: center; gap: 7px;
         }
-
-        .crop-btn:hover {
-            background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
-            border-color: #9b8bdb;
-            transform: translateY(-2px);
-        }
-
-        .crop-footer {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-        }
-
+        .crop-btn:hover { border-color: #9b8bdb; transform: translateY(-2px); }
+        .crop-footer { display: flex; gap: 12px; justify-content: flex-end; }
         .btn-crop-apply {
-            padding: 12px 30px;
+            padding: 12px 28px;
             background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: white; border: none; border-radius: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
         }
-
-        .btn-crop-apply:hover {
-            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.5);
-        }
-
+        .btn-crop-apply:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(155,139,219,0.5); }
         .btn-crop-cancel {
-            padding: 12px 30px;
-            background: transparent;
-            color: #909090;
-            border: 2px solid #404040;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 12px 28px; background: transparent; color: #909090;
+            border: 2px solid #404040; border-radius: 12px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s ease;
         }
+        .btn-crop-cancel:hover { background: #2a2a2a; color: #e8e8e8; }
 
-        .btn-crop-cancel:hover {
-            background: #2a2a2a;
-            border-color: #505050;
-            color: #e8e8e8;
-        }
-
+        /* Checkbox */
         .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 20px;
-            background: #0f0f0f;
-            border-radius: 12px;
-            border: 2px solid #404040;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            display: flex; align-items: center; gap: 12px;
+            padding: 15px 20px; background: #0f0f0f;
+            border-radius: 12px; border: 2px solid #404040;
+            transition: all 0.3s ease; cursor: pointer;
         }
+        .checkbox-container:hover { border-color: #9b8bdb; background: #1a1a1a; }
+        .checkbox-input { width: 20px; height: 20px; cursor: pointer; accent-color: #9b8bdb; }
+        .checkbox-label { color: #e8e8e8; font-size: 1rem; cursor: pointer; margin: 0; }
 
-        .checkbox-container:hover {
-            border-color: #9b8bdb;
-            background: #1a1a1a;
-        }
-
-        .checkbox-input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #9b8bdb;
-        }
-
-        .checkbox-label {
-            color: #e8e8e8;
-            font-size: 1rem;
-            cursor: pointer;
-            margin: 0;
-        }
-
-        .error-message {
-            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-            border-left: 4px solid #e07070;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: #e07070;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .error-message i {
-            font-size: 1.1rem;
-        }
-
+        /* Misc */
         .section-divider {
-            margin: 40px 0;
-            border: 0;
-            height: 2px;
+            margin: 40px 0; border: 0; height: 2px;
             background: linear-gradient(90deg, transparent, #404040, transparent);
         }
-
         .section-title {
-            color: #9b8bdb;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: #9b8bdb; font-size: 1.2rem; font-weight: 600;
+            margin-bottom: 25px; display: flex; align-items: center; gap: 10px;
         }
-
         .info-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
-            color: #7ab8e0;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-top: 8px;
-            border: 1px solid #3a4a5a;
-        }
-
-        .info-badge i {
-            margin-right: 5px;
-        }
-
-        .warning-badge {
-            display: inline-block;
+            display: inline-flex; align-items: center; gap: 8px;
             padding: 8px 14px;
+            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+            color: #7ab8e0; border-radius: 8px; font-size: 0.88rem;
+            margin-top: 10px; border: 1px solid #3a4a5a;
+        }
+        .warning-badge {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 16px;
             background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            color: #e0b870;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            margin-top: 12px;
-            border: 1px solid #5a4a3a;
+            color: #e0b870; border-radius: 10px; font-size: 0.9rem;
+            margin-top: 12px; border: 1px solid #5a4a3a;
         }
-
-        .warning-badge i {
-            margin-right: 8px;
+        .warning-badge i { margin-top: 2px; flex-shrink: 0; }
+        .field-error {
+            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
+            border-left: 4px solid #e07070; padding: 12px 16px;
+            border-radius: 8px; color: #e07070; font-size: 0.88rem;
+            margin-top: 8px; display: flex; align-items: center; gap: 8px;
         }
-
+        .form-errors-block {
+            background: linear-gradient(135deg, #4a1f1f, #3a1f1f);
+            border-left: 4px solid #e07070; padding: 18px 22px;
+            border-radius: 12px; margin-bottom: 28px;
+        }
+        .form-errors-block-title {
+            color: #e07070; font-size: 1rem; font-weight: 700;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .form-errors-block ul { margin: 0; padding: 0; list-style: none; }
+        .form-errors-block ul li {
+            color: #e07070; font-size: 0.92rem;
+            display: flex; align-items: flex-start; gap: 8px;
+            margin-bottom: 6px; line-height: 1.5;
+        }
         .form-footer {
-            padding: 30px 40px;
-            background: #0f0f0f;
+            padding: 28px 40px; background: #0f0f0f;
             border-top: 1px solid #2a2a2a;
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
+            display: flex; gap: 15px; justify-content: flex-end;
         }
-
         .btn-submit, .btn-cancel {
-            padding: 14px 35px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            border: 2px solid transparent;
+            padding: 14px 35px; border-radius: 12px; font-weight: 600;
+            font-size: 1rem; cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; border: 2px solid transparent;
         }
+        .btn-submit { background: linear-gradient(135deg, #9b8bdb, #8b7bcb); color: white; }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(155,139,219,0.5); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-cancel { background: transparent; color: #909090; border-color: #404040; }
+        .btn-cancel:hover { background: #2a2a2a; color: #e8e8e8; border-color: #505050; transform: translateY(-3px); }
 
-        .btn-submit {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-            color: #ffffff;
+        /* Confirmation modal */
+        .confirm-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85); z-index: 10001;
+            align-items: center; justify-content: center; backdrop-filter: blur(4px);
         }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(155, 139, 219, 0.5);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-cancel {
-            background: transparent;
-            color: #909090;
-            border-color: #404040;
-        }
-
-        .btn-cancel:hover {
-            background: #2a2a2a;
-            color: #e8e8e8;
-            border-color: #505050;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .image-counter {
-            display: inline-block;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
-            color: #9b8bdb;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 12px;
-            border: 1px solid #404040;
-        }
-
-        .image-counter.warning {
-            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            color: #e0b870;
-            border-color: #5a4a3a;
-        }
-
-        .image-counter.error {
-            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-            color: #e07070;
-            border-color: #4a2a2a;
-        }
-
-        /* Toast Messages */
-        .toast-container {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 10000;
-            max-width: 400px;
-        }
-
-        .toast-message {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            border-left: 4px solid #9b8bdb;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 300px;
-            animation: slideInRight 0.3s ease;
-        }
-
-        .toast-message.error {
-            border-left-color: #e07070;
-        }
-
-        .toast-message.success {
-            border-left-color: #70c090;
-        }
-
-        .toast-message.warning {
-            border-left-color: #e0b870;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Django Messages Alert Styles */
-        .django-messages {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 10000;
-            max-width: 400px;
-        }
-
-        .django-message {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            min-width: 300px;
-            animation: slideInRight 0.3s ease;
-            border-left: 4px solid #9b8bdb;
-        }
-
-        .django-message.error,
-        .django-message.danger {
-            border-left-color: #e07070;
-        }
-
-        .django-message.success {
-            border-left-color: #70c090;
-        }
-
-        .django-message.warning {
-            border-left-color: #e0b870;
-        }
-
-        .django-message.info {
-            border-left-color: #7ab8e0;
-        }
-
-        .django-message-icon {
-            font-size: 1.2rem;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .django-message.error .django-message-icon,
-        .django-message.danger .django-message-icon {
-            color: #e07070;
-        }
-
-        .django-message.success .django-message-icon {
-            color: #70c090;
-        }
-
-        .django-message.warning .django-message-icon {
-            color: #e0b870;
-        }
-
-        .django-message.info .django-message-icon {
-            color: #7ab8e0;
-        }
-
-        .django-message-content {
-            flex-grow: 1;
-            color: #e8e8e8;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .django-message-close {
-            background: transparent;
-            border: none;
-            color: #909090;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0;
-            margin-left: 10px;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .django-message-close:hover {
-            color: #e8e8e8;
-            transform: scale(1.1);
-        }
-
-        /* Form Errors Display */
-        .form-errors-container {
-            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-            border-left: 4px solid #e07070;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .form-errors-title {
-            color: #e07070;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-errors-list {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .form-errors-list li {
-            color: #e07070;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .form-errors-list li:last-child {
-            margin-bottom: 0;
-        }
-
-        .form-errors-list i {
-            margin-top: 3px;
-            flex-shrink: 0;
-        }
-
-        /* Confirmation Modal Styles */
-        .confirmation-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.2s ease;
-            backdrop-filter: blur(4px);
-        }
-
-        .confirmation-modal.active {
-            display: flex;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .confirmation-container {
+        .confirm-modal.active { display: flex; }
+        .confirm-box {
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            border-radius: 20px;
-            padding: 0;
-            max-width: 500px;
-            width: 90%;
+            border-radius: 20px; max-width: 460px; width: 90%;
             border: 1px solid #404040;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
-            animation: modalSlideIn 0.3s ease;
-            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9); overflow: hidden;
+            animation: confirmIn 0.28s ease;
         }
-
-        .confirmation-header {
-            padding: 25px 30px;
+        @keyframes confirmIn {
+            from { opacity: 0; transform: scale(0.9) translateY(-16px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .confirm-head {
+            padding: 22px 28px;
             background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
             border-bottom: 2px solid #404040;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            display: flex; align-items: center; gap: 14px;
         }
-
-        .confirmation-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
+        .confirm-head-icon {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+            background: linear-gradient(135deg, #4a3a2a, #5a4a3a); color: #e0b870;
         }
-
-        .confirmation-icon.warning {
-            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            color: #e0b870;
-        }
-
-        .confirmation-icon.danger {
-            background: linear-gradient(135deg, #4a2a2a, #3a2a2a);
-            color: #e07070;
-        }
-
-        .confirmation-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #e8e8e8;
-            margin: 0;
-        }
-
-        .confirmation-body {
-            padding: 30px;
-        }
-
-        .confirmation-message {
-            color: #b0b0b0;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .confirmation-details {
-            background: #0f0f0f;
-            border-left: 3px solid #9b8bdb;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .confirmation-details-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #e8e8e8;
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-        }
-
-        .confirmation-details-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .confirmation-details-item i {
-            color: #9b8bdb;
-            width: 20px;
-        }
-
-        .confirmation-warning {
-            background: linear-gradient(135deg, #4a3a2a, #5a4a3a);
-            border-left: 3px solid #e0b870;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .confirmation-warning i {
-            color: #e0b870;
-            font-size: 1.2rem;
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .confirmation-warning-text {
-            color: #e0b870;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .confirmation-footer {
-            padding: 20px 30px;
-            background: #0f0f0f;
+        .confirm-head h3 { font-size: 1.25rem; font-weight: 700; color: #e8e8e8; margin: 0; }
+        .confirm-body { padding: 24px 28px; }
+        .confirm-msg { color: #b0b0b0; font-size: 0.96rem; line-height: 1.6; }
+        .confirm-foot {
+            padding: 18px 28px; background: #0f0f0f;
             border-top: 1px solid #2a2a2a;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
+            display: flex; gap: 12px; justify-content: flex-end;
         }
+        .confirm-btn {
+            padding: 11px 24px; border-radius: 10px; font-weight: 600;
+            font-size: 0.93rem; cursor: pointer; transition: all 0.25s ease;
+            display: flex; align-items: center; gap: 8px; border: none;
+        }
+        .confirm-btn-cancel {
+            background: transparent; color: #909090; border: 2px solid #404040;
+        }
+        .confirm-btn-cancel:hover { background: #2a2a2a; color: #e8e8e8; }
+        .confirm-btn-ok {
+            background: linear-gradient(135deg, #e07070, #d06060); color: white;
+        }
+        .confirm-btn-ok:hover { background: linear-gradient(135deg, #f08080, #e07070); }
 
-        .confirmation-btn {
-            padding: 12px 28px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* Messages portal */
+        .messages-portal {
+            position: fixed; top: 90px; right: 20px;
+            z-index: 10000; max-width: 420px;
+            display: flex; flex-direction: column; gap: 10px;
         }
-
-        .confirmation-btn-cancel {
-            background: transparent;
-            color: #909090;
-            border: 2px solid #404040;
+        .msg-item {
+            background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+            border-radius: 12px; padding: 14px 18px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+            display: flex; align-items: flex-start; gap: 12px; min-width: 300px;
+            animation: msgIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            border-left: 4px solid #9b8bdb;
         }
-
-        .confirmation-btn-cancel:hover {
-            background: #2a2a2a;
-            color: #e8e8e8;
-            border-color: #505050;
-            transform: translateY(-2px);
+        .msg-item.error, .msg-item.danger { border-left-color: #e07070; }
+        .msg-item.success { border-left-color: #70c090; }
+        .msg-item.warning { border-left-color: #e0b870; }
+        .msg-item.info    { border-left-color: #7ab8e0; }
+        @keyframes msgIn {
+            from { transform: translateX(440px); opacity: 0; }
+            to   { transform: translateX(0);     opacity: 1; }
         }
-
-        .confirmation-btn-confirm {
-            background: linear-gradient(135deg, #e07070, #d06060);
-            color: #ffffff;
+        .msg-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .msg-item.error .msg-icon, .msg-item.danger .msg-icon { color: #e07070; }
+        .msg-item.success .msg-icon { color: #70c090; }
+        .msg-item.warning .msg-icon { color: #e0b870; }
+        .msg-item.info    .msg-icon { color: #7ab8e0; }
+        .msg-body { flex: 1; color: #e0e0e0; font-size: 0.93rem; line-height: 1.5; }
+        .msg-close {
+            background: none; border: none; color: #707070;
+            font-size: 1rem; cursor: pointer; padding: 0; flex-shrink: 0;
+            transition: color 0.2s; align-self: flex-start;
         }
-
-        .confirmation-btn-confirm:hover {
-            background: linear-gradient(135deg, #f08080, #e07070);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(224, 112, 112, 0.4);
-        }
-
-        .confirmation-btn-confirm.primary {
-            background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
-        }
-
-        .confirmation-btn-confirm.primary:hover {
-            background: linear-gradient(135deg, #ab9beb, #9b8bdb);
-            box-shadow: 0 5px 20px rgba(155, 139, 219, 0.4);
-        }
+        .msg-close:hover { color: #e8e8e8; }
 
         @media (max-width: 768px) {
-            .form-content {
-                padding: 20px;
-                margin-left: 0;
-            }
-
-            .form-body {
-                padding: 25px;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-footer {
-                flex-direction: column-reverse;
-            }
-
-            .btn-submit, .btn-cancel {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .preview-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-
-            .toast-container,
-            .django-messages {
-                top: 20px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .toast-message,
-            .django-message {
-                min-width: auto;
-            }
-
-            .confirmation-container {
-                width: 95%;
-                max-width: none;
-            }
-
-            .confirmation-body {
-                padding: 20px;
-            }
-
-            .confirmation-footer {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .confirmation-btn {
-                width: 100%;
-                justify-content: center;
-            }
+            .form-content { padding: 20px; margin-left: 0; }
+            .form-body    { padding: 25px; }
+            .form-row     { grid-template-columns: 1fr; }
+            .form-footer  { flex-direction: column-reverse; }
+            .btn-submit, .btn-cancel { width: 100%; justify-content: center; }
+            .messages-portal { top: 20px; right: 10px; left: 10px; max-width: none; }
+            .msg-item { min-width: auto; }
+            .confirm-foot { flex-direction: column; }
+            .confirm-btn  { width: 100%; justify-content: center; }
         }
     </style>
 
-    <!-- Django Messages Display -->
-    {% if messages %}
-    <div class="django-messages" id="djangoMessages">
+    {# ── Unified messages portal ── #}
+    <div class="messages-portal" id="messagesPortal">
         {% for message in messages %}
-        <div class="django-message {{ message.tags }}" data-message-id="{{ forloop.counter }}">
-            <i class="django-message-icon fas 
-                {% if message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-                {% elif message.tags == 'success' %}fa-check-circle
-                {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                {% else %}fa-info-circle
-                {% endif %}"></i>
-            <div class="django-message-content">{{ message }}</div>
-            <button type="button" class="django-message-close" onclick="closeDjangoMessage({{ forloop.counter }})">
+        <div class="msg-item {{ message.tags }}" role="alert">
+            <i class="fas msg-icon
+                {% if 'error' in message.tags or 'danger' in message.tags %}fa-exclamation-circle
+                {% elif 'success' in message.tags %}fa-check-circle
+                {% elif 'warning' in message.tags %}fa-exclamation-triangle
+                {% else %}fa-info-circle{% endif %}"></i>
+            <div class="msg-body">{{ message }}</div>
+            <button class="msg-close" onclick="dismissMsg(this)" aria-label="Dismiss">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         {% endfor %}
     </div>
-    {% endif %}
 
     <div class="form-content">
         <div class="form-container">
-            <!-- Form Header -->
+
             <div class="form-header">
                 <h2 class="form-title">
-                    <div class="form-icon">
-                        <i class="fas fa-edit"></i>
-                    </div>
+                    <div class="form-icon"><i class="fas fa-edit"></i></div>
                     Edit Product
                 </h2>
             </div>
 
-            <!-- Form Body -->
             <div class="form-body">
                 <form method="post" enctype="multipart/form-data" id="productForm">
                     {% csrf_token %}
-                    
-                    <!-- Non-field errors -->
+
+                    {# Server-side non-field errors #}
                     {% if form.non_field_errors %}
-                    <div class="form-errors-container">
-                        <div class="form-errors-title">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Please correct the following errors:
+                    <div class="form-errors-block">
+                        <div class="form-errors-block-title">
+                            <i class="fas fa-exclamation-triangle"></i> Please fix the following:
                         </div>
-                        <ul class="form-errors-list">
+                        <ul>
                             {% for error in form.non_field_errors %}
-                            <li>
-                                <i class="fas fa-times-circle"></i>
-                                <span>{{ error }}</span>
-                            </li>
+                            <li><i class="fas fa-times-circle"></i><span>{{ error }}</span></li>
                             {% endfor %}
                         </ul>
                     </div>
                     {% endif %}
 
-                    <!-- Basic Information Section -->
                     <div class="section-title">
-                        <i class="fas fa-info-circle"></i>
-                        Basic Information
+                        <i class="fas fa-info-circle"></i> Basic Information
                     </div>
 
                     <!-- Product Name -->
                     <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-tag"></i>
-                            Product Name
-                        </label>
-                        <input 
-                            type="text" 
-                            name="{{ form.name.name }}" 
-                            value="{{ form.name.value|default:'' }}"
-                            class="form-input"
-                            placeholder="Enter product name..."
-                            required
-                        >
+                        <label class="form-label"><i class="fas fa-tag"></i> Product Name</label>
+                        <input type="text" name="{{ form.name.name }}"
+                               value="{{ form.name.value|default:'' }}"
+                               class="form-input" placeholder="Enter product name…" required>
                         {% if form.name.errors %}
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                {{ form.name.errors.0 }}
-                            </div>
+                        <div class="field-error">
+                            <i class="fas fa-exclamation-triangle"></i> {{ form.name.errors.0 }}
+                        </div>
                         {% endif %}
                     </div>
 
                     <!-- Description -->
                     <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-align-left"></i>
-                            Description
-                        </label>
-                        <textarea 
-                            name="{{ form.description.name }}"
-                            class="form-textarea"
-                            placeholder="Enter product description..."
-                        >{{ form.description.value|default:'' }}</textarea>
+                        <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
+                        <textarea name="{{ form.description.name }}" class="form-textarea"
+                                  placeholder="Enter product description…">{{ form.description.value|default:'' }}</textarea>
                         {% if form.description.errors %}
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                {{ form.description.errors.0 }}
-                            </div>
+                        <div class="field-error">
+                            <i class="fas fa-exclamation-triangle"></i> {{ form.description.errors.0 }}
+                        </div>
                         {% endif %}
                     </div>
 
-                    <!-- Category and Price Row -->
+                    <!-- Category + Price -->
                     <div class="form-row">
-                        <!-- Category -->
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-layer-group"></i>
-                                Category
-                            </label>
+                            <label class="form-label"><i class="fas fa-layer-group"></i> Category</label>
                             {{ form.category }}
-
                             {% if form.category.errors %}
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ form.category.errors.0 }}
-                                </div>
+                            <div class="field-error">
+                                <i class="fas fa-exclamation-triangle"></i> {{ form.category.errors.0 }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Price -->
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-dollar-sign"></i>
-                                Price
-                            </label>
-                            <input 
-                                type="number" 
-                                name="{{ form.price.name }}" 
-                                value="{{ form.price.value|default:'' }}"
-                                class="form-input"
-                                placeholder="0.00"
-                                step="0.01"
-                                min="0"
-                                required
-                            >
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Price</label>
+                            <input type="number" name="{{ form.price.name }}"
+                                   value="{{ form.price.value|default:'' }}"
+                                   class="form-input" placeholder="0.00" step="0.01" min="0" required>
                             {% if form.price.errors %}
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ form.price.errors.0 }}
-                                </div>
+                            <div class="field-error">
+                                <i class="fas fa-exclamation-triangle"></i> {{ form.price.errors.0 }}
+                            </div>
                             {% endif %}
                         </div>
                     </div>
 
                     <div class="info-badge">
                         <i class="fas fa-info-circle"></i>
-                        Product stock is automatically calculated from variants: {{ product.stock }}
+                        Stock auto-calculated from variants: <strong>{{ product.stock }}</strong>
                     </div>
 
                     <hr class="section-divider">
 
-                    <!-- Images Section -->
-                    <div class="section-title">
-                        <i class="fas fa-images"></i>
-                        Product Images
-                    </div>
+                    {# ════════════════════════════════════════════════════════
+                       MAIN IMAGE — only image field that exists on Product.
+                       Gallery images (VariantImage) are managed per-variant.
+                       ════════════════════════════════════════════════════════ #}
+                    <div class="section-title"><i class="fas fa-image"></i> Main Product Image</div>
 
-                    <!-- Image Counter -->
-                    <div class="image-counter" id="imageCounter">
-                        <i class="fas fa-images"></i>
-                        <span id="imageCount">0</span> / 7 images total
-                    </div>
-
-                    <!-- Current Images Section -->
-                    <div class="current-images-section" id="currentImagesSection">
-                        <div class="current-images-label">
-                            <i class="fas fa-images"></i> Current Images
+                    <!-- Current main image (if any) -->
+                    <div class="current-image-section">
+                        <div class="current-image-label">
+                            <span style="color:#9b8bdb;font-weight:600;">
+                                <i class="fas fa-image" style="margin-right:6px;"></i>Current Image
+                            </span>
+                            <span>Click × to mark for removal — applies when you save</span>
                         </div>
-                        
-                        <div class="preview-grid" id="currentImagesGrid">
+
+                        <div class="current-image-grid" id="currentImageGrid">
                             {% if product.main_image %}
-                            <div class="preview-item" data-type="current-main">
+                            <div class="current-img-item" id="currentMainImg">
                                 <img src="{{ product.main_image.url }}" alt="Current main image">
-                                <button type="button" class="preview-remove" onclick="removeCurrentMainImage()">
+                                <button type="button" class="img-action-btn img-remove-btn"
+                                        id="removeMainBtn" onclick="toggleRemoveMain()"
+                                        title="Mark for removal">
                                     <i class="fas fa-times"></i>
                                 </button>
-                                <span class="preview-badge">MAIN</span>
+                                <span class="img-badge">CURRENT</span>
+                            </div>
+                            {% else %}
+                            <div class="no-image-notice">
+                                <i class="fas fa-image"></i> No main image set — upload one below.
                             </div>
                             {% endif %}
-                            
-                            {% for img in product.images.all %}
-                            <div class="preview-item" data-type="current-gallery" data-id="{{ img.id }}">
-                                <img src="{{ img.image.url }}" alt="Gallery image">
-                                <button type="button" class="preview-remove" onclick="removeCurrentGalleryImage({{ img.id }})">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <span class="preview-badge">#{{ forloop.counter }}</span>
-                            </div>
-                            {% endfor %}
                         </div>
                     </div>
 
-                    <!-- New Main Image Upload -->
+                    <!-- Upload replacement / new main image -->
                     <div class="form-group">
                         <label class="form-label">
-                            <i class="fas fa-image"></i>
-                            {% if product.main_image %}Replace Main Image (Optional){% else %}Add Main Image{% endif %}
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            {% if product.main_image %}Replace Image (optional){% else %}Upload Image{% endif %}
                         </label>
-                        <div class="file-upload-area" id="mainImageUploadArea">
+                        <div class="file-upload-area" id="uploadArea">
                             <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
-                            <div class="file-upload-text">
-                                <strong>Click to upload</strong> or drag and drop
-                            </div>
-                            <div class="file-upload-hint">
-                                {% if product.main_image %}Upload to replace current main image{% else %}Main display image{% endif %} (PNG, JPG, max 5MB)
-                            </div>
-                            <input 
-                                type="file" 
-                                name="main_image"
-                                class="file-input"
-                                id="mainImageInput"
-                                accept="image/*"
-                                style="display: none;"
-                            >
+                            <div class="file-upload-text"><strong>Click to upload</strong> or drag and drop</div>
+                            <div class="file-upload-hint">PNG or JPG — max 5 MB. Cropped to 1:1 square.</div>
+                            <input type="file" name="main_image" class="file-input"
+                                   id="mainImageInput" accept="image/*" style="display:none;">
                         </div>
-                        <div id="newMainImagePreview"></div>
+                        <div id="newImagePreview"></div>
                     </div>
-
-                    <!-- New Gallery Images Upload -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-images"></i>
-                            Add Gallery Images (Optional)
-                        </label>
-                        <div class="file-upload-area" id="galleryUploadArea">
-                            <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
-                            <div class="file-upload-text">
-                                <strong>Click to upload</strong> or drag and drop multiple images
-                            </div>
-                            <div class="file-upload-hint">
-                                Add more gallery images (PNG, JPG, max 5MB each)
-                            </div>
-                            <input 
-                                type="file" 
-                                name="images"
-                                class="file-input"
-                                id="galleryInput"
-                                accept="image/*"
-                                multiple
-                                style="display: none;"
-                            >
-                        </div>
-                        <div id="newGalleryPreview"></div>
-                        <span class="info-badge">
-                            <i class="fas fa-info-circle"></i>
-                            Total images (current + new): Minimum 3, Maximum 7
-                        </span>
-                    </div>
-
-                    <!-- 
-                        FIX: Removed the two broken hidden boolean flags.
-                        Instead, the JS will dynamically inject hidden inputs
-                        named "remove_main_image" and "remove_gallery_ids[]"
-                        directly into formData before submission.
-                    -->
 
                     <hr class="section-divider">
 
-                    <!-- Visibility Section -->
-                    <div class="section-title">
-                        <i class="fas fa-cog"></i>
-                        Product Settings
-                    </div>
+                    <!-- Visibility -->
+                    <div class="section-title"><i class="fas fa-cog"></i> Product Settings</div>
 
                     <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-toggle-on"></i>
-                            Visibility
-                        </label>
+                        <label class="form-label"><i class="fas fa-toggle-on"></i> Visibility</label>
                         <div class="checkbox-container">
-                            <input 
-                                type="checkbox" 
-                                name="{{ form.is_listed.name }}"
-                                class="checkbox-input"
-                                id="isListed"
-                                {% if form.is_listed.value %}checked{% endif %}
-                            >
-                            <label for="isListed" class="checkbox-label">
-                                List this product publicly
-                            </label>
+                            <input type="checkbox" name="{{ form.is_listed.name }}"
+                                   class="checkbox-input" id="isListed"
+                                   {% if form.is_listed.value %}checked{% endif %}>
+                            <label for="isListed" class="checkbox-label">List this product publicly</label>
                         </div>
-
                         {% if form.is_listed.errors %}
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form.is_listed.errors.0 }}
+                        <div class="field-error">
+                            <i class="fas fa-exclamation-circle"></i> {{ form.is_listed.errors.0 }}
                         </div>
                         {% endif %}
-
                         {% if product.variants.count == 0 %}
-                        <div class="warning-badge">
+                        <div class="warning-badge" style="margin-top:14px;">
                             <i class="fas fa-exclamation-triangle"></i>
-                            You must add at least one variant before listing this product.
+                            <span>Add at least one variant before listing this product.</span>
                         </div>
                         {% endif %}
                     </div>
                 </form>
             </div>
 
-            <!-- Form Footer -->
             <div class="form-footer">
                 <button type="button" id="submitBtn" class="btn-submit">
-                    <i class="fas fa-save"></i>
-                    Update Product
+                    <i class="fas fa-save"></i> Update Product
                 </button>
-                <a href="{% url 'custom_admin:product_management:product_list' %}" class="btn-cancel" id="cancelBtn">
-                    <i class="fas fa-times"></i>
-                    Cancel
+                <a href="{% url 'custom_admin:product_management:product_list' %}"
+                   class="btn-cancel" id="cancelBtn">
+                    <i class="fas fa-times"></i> Cancel
                 </a>
             </div>
         </div>
@@ -1385,638 +628,335 @@
     <div class="crop-modal" id="cropModal">
         <div class="crop-container">
             <div class="crop-header">
-                <h3 class="crop-title">
-                    <i class="fas fa-crop"></i>
-                    Crop & Adjust Image
-                </h3>
+                <h3 class="crop-title"><i class="fas fa-crop-alt"></i> Crop Image</h3>
                 <button type="button" class="crop-close" id="closeCropModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
             <div class="crop-image-container">
-                <img id="cropImage" src="" alt="Image to crop">
+                <img id="cropImage" src="" alt="Crop preview">
             </div>
-            
             <div class="crop-controls">
-                <button type="button" class="crop-btn" id="zoomIn">
-                    <i class="fas fa-search-plus"></i> Zoom In
-                </button>
-                <button type="button" class="crop-btn" id="zoomOut">
-                    <i class="fas fa-search-minus"></i> Zoom Out
-                </button>
-                <button type="button" class="crop-btn" id="rotateLeft">
-                    <i class="fas fa-undo"></i> Rotate Left
-                </button>
-                <button type="button" class="crop-btn" id="rotateRight">
-                    <i class="fas fa-redo"></i> Rotate Right
-                </button>
-                <button type="button" class="crop-btn" id="flipH">
-                    <i class="fas fa-arrows-alt-h"></i> Flip H
-                </button>
-                <button type="button" class="crop-btn" id="flipV">
-                    <i class="fas fa-arrows-alt-v"></i> Flip V
-                </button>
-                <button type="button" class="crop-btn" id="reset">
-                    <i class="fas fa-sync"></i> Reset
-                </button>
+                <button type="button" class="crop-btn" id="zoomIn"><i class="fas fa-search-plus"></i> Zoom In</button>
+                <button type="button" class="crop-btn" id="zoomOut"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                <button type="button" class="crop-btn" id="rotateLeft"><i class="fas fa-undo"></i> Rotate L</button>
+                <button type="button" class="crop-btn" id="rotateRight"><i class="fas fa-redo"></i> Rotate R</button>
+                <button type="button" class="crop-btn" id="flipH"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
+                <button type="button" class="crop-btn" id="flipV"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                <button type="button" class="crop-btn" id="resetCrop"><i class="fas fa-sync"></i> Reset</button>
             </div>
-            
             <div class="crop-footer">
                 <button type="button" class="btn-crop-apply" id="applyCrop">
-                    <i class="fas fa-check"></i>
-                    Apply Crop
+                    <i class="fas fa-check"></i> Apply Crop
                 </button>
                 <button type="button" class="btn-crop-cancel" id="cancelCrop">
-                    <i class="fas fa-times"></i>
-                    Cancel
+                    <i class="fas fa-times"></i> Cancel
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Confirmation Modal -->
-    <div class="confirmation-modal" id="confirmationModal">
-        <div class="confirmation-container">
-            <div class="confirmation-header">
-                <div class="confirmation-icon warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h3 class="confirmation-title">Confirm Action</h3>
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-head">
+                <div class="confirm-head-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3>Discard Changes?</h3>
             </div>
-            
-            <div class="confirmation-body">
-                <div class="confirmation-message">
-                    Are you sure you want to proceed with this action?
-                </div>
-                
-                <div class="confirmation-details" style="display: none;">
-                    <!-- Dynamic details will be inserted here -->
-                </div>
-                
-                <div class="confirmation-warning" style="display: none;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div class="confirmation-warning-text">
-                        This action cannot be undone.
-                    </div>
-                </div>
+            <div class="confirm-body">
+                <p class="confirm-msg">
+                    You have unsaved changes. Are you sure you want to leave?
+                    All modifications will be lost.
+                </p>
             </div>
-            
-            <div class="confirmation-footer">
-                <button type="button" class="confirmation-btn confirmation-btn-cancel" onclick="hideConfirmationModal()">
-                    <i class="fas fa-times"></i>
-                    Cancel
+            <div class="confirm-foot">
+                <button class="confirm-btn confirm-btn-cancel" onclick="hideConfirm()">
+                    <i class="fas fa-arrow-left"></i> Keep Editing
                 </button>
-                <button type="button" class="confirmation-btn confirmation-btn-confirm">
-                    <i class="fas fa-check"></i>
-                    Confirm
+                <button class="confirm-btn confirm-btn-ok" id="confirmLeaveBtn">
+                    <i class="fas fa-times"></i> Discard &amp; Leave
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Container for JavaScript Messages -->
-    <div class="toast-container" id="toastContainer"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        // ─── Django message helpers ────────────────────────────────────────────────
-        function closeDjangoMessage(id) {
-            const message = document.querySelector(`[data-message-id="${id}"]`);
-            if (message) {
-                message.style.animation = 'slideInRight 0.3s ease reverse';
-                setTimeout(() => message.remove(), 300);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.django-message').forEach((message, index) => {
-                setTimeout(() => {
-                    message.style.animation = 'slideInRight 0.3s ease reverse';
-                    setTimeout(() => message.remove(), 300);
-                }, 5000 + index * 500);
-            });
-        });
-
-        // ─── Toast helper ──────────────────────────────────────────────────────────
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast-message ${type}`;
-
-            const iconMap = {
-                error: 'fa-exclamation-circle',
-                success: 'fa-check-circle',
-                warning: 'fa-exclamation-triangle',
-                info: 'fa-info-circle'
-            };
-            const colorMap = {
-                error: '#e07070',
-                success: '#70c090',
-                warning: '#e0b870',
-                info: '#7ab8e0'
-            };
-
-            toast.innerHTML = `
-                <i class="fas ${iconMap[type] || iconMap.info}" style="color:${colorMap[type] || colorMap.info};font-size:1.2rem;"></i>
-                <span style="color:#e8e8e8;">${message}</span>
-            `;
-            container.appendChild(toast);
-
+    // ═══════════════════════════════════════════════════════════════
+    // UNIFIED MESSAGE SYSTEM
+    // ═══════════════════════════════════════════════════════════════
+    
+    function dismissMsg(btn) {
+        const item = btn.closest('.msg-item');
+        if (!item) return;
+        item.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        item.style.opacity    = '0';
+        item.style.transform  = 'translateX(440px)';
+        setTimeout(() => item.remove(), 260);
+    }
+    
+    function toast(message, type = 'info', duration = 5000) {
+        const icons = {
+            error:   'fa-exclamation-circle',
+            danger:  'fa-exclamation-circle',
+            success: 'fa-check-circle',
+            warning: 'fa-exclamation-triangle',
+            info:    'fa-info-circle'
+        };
+        const portal = document.getElementById('messagesPortal');
+        const el = document.createElement('div');
+        el.className = `msg-item ${type}`;
+        el.setAttribute('role', 'alert');
+        el.innerHTML = `
+            <i class="fas ${icons[type] || icons.info} msg-icon"></i>
+            <div class="msg-body">${message}</div>
+            <button class="msg-close" onclick="dismissMsg(this)" aria-label="Dismiss">
+                <i class="fas fa-times"></i>
+            </button>`;
+        portal.appendChild(el);
+        if (duration > 0) {
             setTimeout(() => {
-                toast.style.animation = 'slideInRight 0.3s ease reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+                if (el.parentNode) dismissMsg(el.querySelector('.msg-close'));
+            }, duration);
         }
-
-        // ─── Confirmation modal ────────────────────────────────────────────────────
-        function showConfirmationModal(options) {
-            const modal       = document.getElementById('confirmationModal');
-            const icon        = document.querySelector('.confirmation-icon');
-            const title       = document.querySelector('.confirmation-title');
-            const message     = document.querySelector('.confirmation-message');
-            const details     = document.querySelector('.confirmation-details');
-            const warning     = document.querySelector('.confirmation-warning');
-            const confirmBtn  = document.querySelector('.confirmation-btn-confirm');
-
-            icon.className = `confirmation-icon ${options.type || 'warning'}`;
-            icon.innerHTML = `<i class="fas ${options.icon || 'fa-exclamation-triangle'}"></i>`;
-
-            title.textContent   = options.title   || 'Confirm Action';
-            message.textContent = options.message || 'Are you sure you want to proceed?';
-
-            if (options.details) {
-                details.innerHTML    = options.details;
-                details.style.display = 'block';
-            } else {
-                details.style.display = 'none';
-            }
-
-            if (options.warning) {
-                warning.querySelector('.confirmation-warning-text').textContent = options.warning;
-                warning.style.display = 'flex';
-            } else {
-                warning.style.display = 'none';
-            }
-
-            confirmBtn.innerHTML  = `<i class="fas ${options.confirmIcon || 'fa-check'}"></i> ${options.confirmText || 'Confirm'}`;
-            confirmBtn.className  = `confirmation-btn confirmation-btn-confirm ${options.confirmClass || ''}`;
-            confirmBtn.onclick    = () => { if (options.onConfirm) options.onConfirm(); hideConfirmationModal(); };
-
-            modal.classList.add('active');
-        }
-
-        function hideConfirmationModal() {
-            document.getElementById('confirmationModal').classList.remove('active');
-        }
-
-        document.getElementById('confirmationModal').addEventListener('click', e => {
-            if (e.target.id === 'confirmationModal') hideConfirmationModal();
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('#messagesPortal .msg-item').forEach((el, i) => {
+            setTimeout(() => {
+                if (el.parentNode) dismissMsg(el.querySelector('.msg-close'));
+            }, 6000 + i * 600);
         });
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') hideConfirmationModal();
-        });
-
-        // ─── State ────────────────────────────────────────────────────────────────
-        let cropper             = null;
-        let currentCropTarget   = null;
-        let newMainImageFile    = null;
-        let newGalleryFiles     = [];
-        let croppedNewMainBlob  = null;
-        let croppedNewGalleryBlobs = [];
-
-        // FIX: track which specific gallery image IDs have been removed
-        let currentMainExists   = {{ product.main_image|yesno:"true,false" }};
-        let currentGalleryCount = {{ product.images.count }};
-        let removedGalleryIds   = [];   // array of numeric IDs
-        let removeMainFlag      = false;
-
-        const mainImageUploadArea = document.getElementById('mainImageUploadArea');
-        const mainImageInput      = document.getElementById('mainImageInput');
-        const galleryUploadArea   = document.getElementById('galleryUploadArea');
-        const galleryInput        = document.getElementById('galleryInput');
-        const cropModal           = document.getElementById('cropModal');
-        const cropImage           = document.getElementById('cropImage');
-
-        // ─── Image counting ────────────────────────────────────────────────────────
-        function getTotalImageCount() {
-            const currentMain    = (currentMainExists && !removeMainFlag) ? 1 : 0;
-            const currentGallery = currentGalleryCount - removedGalleryIds.length;
-            const newMain        = croppedNewMainBlob ? 1 : 0;
-            const newGallery     = croppedNewGalleryBlobs.length;
-            return currentMain + currentGallery + newMain + newGallery;
+    });
+    
+    // ═══════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════
+    
+    let removeMainFlag = false;
+    let croppedBlob    = null;
+    let cropper        = null;
+    let scaleX = 1, scaleY = 1;
+    
+    const uploadArea     = document.getElementById('uploadArea');
+    const mainImageInput = document.getElementById('mainImageInput');
+    const cropModal      = document.getElementById('cropModal');
+    const cropImage      = document.getElementById('cropImage');
+    
+    // ── Toggle current-image removal mark ──────────────────────────
+    function toggleRemoveMain() {
+        removeMainFlag = !removeMainFlag;
+        const el  = document.getElementById('currentMainImg');
+        const btn = document.getElementById('removeMainBtn');
+    
+        if (removeMainFlag) {
+            el.classList.add('pending-removal');
+            btn.classList.replace('img-remove-btn', 'img-undo-btn');
+            btn.title     = 'Undo removal';
+            btn.innerHTML = '<i class="fas fa-undo"></i>';
+            toast('Current image marked for removal — save to apply.', 'warning');
+        } else {
+            el.classList.remove('pending-removal');
+            btn.classList.replace('img-undo-btn', 'img-remove-btn');
+            btn.title     = 'Mark for removal';
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            toast('Removal cancelled.', 'info');
         }
-
-        function updateImageCounter() {
-            const total    = getTotalImageCount();
-            const counter  = document.getElementById('imageCounter');
-            const countSpan = document.getElementById('imageCount');
-
-            countSpan.textContent = total;
-            counter.classList.remove('warning', 'error');
-            if (total > 7)      counter.classList.add('error');
-            else if (total < 3) counter.classList.add('warning');
-        }
-
-        // ─── Remove current main image ─────────────────────────────────────────────
-        function removeCurrentMainImage() {
-            const totalAfterRemoval = getTotalImageCount() - 1;
-
-            showConfirmationModal({
-                type: 'warning',
-                icon: 'fa-image',
-                title: 'Remove Main Image?',
-                message: 'Are you sure you want to remove the current main image?',
-                details: `
-                    <div class="confirmation-details-item">
-                        <i class="fas fa-image"></i>
-                        <span>Main product display image</span>
-                    </div>
-                    <div class="confirmation-details-item">
-                        <i class="fas fa-layer-group"></i>
-                        <span>${totalAfterRemoval} image(s) will remain</span>
-                    </div>
-                `,
-                warning: totalAfterRemoval < 3
-                    ? `Warning: You need at least 3 images total. After removal, you'll have ${totalAfterRemoval} image(s).`
-                    : 'The image will be permanently removed when you save the product.',
-                confirmText: 'Remove Image',
-                confirmIcon: 'fa-trash',
-                onConfirm: () => {
-                    removeMainFlag = true;
-
-                    const mainElement = document.querySelector('[data-type="current-main"]');
-                    if (mainElement) mainElement.remove();
-
-                    currentMainExists = false;
-                    updateImageCounter();
-
-                    if (totalAfterRemoval < 3) {
-                        showToast(`Warning: You need ${3 - totalAfterRemoval} more image(s)`, 'warning');
-                    } else {
-                        showToast('Main image will be removed on save', 'success');
-                    }
-                }
-            });
-        }
-
-        // ─── Remove current gallery image ──────────────────────────────────────────
-        function removeCurrentGalleryImage(imageId) {
-            const totalAfterRemoval     = getTotalImageCount() - 1;
-            const currentGalleryElement = document.querySelector(`[data-id="${imageId}"]`);
-            const galleryNumber         = currentGalleryElement
-                ? Array.from(document.querySelectorAll('[data-type="current-gallery"]')).indexOf(currentGalleryElement) + 1
-                : '?';
-
-            showConfirmationModal({
-                type: 'warning',
-                icon: 'fa-images',
-                title: 'Remove Gallery Image?',
-                message: 'Are you sure you want to remove this gallery image?',
-                details: `
-                    <div class="confirmation-details-item">
-                        <i class="fas fa-image"></i>
-                        <span>Gallery Image #${galleryNumber}</span>
-                    </div>
-                    <div class="confirmation-details-item">
-                        <i class="fas fa-layer-group"></i>
-                        <span>${totalAfterRemoval} image(s) will remain</span>
-                    </div>
-                `,
-                warning: totalAfterRemoval < 3
-                    ? `Warning: You need at least 3 images total. After removal, you'll have ${totalAfterRemoval} image(s).`
-                    : 'The image will be permanently removed when you save the product.',
-                confirmText: 'Remove Image',
-                confirmIcon: 'fa-trash',
-                onConfirm: () => {
-                    // FIX: push the actual numeric ID so the view knows which row to delete
-                    if (!removedGalleryIds.includes(imageId)) {
-                        removedGalleryIds.push(imageId);
-                    }
-
-                    const galleryElement = document.querySelector(`[data-id="${imageId}"]`);
-                    if (galleryElement) galleryElement.remove();
-
-                    updateImageCounter();
-
-                    if (totalAfterRemoval < 3) {
-                        showToast(`Warning: You need ${3 - totalAfterRemoval} more image(s)`, 'warning');
-                    } else {
-                        showToast('Gallery image will be removed on save', 'success');
-                    }
-                }
-            });
-        }
-
-        // ─── Upload area events ────────────────────────────────────────────────────
-        mainImageUploadArea.addEventListener('click', e => {
-            if (!e.target.closest('.preview-remove')) mainImageInput.click();
-        });
-
-        galleryUploadArea.addEventListener('click', e => {
-            if (!e.target.closest('.preview-remove')) galleryInput.click();
-        });
-
-        ['dragover', 'dragleave', 'drop'].forEach(evt => {
-            mainImageUploadArea.addEventListener(evt, e => {
-                e.preventDefault();
-                if (evt === 'dragover')  mainImageUploadArea.classList.add('dragover');
-                if (evt === 'dragleave') mainImageUploadArea.classList.remove('dragover');
-                if (evt === 'drop') {
-                    mainImageUploadArea.classList.remove('dragover');
-                    const file = e.dataTransfer.files[0];
-                    if (file && file.type.startsWith('image/')) handleNewMainImageSelect(file);
-                }
-            });
-
-            galleryUploadArea.addEventListener(evt, e => {
-                e.preventDefault();
-                if (evt === 'dragover')  galleryUploadArea.classList.add('dragover');
-                if (evt === 'dragleave') galleryUploadArea.classList.remove('dragover');
-                if (evt === 'drop') {
-                    galleryUploadArea.classList.remove('dragover');
-                    if (e.dataTransfer.files.length) handleNewGalleryFilesSelect(Array.from(e.dataTransfer.files));
-                }
-            });
-        });
-
-        mainImageInput.addEventListener('change', e => {
-            if (e.target.files.length) handleNewMainImageSelect(e.target.files[0]);
-        });
-
-        galleryInput.addEventListener('change', e => {
-            if (e.target.files.length) handleNewGalleryFilesSelect(Array.from(e.target.files));
-        });
-
-        // ─── Main image handling ───────────────────────────────────────────────────
-        function handleNewMainImageSelect(file) {
-            const totalAfter = getTotalImageCount() + 1 - (croppedNewMainBlob ? 1 : 0);
-            if (totalAfter > 7) { showToast('Cannot add main image — would exceed 7 image limit', 'error'); return; }
-
-            const reader = new FileReader();
-            reader.onload = e => {
-                cropImage.src         = e.target.result;
-                currentCropTarget     = 'new-main';
-                cropModal.classList.add('active');
-                initCropper();
-            };
-            reader.readAsDataURL(file);
-            newMainImageFile = file;
-        }
-
-        function removeNewMainImage() {
-            newMainImageFile  = null;
-            croppedNewMainBlob = null;
-            document.getElementById('newMainImagePreview').innerHTML = '';
-            updateImageCounter();
-            showToast('New main image removed', 'success');
-        }
-
-        function showNewMainImagePreview(blob) {
-            document.getElementById('newMainImagePreview').innerHTML = `
-                <div class="image-preview-container">
-                    <div class="preview-grid">
-                        <div class="preview-item">
-                            <img src="${URL.createObjectURL(blob)}" alt="New main image preview">
-                            <button type="button" class="preview-remove" onclick="removeNewMainImage()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <span class="preview-badge">NEW MAIN</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ─── Gallery images handling ───────────────────────────────────────────────
-        function handleNewGalleryFilesSelect(files) {
-            const imageFiles = files.filter(f => f.type.startsWith('image/'));
-            if (!imageFiles.length) { showToast('Please select valid image files', 'error'); return; }
-
-            const currentTotal = getTotalImageCount();
-            if (currentTotal + imageFiles.length > 7) {
-                showToast(`Cannot add ${imageFiles.length} image(s) — would exceed 7 image limit (currently have ${currentTotal})`, 'error');
-                return;
-            }
-            processNewGalleryImage(imageFiles[0], 0, imageFiles);
-        }
-
-        let pendingNewGalleryFiles  = [];
-        let currentNewGalleryIndex  = 0;
-
-        function processNewGalleryImage(file, index, allFiles) {
-            pendingNewGalleryFiles  = allFiles;
-            currentNewGalleryIndex  = index;
-            const reader = new FileReader();
-            reader.onload = e => {
-                cropImage.src     = e.target.result;
-                currentCropTarget = `new-gallery-${newGalleryFiles.length}`;
-                cropModal.classList.add('active');
-                initCropper();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function removeNewGalleryImage(index) {
-            newGalleryFiles.splice(index, 1);
-            croppedNewGalleryBlobs.splice(index, 1);
-            updateNewGalleryPreview();
-            updateImageCounter();
-            showToast('New gallery image removed', 'success');
-        }
-
-        function updateNewGalleryPreview() {
-            const preview = document.getElementById('newGalleryPreview');
-            if (!croppedNewGalleryBlobs.length) { preview.innerHTML = ''; return; }
-
-            let html = '<div class="image-preview-container"><div class="preview-grid">';
-            croppedNewGalleryBlobs.forEach((blob, index) => {
-                html += `
-                    <div class="preview-item">
-                        <img src="${URL.createObjectURL(blob)}" alt="New gallery image ${index + 1}">
-                        <button type="button" class="preview-remove" onclick="removeNewGalleryImage(${index})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <span class="preview-badge">NEW #${index + 1}</span>
-                    </div>
-                `;
-            });
-            html += '</div></div>';
-            preview.innerHTML = html;
-        }
-
-        // ─── Cropper ──────────────────────────────────────────────────────────────
-        function initCropper() {
-            if (cropper) cropper.destroy();
-            cropper = new Cropper(cropImage, {
-                aspectRatio: 1,
-                viewMode: 1,
-                dragMode: 'move',
-                autoCropArea: 1,
-                restore: false,
-                guides: true,
-                center: true,
-                highlight: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-            });
-        }
-
-        document.getElementById('zoomIn').addEventListener('click',    () => cropper.zoom(0.1));
-        document.getElementById('zoomOut').addEventListener('click',   () => cropper.zoom(-0.1));
-        document.getElementById('rotateLeft').addEventListener('click', () => cropper.rotate(-45));
-        document.getElementById('rotateRight').addEventListener('click',() => cropper.rotate(45));
-        document.getElementById('reset').addEventListener('click',     () => { cropper.reset(); scaleX = 1; scaleY = 1; });
-
-        let scaleX = 1, scaleY = 1;
-        document.getElementById('flipH').addEventListener('click', () => { scaleX = -scaleX; cropper.scaleX(scaleX); });
-        document.getElementById('flipV').addEventListener('click', () => { scaleY = -scaleY; cropper.scaleY(scaleY); });
-
-        document.getElementById('applyCrop').addEventListener('click', () => {
-            const isMain = currentCropTarget === 'new-main';
-            const canvas = cropper.getCroppedCanvas({
-                width: isMain ? 800 : 1024,
-                height: isMain ? 800 : 1024,
-                imageSmoothingQuality: 'high'
-            });
-
-            canvas.toBlob(blob => {
-                if (currentCropTarget === 'new-main') {
-                    croppedNewMainBlob = blob;
-                    showNewMainImagePreview(blob);
-                    showToast('New main image cropped successfully', 'success');
-                } else {
-                    newGalleryFiles.push(pendingNewGalleryFiles[currentNewGalleryIndex]);
-                    croppedNewGalleryBlobs.push(blob);
-
-                    if (currentNewGalleryIndex + 1 < pendingNewGalleryFiles.length && getTotalImageCount() + 1 <= 7) {
-                        processNewGalleryImage(pendingNewGalleryFiles[currentNewGalleryIndex + 1], currentNewGalleryIndex + 1, pendingNewGalleryFiles);
-                        return;
-                    }
-
-                    updateNewGalleryPreview();
-                    showToast(`Gallery image ${croppedNewGalleryBlobs.length} added`, 'success');
-                }
-
-                updateImageCounter();
-                closeCropModal();
-            }, 'image/jpeg', 0.85);
-        });
-
-        function closeCropModal() {
-            cropModal.classList.remove('active');
+    }
+    
+    // ── Upload area ──────────────────────────────────────────────────
+    uploadArea.addEventListener('click', e => {
+        if (!e.target.closest('.preview-remove')) mainImageInput.click();
+    });
+    uploadArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) openCropper(file);
+        else toast('Please drop a valid image file (PNG or JPG).', 'error');
+    });
+    mainImageInput.addEventListener('change', e => {
+        if (e.target.files[0]) openCropper(e.target.files[0]);
+    });
+    
+    // ── Cropper ──────────────────────────────────────────────────────
+    function openCropper(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            cropImage.src = e.target.result;
+            cropModal.classList.add('active');
             if (cropper) { cropper.destroy(); cropper = null; }
             scaleX = 1; scaleY = 1;
-            currentCropTarget      = null;
-            pendingNewGalleryFiles = [];
-            currentNewGalleryIndex = 0;
+            cropper = new Cropper(cropImage, {
+                aspectRatio:            1,
+                viewMode:               1,
+                dragMode:               'move',
+                autoCropArea:           1,
+                restore:                false,
+                guides:                 true,
+                center:                 true,
+                highlight:              false,
+                cropBoxMovable:         true,
+                cropBoxResizable:       true,
+                toggleDragModeOnDblclick: false,
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    document.getElementById('zoomIn').addEventListener('click',     () => cropper?.zoom(0.1));
+    document.getElementById('zoomOut').addEventListener('click',    () => cropper?.zoom(-0.1));
+    document.getElementById('rotateLeft').addEventListener('click', () => cropper?.rotate(-45));
+    document.getElementById('rotateRight').addEventListener('click',() => cropper?.rotate(45));
+    document.getElementById('resetCrop').addEventListener('click',  () => { cropper?.reset(); scaleX = 1; scaleY = 1; });
+    document.getElementById('flipH').addEventListener('click', () => { scaleX = -scaleX; cropper?.scaleX(scaleX); });
+    document.getElementById('flipV').addEventListener('click', () => { scaleY = -scaleY; cropper?.scaleY(scaleY); });
+    
+    document.getElementById('applyCrop').addEventListener('click', () => {
+        if (!cropper) return;
+        cropper.getCroppedCanvas({ width: 800, height: 800, imageSmoothingQuality: 'high' })
+            .toBlob(blob => {
+                croppedBlob = blob;
+                showNewPreview(blob);
+                closeCropModal();
+                toast('New image ready — click "Update Product" to save.', 'success');
+            }, 'image/jpeg', 0.87);
+    });
+    
+    function closeCropModal() {
+        cropModal.classList.remove('active');
+        if (cropper) { cropper.destroy(); cropper = null; }
+        scaleX = 1; scaleY = 1;
+        mainImageInput.value = '';
+    }
+    document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
+    document.getElementById('closeCropModal').addEventListener('click', closeCropModal);
+    
+    function showNewPreview(blob) {
+        const url = URL.createObjectURL(blob);
+        document.getElementById('newImagePreview').innerHTML = `
+            <div class="new-preview-wrap">
+                <div class="new-img-thumb">
+                    <img src="${url}" alt="New image preview">
+                    <button type="button" class="preview-remove" onclick="removeNewImage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <span class="new-img-badge">NEW</span>
+                </div>
+                <div class="new-preview-info">
+                    <div class="label">
+                        <i class="fas fa-check-circle"></i> New image selected
+                    </div>
+                    <div class="sub">
+                        This will replace the current image when you save.<br>
+                        Cropped to 800×800 px.
+                    </div>
+                </div>
+            </div>`;
+    }
+    
+    function removeNewImage() {
+        croppedBlob = null;
+        document.getElementById('newImagePreview').innerHTML = '';
+        toast('New image removed.', 'info');
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // FORM SUBMISSION
+    // KEY FIX: only use fetch when a cropped blob or remove flag is
+    // present. Otherwise submit the form normally so Django can
+    // re-render validation errors without losing JS listeners.
+    // ═══════════════════════════════════════════════════════════════
+    
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+        const formEl = document.getElementById('productForm');
+    
+        // ── Simple case: no image changes — let the form submit normally.
+        // Django re-renders the page with errors, JS listeners stay intact
+        // because the page loads fresh from the server (not via document.write).
+        if (!croppedBlob && !removeMainFlag) {
+            formEl.submit();
+            return;
         }
-
-        document.getElementById('cancelCrop').addEventListener('click', () => {
-            if (currentCropTarget === 'new-main') { newMainImageFile = null; mainImageInput.value = ''; }
-            closeCropModal();
-            showToast('Image cropping cancelled', 'info');
-        });
-
-        document.getElementById('closeCropModal').addEventListener('click', () => {
-            if (currentCropTarget === 'new-main') { newMainImageFile = null; mainImageInput.value = ''; }
-            closeCropModal();
-        });
-
-        // ─── Form submission ───────────────────────────────────────────────────────
-        document.getElementById('submitBtn').addEventListener('click', async () => {
-            const totalImages = getTotalImageCount();
-
-            if (totalImages < 3) {
-                showToast('Please ensure at least 3 images total (current + new)', 'error');
+    
+        // ── Image case: we need fetch so we can inject the blob/remove flag.
+        const formData = new FormData(formEl);
+    
+        // Drop the raw file input; we send the cropped blob instead
+        formData.delete('main_image');
+    
+        if (removeMainFlag) {
+            formData.set('remove_main_image', 'true');
+        }
+    
+        if (croppedBlob) {
+            formData.append('main_image', croppedBlob, 'main_image.jpg');
+        }
+    
+        const btn      = document.getElementById('submitBtn');
+        const origHTML = btn.innerHTML;
+        btn.disabled   = true;
+        btn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i> Updating…';
+    
+        try {
+            const response = await fetch(window.location.href, {
+                method:  'POST',
+                body:    formData,
+                headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+            });
+    
+            // Success → Django redirects to product list
+            if (response.redirected) {
+                window.location.href = response.url;
                 return;
             }
-            if (totalImages > 7) {
-                showToast('Maximum 7 images allowed. Please remove some images.', 'error');
-                return;
-            }
-
-            const formData = new FormData(document.getElementById('productForm'));
-
-            // Remove the file inputs collected by FormData — we'll re-add cropped blobs
-            formData.delete('main_image');
-            formData.delete('images');
-
-            // FIX: send remove_main_image flag correctly
-            if (removeMainFlag) {
-                formData.set('remove_main_image', 'true');
-            }
-
-            // FIX: send each removed gallery ID individually so the view can call getlist()
-            removedGalleryIds.forEach(id => formData.append('remove_gallery_ids', id));
-
-            // Append cropped blobs
-            if (croppedNewMainBlob) {
-                formData.append('main_image', croppedNewMainBlob, 'main_image.jpg');
-            }
-            croppedNewGalleryBlobs.forEach((blob, i) => {
-                formData.append('images', blob, `gallery_${i}.jpg`);
-            });
-
-            const submitBtn   = document.getElementById('submitBtn');
-            const originalHTML = submitBtn.innerHTML;
-            submitBtn.disabled  = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Product...';
-
-            try {
-                const response = await fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
-                });
-
-                if (response.redirected) {
-                    showToast('Product updated successfully!', 'success');
-                    setTimeout(() => { window.location.href = response.url; }, 500);
-                } else {
-                    const html = await response.text();
-                    document.open();
-                    document.write(html);
-                    document.close();
-                }
-            } catch (error) {
-                showToast('Error submitting form. Please try again.', 'error');
-                console.error('Form submission error:', error);
-                submitBtn.disabled  = false;
-                submitBtn.innerHTML = originalHTML;
-            }
-        });
-
-        // ─── Cancel guard ──────────────────────────────────────────────────────────
-        let formModified = false;
-        document.getElementById('productForm').addEventListener('change', () => { formModified = true; });
-        document.getElementById('productForm').addEventListener('input',  () => { formModified = true; });
-
-        document.getElementById('cancelBtn').addEventListener('click', e => {
-            const isDirty = formModified || croppedNewMainBlob || croppedNewGalleryBlobs.length || removeMainFlag || removedGalleryIds.length;
-            if (!isDirty) return;
-
-            e.preventDefault();
-            showConfirmationModal({
-                type: 'warning',
-                icon: 'fa-exclamation-circle',
-                title: 'Discard Changes?',
-                message: 'Are you sure you want to cancel? Any unsaved changes will be lost.',
-                details: `<div class="confirmation-details-item"><i class="fas fa-edit"></i><span>Form has unsaved changes</span></div>`,
-                warning: 'All your changes since the last save will be discarded.',
-                confirmText: 'Discard Changes',
-                confirmIcon: 'fa-times',
-                confirmClass: 'primary',
-                onConfirm: () => { window.location.href = e.target.href; }
-            });
-        });
-
-        // ─── Init ──────────────────────────────────────────────────────────────────
-        updateImageCounter();
-    </script>
+    
+            // Validation error while uploading image → redirect back to the
+            // same edit URL so the page reloads cleanly with error messages.
+            // This avoids document.write which kills all JS listeners.
+            window.location.href = window.location.href;
+    
+        } catch (err) {
+            console.error(err);
+            toast('Network error — please try again.', 'error');
+            btn.disabled  = false;
+            btn.innerHTML = origHTML;
+        }
+    });
+    
+    // ── Cancel guard ─────────────────────────────────────────────────
+    let formModified = false;
+    document.getElementById('productForm').addEventListener('change', () => { formModified = true; });
+    document.getElementById('productForm').addEventListener('input',  () => { formModified = true; });
+    
+    function hideConfirm() {
+        document.getElementById('confirmModal').classList.remove('active');
+    }
+    
+    document.getElementById('cancelBtn').addEventListener('click', e => {
+        const isDirty = formModified || croppedBlob || removeMainFlag;
+        if (!isDirty) return;
+        e.preventDefault();
+        const href = e.currentTarget.href;
+        document.getElementById('confirmLeaveBtn').onclick = () => { window.location.href = href; };
+        document.getElementById('confirmModal').classList.add('active');
+    });
+    
+    document.getElementById('confirmModal').addEventListener('click', e => {
+        if (e.target.id === 'confirmModal') hideConfirm();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') hideConfirm();
+    });
+    </script> 
   </section>
 </div>
 {% endblock %}
