@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 import weasyprint
 
 from .models import Order, OrderItem
-from user_profile.models import Profile
+from profiles.models import Profile
 from coupons.models import CouponUsage
 from wallet.models import Wallet, WalletTransaction
 from orders.services.order_service import OrderService

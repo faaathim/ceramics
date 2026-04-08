@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from product_management.models import Variant
 from .models import Wishlist
-from user_profile.models import Profile
+from profiles.models import Profile
 
 
 @login_required

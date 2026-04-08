@@ -60,19 +60,19 @@
                 <p>{{ addr.city }}, {{ addr.state }} — {{ addr.pin_code }}</p>
                 <p class="address-phone">📞 {{ addr.phone }}</p>
               </div>
-              <a href="{% url 'user_addresses:address_edit' addr.id %}?next=checkout" class="btn-edit">✏️ Edit</a>
+              <a href="{% url 'profiles:address_edit' addr.id %}?next=checkout" class="btn-edit">✏️ Edit</a>
             </label>
           </div>
           {% endfor %}
         </div>
-        <a href="{% url 'user_addresses:address_add' %}?next=checkout" class="btn-add-new">+ Add New Address</a>
+        <a href="{% url 'profiles:address_add' %}?next=checkout" class="btn-add-new">+ Add New Address</a>
 
         {% else %}
         <div class="no-address">
           <div class="no-address-icon">📍</div>
           <h3>No Address Found</h3>
           <p>Add a shipping address to continue.</p>
-          <a href="{% url 'user_addresses:address_add' %}?next=checkout" class="btn-add-first">Add Address</a>
+          <a href="{% url 'profiles:address_add' %}?next=checkout" class="btn-add-first">Add Address</a>
         </div>
         {% endif %}
 

@@ -34,16 +34,9 @@ class ProductForm(forms.ModelForm):
             raise forms.ValidationError("Price must be a positive number.")
         return price
 
-    # ✅ ADD THIS
-    def clean(self):
-        cleaned_data = super().clean()
-        main_image = cleaned_data.get('main_image')
-
-        # If editing, check existing instance image
-        if not main_image and not self.instance.main_image:
-            raise forms.ValidationError("Product must have a main image.")
-
-        return cleaned_data
+    # ✅ REMOVED the clean() override that checked main_image.
+    # Image presence is validated in the view (product_create / product_edit)
+    # because the cropped blob is injected via fetch() outside normal form fields.
 
 
 # =========================
@@ -67,7 +60,6 @@ class ProductSearchForm(forms.Form):
 class VariantForm(forms.ModelForm):
     class Meta:
         model = Variant
-        # ❌ REMOVED main_image
         fields = ['color', 'stock', 'is_listed']
         widgets = {
             'color': forms.TextInput(attrs={

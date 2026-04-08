@@ -8,7 +8,7 @@ from django.contrib import messages
 from wallet.models import Wallet, WalletTransaction
 from orders.models import Order
 from cart.models import CartItem
-from user_profile.models import Profile
+from profiles.models import Profile
 
 
 @login_required

@@ -68,39 +68,37 @@ def product_create(request):
     No gallery images belong to Product — they belong to VariantImage.
     """
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)  # ✅ pass request.FILES
         main_file = request.FILES.get('main_image')
- 
+
         if not main_file:
-            # Server-side guard (client also validates, but defence-in-depth)
             messages.error(request, "A main product image is required.")
             return render(request, 'product_management/product_form.html', {
                 'form': form,
                 'action': 'Create',
                 'product': None,
             })
- 
+
         if form.is_valid():
-            product            = form.save(commit=False)
-            product.stock      = 0
-            product.is_listed  = False
+            product           = form.save(commit=False)
+            product.stock     = 0
+            product.is_listed = False
             product.main_image = main_file
             product.save()
- 
+
             messages.success(request, f'Product "{product.name}" created. Now add variants.')
             return redirect(
                 reverse('custom_admin:product_management:variant_list', args=[product.id])
             )
- 
+
     else:
         form = ProductForm()
- 
+
     return render(request, 'product_management/product_form.html', {
         'form': form,
         'action': 'Create',
         'product': None,
     })
- 
  
 @admin_required
 @transaction.atomic

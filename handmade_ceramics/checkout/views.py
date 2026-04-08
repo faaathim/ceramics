@@ -6,7 +6,7 @@ from django.db import transaction
 from django.contrib import messages
 
 from cart.models import CartItem
-from user_addresses.models import Address
+from profiles.models import Address
 from orders.models import Order, OrderItem
 from coupons.models import Coupon, CouponUsage
 from decimal import Decimal

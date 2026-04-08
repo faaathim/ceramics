@@ -4,9 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile, InMemoryUploadedFile
 
 
-# -----------------------------------------------------
-# 1. MOBILE VALIDATION
-# -----------------------------------------------------
+# ✅ MOBILE VALIDATION
 def validate_indian_mobile(value):
     if not value or not isinstance(value, str):
         return
@@ -18,20 +16,16 @@ def validate_indian_mobile(value):
         raise ValidationError("Enter a valid Indian mobile number.")
 
 
-# -----------------------------------------------------
-# 2. PINCODE VALIDATION
-# -----------------------------------------------------
+# ✅ PINCODE
 def validate_indian_pincode(value):
     if not value:
         return
 
     if not re.match(r'^\d{6}$', value):
-        raise ValidationError("Enter a valid 6-digit PIN code (e.g. 560001).")
+        raise ValidationError("Enter a valid 6-digit PIN code.")
 
 
-# -----------------------------------------------------
-# 3. GENERIC TEXT VALIDATION
-# -----------------------------------------------------
+# ✅ TEXT
 def validate_small_text(value, min_len=2, max_len=100):
     if not value:
         return
@@ -52,15 +46,10 @@ def validate_state(value):
     validate_small_text(value, 2, 100)
 
 
-# -----------------------------------------------------
-# 4. NAME VALIDATION (FIXED)
-# -----------------------------------------------------
+# ✅ NAME
 def validate_name(value):
-    """
-    Allows only letters and spaces.
-    """
     if not value:
-        return value  # allow empty for optional fields
+        return value
 
     cleaned = value.strip()
 
@@ -68,30 +57,25 @@ def validate_name(value):
         raise ValidationError("Name must be at least 2 characters long.")
 
     if not re.match(r'^[A-Za-z\s]+$', cleaned):
-        raise ValidationError("Name can only contain letters and spaces.")
+        raise ValidationError("Only letters and spaces allowed.")
 
     return cleaned
 
 
-# -----------------------------------------------------
-# 5. IMAGE VALIDATION (FIXED)
-# -----------------------------------------------------
+# ✅ IMAGE
 def validate_profile_image(file_obj):
     if not file_obj:
         return
 
-    # Only validate if it's an uploaded file
     if isinstance(file_obj, (UploadedFile, InMemoryUploadedFile)):
 
-        # ✅ Size check
-        max_size = 2 * 1024 * 1024  # 2MB
+        max_size = 2 * 1024 * 1024
         if file_obj.size > max_size:
-            raise ValidationError("Image too large. Maximum allowed size is 2 MB.")
+            raise ValidationError("Image too large (max 2MB).")
 
-        # ✅ Type check (REAL validation)
         file_obj.seek(0)
         file_type = imghdr.what(file_obj)
         file_obj.seek(0)
 
         if file_type not in ("jpeg", "png"):
-            raise ValidationError("Invalid image format. Only JPEG and PNG are allowed.")
+            raise ValidationError("Only JPEG and PNG allowed.")
