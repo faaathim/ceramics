@@ -54,6 +54,9 @@ class Product(models.Model):
     objects = ProductManager()
     all_objects = models.Manager()
 
+    average_rating = models.FloatField(default=0)
+    review_count = models.PositiveIntegerField(default=0)
+
     class Meta:
         ordering = ['-created_at']
 
@@ -118,6 +121,7 @@ class Product(models.Model):
         final_price = self.price - discount_amount
 
         return final_price.quantize(Decimal('0.01'))
+        
 
 
 class Variant(models.Model):

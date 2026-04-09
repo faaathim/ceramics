@@ -48,8 +48,6 @@ INSTALLED_APPS = [
     'user_authentication',
     'profiles',
     'user_side',
-    # 'user_profile',
-    # 'user_addresses',
     'cart',
     'orders',
     'checkout',
@@ -62,6 +60,7 @@ INSTALLED_APPS = [
     'wallet',
     'offers',
     'reports',
+    'reviews',
 ]
 
 MIDDLEWARE = [

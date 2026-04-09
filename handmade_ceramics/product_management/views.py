@@ -6,7 +6,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404, JsonResponse
 from django.db.models import Q
-
+from reviews.models import Review
+from reviews.utils import can_user_review
 from .models import Product, Variant, VariantImage, product_average_rating, get_related_products
 from .forms import ProductForm, ProductSearchForm, VariantForm
 
@@ -416,11 +417,19 @@ def product_detail(request, pk):
         .prefetch_related("variants__images")
     )
 
+    reviews = product.reviews.filter(is_approved=True, is_deleted=False)
+
+    can_review = False
+    if request.user.is_authenticated:
+        can_review = can_user_review(request.user, product)
+
     return render(request, "product_management/product_variant_detail.html", {
         "product": product,
         "variant": selected_variant,
         "variants": variants,
         "related_products": related_products,
+        "reviews": reviews,
+        "can_review": can_review,
     })
 
 

@@ -7,11 +7,7 @@
 
 {% block content %}
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -45,8 +41,6 @@
     color: #0a0a0a;
   }
 
-  .wishlist-link { display: none; }
-
   .container {
     max-width: 1600px;
     margin: 0 auto;
@@ -66,6 +60,57 @@
     align-items: flex-start;
     padding-top: 0;
   }
+
+  /* ===== MESSAGES ===== */
+  .messages-container { margin-bottom: 30px; }
+
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 10px;
+    border: 1px solid;
+    position: relative;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .alert-close {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 0 4px;
+  }
+
+  .alert-close:hover { opacity: 1; }
+
+  .alert-success  { background: rgba(76,175,80,0.12);  border-color: #3a6a4a; color: #80d090; }
+  .alert-success  .alert-close { color: #80d090; }
+  .alert-error    { background: rgba(244,67,54,0.12);  border-color: #6a3a3a; color: #e08080; }
+  .alert-error    .alert-close { color: #e08080; }
+  .alert-warning  { background: rgba(255,193,7,0.12);  border-color: #6a5a2a; color: #d4aa50; }
+  .alert-warning  .alert-close { color: #d4aa50; }
+  .alert-info     { background: rgba(33,150,243,0.12); border-color: #2a4a6a; color: #70a8e0; }
+  .alert-info     .alert-close { color: #70a8e0; }
 
   /* ===== GALLERY & ZOOM ===== */
   .gallery {
@@ -97,11 +142,10 @@
     user-select: none;
   }
 
-  /* Zoom lens overlay */
   .zoom-lens {
     position: absolute;
-    border: 2px solid rgba(232, 232, 232, 0.6);
-    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(232,232,232,0.6);
+    background: rgba(255,255,255,0.08);
     border-radius: 6px;
     pointer-events: none;
     display: none;
@@ -109,7 +153,6 @@
     backdrop-filter: brightness(1.15);
   }
 
-  /* Zoom result panel — appears to the right of the gallery */
   .zoom-result {
     position: absolute;
     left: calc(100% + 20px);
@@ -126,10 +169,9 @@
     box-shadow: 0 20px 60px rgba(0,0,0,0.7);
   }
 
-  .zoom-wrapper:hover .zoom-lens { display: block; }
+  .zoom-wrapper:hover .zoom-lens   { display: block; }
   .zoom-wrapper:hover + .zoom-result { display: block; }
 
-  /* Hint badge */
   .zoom-hint {
     position: absolute;
     bottom: 12px;
@@ -144,7 +186,6 @@
     padding: 6px 14px;
     border-radius: 20px;
     pointer-events: none;
-    opacity: 1;
     transition: opacity 0.3s ease;
     white-space: nowrap;
     z-index: 6;
@@ -169,14 +210,10 @@
     transition: all 0.3s ease;
   }
 
-  .thumb:hover,
-  .thumb.active { border-color: #e8e8e8; }
+  .thumb:hover, .thumb.active { border-color: #e8e8e8; }
 
   /* ===== DETAILS ===== */
-  .details {
-    padding-top: 0;
-    max-width: 600px;
-  }
+  .details { padding-top: 0; max-width: 600px; }
 
   .product-name {
     font-size: 2.5rem;
@@ -187,6 +224,15 @@
     margin-bottom: 30px;
     line-height: 1.2;
   }
+
+  /* ===== STAR RATING DISPLAY ===== */
+  .rating-summary { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
+  .stars-display  { display: flex; gap: 3px; }
+  .star-icon      { font-size: 1.1rem; color: #404040; transition: color 0.2s; }
+  .star-icon.filled { color: #f5c842; }
+
+  .rating-text  { font-size: 0.8rem; font-weight: 700; color: #b0b0b0; letter-spacing: 1px; }
+  .rating-value { font-size: 0.9rem; font-weight: 900; color: #e8e8e8; }
 
   .price {
     font-size: 2rem;
@@ -199,12 +245,7 @@
     gap: 12px;
   }
 
-  .price-original {
-    font-size: 1.1rem;
-    color: #606060;
-    text-decoration: line-through;
-    font-weight: 600;
-  }
+  .price-original { font-size: 1.1rem; color: #606060; text-decoration: line-through; font-weight: 600; }
 
   .price-discount-badge {
     font-size: 0.8rem;
@@ -214,7 +255,7 @@
     padding: 5px 12px;
     border-radius: 8px;
     letter-spacing: 1px;
-    box-shadow: 0 2px 8px rgba(112, 192, 144, 0.4);
+    box-shadow: 0 2px 8px rgba(112,192,144,0.4);
   }
 
   .stock {
@@ -231,25 +272,15 @@
     border: 2px solid;
   }
 
-  .stock.in-stock {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
-    color: #70c090;
-    border-color: #4a6a5a;
-  }
+  .stock.in-stock  { background: linear-gradient(135deg,rgba(76,175,80,0.2),rgba(76,175,80,0.1)); color: #70c090; border-color: #4a6a5a; }
+  .stock.out-of-stock { background: linear-gradient(135deg,rgba(244,67,54,0.2),rgba(244,67,54,0.1)); color: #e07070; border-color: #6a4a4a; }
 
-  .stock.out-of-stock {
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(244, 67, 54, 0.1));
-    color: #e07070;
-    border-color: #6a4a4a;
-  }
-
+  /* ===== SECTIONS ===== */
   .section {
-    margin-bottom: 40px;
-    padding-bottom: 40px;
-    border-bottom: 1px solid #404040;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
   }
-
-  .section:last-of-type { border-bottom: none; }
 
   .section-title {
     font-size: 0.7rem;
@@ -260,16 +291,9 @@
     margin-bottom: 15px;
   }
 
-  .section-content {
-    color: #e8e8e8;
-    line-height: 1.8;
-  }
+  .section-content { color: #e8e8e8; line-height: 1.8; }
 
-  .colors {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+  .colors { display: flex; gap: 12px; flex-wrap: wrap; }
 
   .color {
     width: 50px;
@@ -280,17 +304,273 @@
     transition: all 0.3s ease;
   }
 
-  .color:hover,
-  .color.active {
-    border-color: #e8e8e8;
-    transform: scale(1.1);
+  .color:hover, .color.active { border-color: #e8e8e8; transform: scale(1.1); }
+
+  /* ===== DIVIDER ===== */
+  .section-divider {
+    height: 1px;
+    background: #2a2a2a;
+    margin: 28px 0;
   }
 
-  .actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 40px;
+  /* ===== REVIEWS DROPDOWN (inline, under description) ===== */
+  .reviews-accordion {
+    border: 1px solid #2e2e2e;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #141414, #1c1c1c);
   }
+
+  .reviews-accordion-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    color: #e8e8e8;
+    transition: background 0.2s ease;
+  }
+
+  .reviews-accordion-toggle:hover { background: rgba(255,255,255,0.03); }
+
+  .reviews-accordion-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .reviews-accordion-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #b0b0b0;
+  }
+
+  .reviews-accordion-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reviews-accordion-stars { display: flex; gap: 2px; }
+  .reviews-accordion-stars .star-icon { font-size: 0.8rem; }
+
+  .reviews-count-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: #2a2a2a;
+    color: #808080;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .reviews-chevron {
+    font-size: 0.8rem;
+    color: #606060;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .reviews-accordion.open .reviews-chevron { transform: rotate(180deg); }
+
+  .reviews-accordion-body {
+    display: none;
+    padding: 0 24px 24px;
+    border-top: 1px solid #222;
+  }
+
+  .reviews-accordion.open .reviews-accordion-body { display: block; }
+
+  /* Review list */
+  .review-list { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+
+  .review-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #272727;
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: border-color 0.3s ease;
+  }
+
+  .review-card:hover { border-color: #383838; }
+
+  .review-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .reviewer-info { display: flex; align-items: center; gap: 10px; }
+
+  .reviewer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #303030, #404040);
+    border: 2px solid #404040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #b0b0b0;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .reviewer-name { font-size: 0.82rem; font-weight: 700; color: #e8e8e8; }
+
+  .review-stars { display: flex; gap: 2px; margin-top: 3px; }
+  .review-stars .star-icon { font-size: 0.78rem; }
+
+  .review-date { font-size: 0.68rem; color: #555; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; }
+
+  .review-comment { font-size: 0.875rem; color: #b8b8b8; line-height: 1.7; }
+
+  .no-reviews {
+    text-align: center;
+    padding: 36px 20px;
+    color: #444;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px dashed #252525;
+    border-radius: 12px;
+    margin: 20px 0;
+  }
+
+  /* Write review inside accordion */
+  .write-review-divider {
+    height: 1px;
+    background: #222;
+    margin: 20px 0;
+  }
+
+  .write-review-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #606060;
+    margin-bottom: 18px;
+  }
+
+  .form-group { margin-bottom: 18px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #606060;
+    margin-bottom: 10px;
+  }
+
+  /* Star picker */
+  .star-picker { display: flex; gap: 6px; flex-direction: row-reverse; justify-content: flex-end; }
+  .star-picker input[type="radio"] { display: none; }
+
+  .star-picker label {
+    font-size: 1.8rem;
+    color: #2e2e2e;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+    line-height: 1;
+  }
+
+  .star-picker label:hover,
+  .star-picker label:hover ~ label,
+  .star-picker input[type="radio"]:checked ~ label { color: #f5c842; }
+
+  .star-picker label:hover { transform: scale(1.2); }
+
+  .form-textarea {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    color: #e8e8e8;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .form-textarea::placeholder { color: #3a3a3a; }
+
+  .form-textarea:focus {
+    border-color: #505050;
+    box-shadow: 0 0 0 3px rgba(232,232,232,0.04);
+  }
+
+  .btn-submit-review {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+    color: #0a0a0a;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-submit-review:hover {
+    background: linear-gradient(135deg, #ffffff, #e8e8e8);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(232,232,232,0.15);
+  }
+
+  .review-login-prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed #2a2a2a;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #606060;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .review-login-prompt a {
+    color: #e8e8e8;
+    font-weight: 800;
+    text-decoration: none;
+    border-bottom: 1px solid #404040;
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+  }
+
+  .review-login-prompt a:hover { border-color: #e8e8e8; }
+
+  /* ===== ACTIONS ===== */
+  .actions { display: flex; gap: 12px; margin-top: 40px; }
 
   .btn {
     padding: 18px;
@@ -317,7 +597,7 @@
   .btn-primary:hover:not(:disabled) {
     background: linear-gradient(135deg, #ffffff, #e8e8e8);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(232, 232, 232, 0.3);
+    box-shadow: 0 5px 15px rgba(232,232,232,0.3);
   }
 
   .btn-primary:disabled {
@@ -337,52 +617,22 @@
     align-items: center;
     justify-content: center;
     padding: 0;
+    border-radius: 12px;
   }
 
-  .btn-icon:hover {
-    background: #3a3a3a;
-    border-color: #e8e8e8;
-    transform: scale(1.05);
-  }
+  .btn-icon:hover { background: #3a3a3a; border-color: #e8e8e8; transform: scale(1.05); }
 
-  .btn-icon.active {
-    background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
-    border-color: #6a4a4a;
-  }
+  .btn-icon.active { background: linear-gradient(135deg,#4a2a2a,#5a3a3a); border-color: #6a4a4a; }
 
-  .btn-icon svg {
-    width: 20px;
-    height: 20px;
-    stroke: #e8e8e8;
-    fill: none;
-    stroke-width: 2;
-    transition: all 0.3s ease;
-  }
-
+  .btn-icon svg { width: 20px; height: 20px; stroke: #e8e8e8; fill: none; stroke-width: 2; transition: all 0.3s ease; }
   .btn-icon:hover svg { stroke: #fff; }
+  .btn-icon.active svg { fill: #e07070; stroke: #e07070; }
+  .btn-icon.active:hover svg { fill: #e07070; stroke: #e07070; }
 
-  .btn-icon.active svg {
-    fill: #e07070;
-    stroke: #e07070;
-  }
-
-  .btn-icon.active:hover svg {
-    fill: #e07070;
-    stroke: #e07070;
-  }
-
-  a.btn-icon {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  a.btn-icon { text-decoration: none; display: flex; align-items: center; justify-content: center; }
 
   /* ===== SIMILAR PRODUCTS ===== */
-  .similar {
-    padding-top: 60px;
-    border-top: 2px solid #404040;
-  }
+  .similar { padding-top: 60px; border-top: 2px solid #404040; }
 
   .similar-title {
     font-size: 1.5rem;
@@ -393,11 +643,7 @@
     color: #e8e8e8;
   }
 
-  .similar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
-  }
+  .similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 
   .card {
     background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
@@ -410,34 +656,16 @@
     display: block;
   }
 
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
-    border-color: #e8e8e8;
-  }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.6); border-color: #e8e8e8; }
 
-  .card-image {
-    position: relative;
-    width: 100%;
-    height: 280px;
-    background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-    overflow: hidden;
-  }
-
-  .card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
+  .card-image { position: relative; width: 100%; height: 280px; background: linear-gradient(135deg,#2a2a2a,#3a3a3a); overflow: hidden; }
+  .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
   .card:hover .card-image img { transform: scale(1.05); }
 
   .card-discount-badge {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: linear-gradient(135deg, #70c090, #4a8a6a);
+    top: 10px; left: 10px;
+    background: linear-gradient(135deg,#70c090,#4a8a6a);
     color: #0a0a0a;
     font-size: 0.6rem;
     font-weight: 900;
@@ -446,83 +674,29 @@
     letter-spacing: 1.5px;
     z-index: 2;
     text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(112, 192, 144, 0.4);
+    box-shadow: 0 2px 8px rgba(112,192,144,0.4);
   }
 
   .card-body { padding: 20px; }
-
-  .card-name {
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-    color: #e8e8e8;
-  }
-
-  .card-price {
-    font-size: 1.2rem;
-    font-weight: 900;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .card-price-original {
-    font-size: 0.8rem;
-    color: #606060;
-    text-decoration: line-through;
-    font-weight: 600;
-  }
+  .card-name { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: #e8e8e8; }
+  .card-price { font-size: 1.2rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .card-price-original { font-size: 0.8rem; color: #606060; text-decoration: line-through; font-weight: 600; }
 
   /* ===== RESPONSIVE ===== */
-  @media (max-width: 1400px) {
-    .zoom-result {
-      width: 380px;
-      height: 500px;
-    }
-  }
+  @media (max-width: 1400px) { .zoom-result { width: 380px; height: 500px; } }
 
-  @media (max-width: 1200px) {
-    /* On narrower screens, show zoom result below instead of beside */
-    .zoom-result {
-      left: 0;
-      top: calc(100% + 16px);
-      width: 100%;
-      height: 400px;
-    }
-  }
+  @media (max-width: 1200px) { .zoom-result { left: 0; top: calc(100% + 16px); width: 100%; height: 400px; } }
 
   @media (max-width: 1024px) {
-    .product-grid {
-      grid-template-columns: 1fr;
-      gap: 50px;
-    }
-
-    .back-column { display: none; }
-
-    .gallery {
-      position: relative;
-      top: 0;
-      width: 100%;
-    }
-
+    .product-grid { grid-template-columns: 1fr; gap: 50px; }
+    .back-column  { display: none; }
+    .gallery      { position: relative; top: 0; width: 100%; }
     .zoom-wrapper { height: 450px; }
-
-    .zoom-result {
-      left: 0;
-      top: calc(100% + 16px);
-      width: 100%;
-      height: 350px;
-    }
-
-    .page-header {
+    .zoom-result  { left: 0; top: calc(100% + 16px); width: 100%; height: 350px; }
+    .page-header  {
       display: flex;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+      background: linear-gradient(135deg,#1a1a1a,#2a2a2a);
       padding: 20px 60px;
-      margin-top: 0;
       border-bottom: 1px solid #333;
       justify-content: flex-start;
       align-items: center;
@@ -530,61 +704,67 @@
   }
 
   @media (max-width: 768px) {
-    .page-header {
-      padding: 15px 25px;
-      margin-top: 0;
-      flex-direction: row;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .container { padding: 40px 25px 60px; }
-
-    .product-name {
-      font-size: 1.8rem;
-      letter-spacing: 2px;
-    }
-
-    .zoom-wrapper { height: 350px; }
-
-    /* Disable zoom result on small screens — too cramped */
-    .zoom-result { display: none !important; }
-    .zoom-lens { display: none !important; }
-    .zoom-wrapper { cursor: default; }
-    .zoom-hint { display: none; }
-
+    .page-header  { padding: 15px 25px; }
+    .container    { padding: 40px 25px 60px; }
+    .product-name { font-size: 1.8rem; letter-spacing: 2px; }
+    .zoom-wrapper { height: 350px; cursor: default; }
+    .zoom-result, .zoom-lens, .zoom-hint { display: none !important; }
     .similar-grid { grid-template-columns: 1fr; }
-
-    .actions { flex-direction: column; }
-
-    .btn-icon {
-      width: 100%;
-      height: 60px;
-    }
+    .actions      { flex-direction: column; }
+    .btn-icon     { width: 100%; height: 60px; }
+    .reviews-accordion-toggle { padding: 16px 18px; }
+    .reviews-accordion-body   { padding: 0 16px 20px; }
   }
 </style>
 
-<!-- HEADER -->
+<!-- HEADER (mobile only) -->
 <div class="page-header">
   <a href="{% url 'user_side:shop' %}" class="back-link">
     <span>←</span>
     <span>Back to Shop</span>
   </a>
-
-  {% if user.is_authenticated %}
-    <a href="{% url 'wishlist:wishlist_page' %}" class="wishlist-link">
-      <span>❤️</span>
-      <span>View Wishlist</span>
-    </a>
-  {% endif %}
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="container">
+
+  <!-- ===== DJANGO MESSAGES ===== -->
+  {% if messages %}
+    <div class="messages-container" id="messagesContainer">
+      {% for message in messages %}
+        {% if message.tags == 'error' %}
+          {% with tag='error' icon='✕' %}
+            <div class="alert alert-{{ tag }}" role="alert">
+              <span class="alert-icon">{{ icon }}</span>
+              <span>{{ message }}</span>
+              <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>
+            </div>
+          {% endwith %}
+        {% elif message.tags == 'success' %}
+          <div class="alert alert-success" role="alert">
+            <span class="alert-icon">✓</span>
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>
+          </div>
+        {% elif message.tags == 'warning' %}
+          <div class="alert alert-warning" role="alert">
+            <span class="alert-icon">⚠</span>
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>
+          </div>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            <span class="alert-icon">ℹ</span>
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <div class="product-grid">
 
-    <!-- BACK BUTTON COLUMN -->
+    <!-- BACK BUTTON COLUMN (desktop) -->
     <div class="back-column">
       <a href="{% url 'user_side:shop' %}" class="back-link">
         <span>←</span>
@@ -592,7 +772,7 @@
       </a>
     </div>
 
-    <!-- GALLERY WITH ZOOM -->
+    <!-- GALLERY -->
     <div class="gallery">
       <div class="zoom-wrapper" id="zoomWrapper">
         {% if variant.main_image %}
@@ -606,15 +786,15 @@
         <div class="zoom-hint">Hover to zoom</div>
       </div>
 
-      <!-- Zoom result panel sits outside zoom-wrapper but is controlled by JS -->
       <div class="zoom-result" id="zoomResult"></div>
 
       <div class="thumbnails">
         {% if variant.main_image %}
-          <img class="thumb active" src="{{ variant.main_image.url }}" data-src="{{ variant.main_image.url }}" alt="Thumbnail">
+          <img class="thumb active" src="{{ variant.main_image.url }}" data-src="{{ variant.main_image.url }}" alt="Main image">
         {% endif %}
         {% for img in variant.images.all %}
-          <img class="thumb" src="{{ img.image.url }}" data-src="{{ img.image.url }}" alt="Thumbnail">
+          <img class="thumb {% if not variant.main_image and forloop.first %}active{% endif %}"
+               src="{{ img.image.url }}" data-src="{{ img.image.url }}" alt="Thumbnail {{ forloop.counter }}">
         {% endfor %}
       </div>
     </div>
@@ -624,6 +804,24 @@
 
       <h1 class="product-name">{{ product.name }}</h1>
 
+      <!-- RATING SUMMARY -->
+      {% with avg=product.average_rating count=product.review_count %}
+        <div class="rating-summary">
+          <div class="stars-display">
+            {% for i in "12345" %}
+              <span class="star-icon {% if forloop.counter <= avg %}filled{% endif %}">★</span>
+            {% endfor %}
+          </div>
+          {% if count > 0 %}
+            <span class="rating-value">{{ avg }}</span>
+            <span class="rating-text">({{ count }} review{{ count|pluralize }})</span>
+          {% else %}
+            <span class="rating-text">No reviews yet</span>
+          {% endif %}
+        </div>
+      {% endwith %}
+
+      <!-- PRICE -->
       <div class="price">
         {% with best_discount=product.get_best_discount_percentage %}
           {% if best_discount > 0 %}
@@ -636,6 +834,7 @@
         {% endwith %}
       </div>
 
+      <!-- STOCK -->
       <div class="stock {% if variant.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
         <span>●</span>
         <span>{% if variant.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}</span>
@@ -655,11 +854,131 @@
         </div>
       </div>
 
+      <div class="section-divider"></div>
+
       <!-- DESCRIPTION -->
       <div class="section">
         <div class="section-title">Description</div>
         <div class="section-content">{{ product.description }}</div>
       </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ===== REVIEWS ACCORDION ===== -->
+      <div class="reviews-accordion {% if messages %}open{% endif %}" id="reviewsAccordion">
+        <button class="reviews-accordion-toggle" id="reviewsToggle" aria-expanded="false" aria-controls="reviewsBody">
+          <div class="reviews-accordion-left">
+            <span class="reviews-accordion-label">Reviews</span>
+            <div class="reviews-accordion-meta">
+              {% with avg=product.average_rating count=product.review_count %}
+                {% if count > 0 %}
+                  <div class="reviews-accordion-stars">
+                    {% for i in "12345" %}
+                      <span class="star-icon {% if forloop.counter <= avg %}filled{% endif %}">★</span>
+                    {% endfor %}
+                  </div>
+                  <span class="reviews-count-pill">{{ count }}</span>
+                {% else %}
+                  <span class="reviews-count-pill">0</span>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </div>
+          <span class="reviews-chevron">▼</span>
+        </button>
+
+        <div class="reviews-accordion-body" id="reviewsBody">
+
+          <!-- Review list -->
+          <div class="review-list">
+            {% for review in reviews %}
+              <div class="review-card">
+                <div class="review-top">
+                  <div class="reviewer-info">
+                    <div class="reviewer-avatar">{{ review.user.username|slice:":1" }}</div>
+                    <div>
+                      <div class="reviewer-name">{{ review.user.username }}</div>
+                      <div class="review-stars">
+                        {% for i in "12345" %}
+                          <span class="star-icon {% if forloop.counter <= review.rating %}filled{% endif %}">★</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                  {% if review.created_at %}
+                    <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+                  {% endif %}
+                </div>
+                <p class="review-comment">{{ review.comment }}</p>
+              </div>
+            {% empty %}
+              <div class="no-reviews">No reviews yet — be the first to share your thoughts.</div>
+            {% endfor %}
+          </div>
+
+          <!-- Write review / prompt -->
+          {% if user.is_authenticated %}
+            {% if can_review %}
+              <div class="write-review-divider"></div>
+              <div class="write-review-label">Write a Review</div>
+
+              <form method="POST" action="{% url 'review:add_review' product.id %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                  <label class="form-label">Your Rating</label>
+                  <div class="star-picker">
+                    <input type="radio" id="star5" name="rating" value="5" required>
+                    <label for="star5" title="5 stars">★</label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4" title="4 stars">★</label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3" title="3 stars">★</label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2" title="2 stars">★</label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1" title="1 star">★</label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="reviewComment">Your Comment</label>
+                  <textarea
+                    id="reviewComment"
+                    name="comment"
+                    class="form-textarea"
+                    placeholder="Share your experience with this product…"
+                    required
+                  ></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit-review">
+                  <i class="fas fa-paper-plane"></i>
+                  Submit Review
+                </button>
+              </form>
+
+            {% else %}
+              <div class="write-review-divider"></div>
+              <div class="review-login-prompt">
+                <span>🔒</span>
+                <span>Only verified buyers can leave a review. Purchase this product to share your feedback.</span>
+              </div>
+            {% endif %}
+
+          {% else %}
+            <div class="write-review-divider"></div>
+            <div class="review-login-prompt">
+              <span>✍️</span>
+              <span>
+                <a href="{% url 'user_auth:login' %}?next={{ request.path }}">Sign in</a>
+                to leave a review.
+              </span>
+            </div>
+          {% endif %}
+
+        </div>{# /reviews-accordion-body #}
+      </div>{# /reviews-accordion #}
 
       <!-- ACTIONS -->
       <div class="actions">
@@ -667,7 +986,7 @@
           <form method="POST" action="{% url 'cart:add_to_cart' %}" style="flex: 1;">
             {% csrf_token %}
             <input type="hidden" name="variant_id" value="{{ variant.id }}">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" style="width:100%;">
               <i class="fas fa-shopping-cart"></i>
               Add to Cart
             </button>
@@ -709,18 +1028,16 @@
         {% endif %}
       </div>
 
-    </div>
-
-  </div>
+    </div>{# /details #}
+  </div>{# /product-grid #}
 
   <!-- SIMILAR PRODUCTS -->
   <div class="similar">
     <h2 class="similar-title">Similar Items</h2>
-
     <div class="similar-grid">
       {% for p in related_products %}
         {% with v=p.variants.first %}
-          <a href="{% url 'custom_admin:product_management:product_detail' p.id %}?variant={{ v.id }}" class="card">
+          <a href="{% url 'custom_admin:product_management:product_detail' p.id %}{% if v %}?variant={{ v.id }}{% endif %}" class="card">
             <div class="card-image">
               {% if v and v.main_image %}
                 <img src="{{ v.main_image.url }}" alt="{{ p.name }}">
@@ -729,7 +1046,6 @@
               {% else %}
                 <img src="https://via.placeholder.com/280x280/2a2a2a/606060?text=No+Image" alt="No Image">
               {% endif %}
-
               {% if p.get_best_discount_percentage > 0 %}
                 <div class="card-discount-badge">-{{ p.get_best_discount_percentage }}%</div>
               {% endif %}
@@ -750,25 +1066,25 @@
           </a>
         {% endwith %}
       {% empty %}
-        <p style="grid-column: 1/-1; text-align: center; color: #606060; padding: 40px 0;">No similar items found.</p>
+        <p style="grid-column:1/-1;text-align:center;color:#606060;padding:40px 0;">No similar items found.</p>
       {% endfor %}
     </div>
   </div>
 
-</div>
+</div>{# /container #}
 
 <script>
 (function () {
+
   /* ── Thumbnail switcher ── */
   const mainImg = document.getElementById('mainImage');
   const thumbs  = document.querySelectorAll('.thumb');
 
-  thumbs.forEach(thumb => {
+  thumbs.forEach(function(thumb) {
     thumb.addEventListener('click', function () {
-      thumbs.forEach(t => t.classList.remove('active'));
+      thumbs.forEach(function(t) { t.classList.remove('active'); });
       this.classList.add('active');
       mainImg.src = this.dataset.src;
-      /* Update zoom source when image changes */
       initZoom();
     });
   });
@@ -777,27 +1093,14 @@
   const wrapper    = document.getElementById('zoomWrapper');
   const lens       = document.getElementById('zoomLens');
   const zoomResult = document.getElementById('zoomResult');
+  const ZOOM = 2.8, LENS_W = 120, LENS_H = 120;
 
-  const ZOOM = 2.8;        /* magnification factor */
-  const LENS_W = 120;      /* lens box width  (px) */
-  const LENS_H = 120;      /* lens box height (px) */
-
-  function initZoom () {
-    const src = mainImg.src;
-
-    /* Size the result panel */
-    const rw = zoomResult.offsetWidth  || 480;
-    const rh = zoomResult.offsetHeight || 600;
-
-    /* Calculate bg-size so it fills the result panel at ZOOM level */
-    const wRect = wrapper.getBoundingClientRect();
-    const bgW   = wRect.width  * ZOOM;
-    const bgH   = wRect.height * ZOOM;
-
-    zoomResult.style.backgroundImage    = `url('${src}')`;
-    zoomResult.style.backgroundSize     = `${bgW}px ${bgH}px`;
-    zoomResult.style.backgroundRepeat   = 'no-repeat';
-
+  function initZoom() {
+    var src   = mainImg.src;
+    var wRect = wrapper.getBoundingClientRect();
+    zoomResult.style.backgroundImage  = "url('" + src + "')";
+    zoomResult.style.backgroundSize   = (wRect.width * ZOOM) + 'px ' + (wRect.height * ZOOM) + 'px';
+    zoomResult.style.backgroundRepeat = 'no-repeat';
     lens.style.width  = LENS_W + 'px';
     lens.style.height = LENS_H + 'px';
   }
@@ -805,38 +1108,18 @@
   wrapper.addEventListener('mouseenter', initZoom);
 
   wrapper.addEventListener('mousemove', function (e) {
-    const rect = wrapper.getBoundingClientRect();
-
-    /* Cursor position relative to wrapper */
-    let cx = e.clientX - rect.left;
-    let cy = e.clientY - rect.top;
-
-    /* Clamp lens so it stays inside wrapper */
-    let lx = cx - LENS_W / 2;
-    let ly = cy - LENS_H / 2;
-    lx = Math.max(0, Math.min(lx, rect.width  - LENS_W));
-    ly = Math.max(0, Math.min(ly, rect.height - LENS_H));
-
+    var rect = wrapper.getBoundingClientRect();
+    var cx = e.clientX - rect.left;
+    var cy = e.clientY - rect.top;
+    var lx = Math.max(0, Math.min(cx - LENS_W / 2, rect.width  - LENS_W));
+    var ly = Math.max(0, Math.min(cy - LENS_H / 2, rect.height - LENS_H));
     lens.style.left = lx + 'px';
     lens.style.top  = ly + 'px';
-
-    /* Background position in result panel */
-    const rw = zoomResult.offsetWidth;
-    const rh = zoomResult.offsetHeight;
-
-    /* The fraction of the image the lens is centred on */
-    const fx = cx / rect.width;
-    const fy = cy / rect.height;
-
-    /* Background offset so the zoomed region is centred in result */
-    const bgW = rect.width  * ZOOM;
-    const bgH = rect.height * ZOOM;
-    const bx  = fx * bgW - rw / 2;
-    const by  = fy * bgH - rh / 2;
-
-    zoomResult.style.backgroundPosition =
-      `-${Math.max(0, bx)}px -${Math.max(0, by)}px`;
-
+    var bgW = rect.width  * ZOOM;
+    var bgH = rect.height * ZOOM;
+    var bx  = (cx / rect.width)  * bgW - zoomResult.offsetWidth  / 2;
+    var by  = (cy / rect.height) * bgH - zoomResult.offsetHeight / 2;
+    zoomResult.style.backgroundPosition = '-' + Math.max(0, bx) + 'px -' + Math.max(0, by) + 'px';
     zoomResult.style.display = 'block';
     lens.style.display       = 'block';
   });
@@ -845,6 +1128,39 @@
     zoomResult.style.display = 'none';
     lens.style.display       = 'none';
   });
+
+  /* ── Reviews accordion ── */
+  var accordion = document.getElementById('reviewsAccordion');
+  var toggle    = document.getElementById('reviewsToggle');
+  var body      = document.getElementById('reviewsBody');
+
+  // Auto-open if there's a flash message (e.g. after review submit / error)
+  {% if messages %}
+    accordion.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+  {% endif %}
+
+  toggle.addEventListener('click', function () {
+    var isOpen = accordion.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+    // Smooth-scroll accordion into view when opening
+    if (isOpen) {
+      setTimeout(function () {
+        accordion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+  });
+
+  /* ── Auto-dismiss messages after 5 s ── */
+  document.querySelectorAll('.alert').forEach(function (el) {
+    setTimeout(function () {
+      el.style.transition = 'opacity 0.4s ease';
+      el.style.opacity    = '0';
+      setTimeout(function () { el.remove(); }, 420);
+    }, 5000);
+  });
+
 })();
 </script>
 
