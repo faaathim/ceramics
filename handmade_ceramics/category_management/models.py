@@ -1,3 +1,5 @@
+# category_management/models.py
+
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -16,7 +18,7 @@ class CategoryManager(models.Manager):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=150)  # ✅ DB-level unique
+    name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
     image = CloudinaryField('category_image', blank=True, null=True)
 
@@ -36,7 +38,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-    # ✅ Strong Validation
     def clean(self):
         name = self.name.strip()
 
@@ -50,11 +51,10 @@ class Category(models.Model):
             raise ValidationError({'name': "Category name cannot exceed 150 characters."})
 
     def save(self, *args, **kwargs):
-        self.name = self.name.strip()  # ✅ Always clean before saving
+        self.name = self.name.strip()
         self.full_clean()
         super().save(*args, **kwargs)
 
-    # ✅ Optimized Soft Delete
     def soft_delete(self):
         self.is_deleted = True
         self.is_listed = False
@@ -62,10 +62,8 @@ class Category(models.Model):
 
         products = Product.all_objects.filter(category=self, is_deleted=False)
 
-        # ✅ Bulk update (FAST)
         products.update(is_deleted=True, is_listed=False)
 
-        # ✅ Variants bulk update
         from product_management.models import Variant
         Variant.objects.filter(product__in=products).update(
             is_deleted=True,

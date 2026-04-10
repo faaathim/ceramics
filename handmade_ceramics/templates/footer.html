@@ -58,22 +58,80 @@
   <!-- Bottom Bar -->
   <div class="footer-bottom">
     <div class="footer-bottom-content">
+
       <div class="shipping-payment">
+
+        <!-- Shipping -->
         <span class="footer-small-text">We ship with:</span>
         <div class="shipping-logos">
-          <img src="{% static 'images/dhl-logo.png' %}" alt="DHL" class="shipping-logo">
-          <img src="{% static 'images/fedex-logo.png' %}" alt="FedEx" class="shipping-logo">
+
+          <!-- DHL -->
+          <div class="brand-badge" title="DHL">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 24" width="48" height="20">
+              <rect width="60" height="24" rx="3" fill="#FFCC00"/>
+              <text x="6" y="17" font-family="Arial Black, Arial" font-weight="900" font-size="13" fill="#D40511" letter-spacing="0.5">DHL</text>
+            </svg>
+          </div>
+
+          <!-- FedEx -->
+          <div class="brand-badge" title="FedEx">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 24" width="56" height="20">
+              <rect width="72" height="24" rx="3" fill="#ffffff"/>
+              <text x="4" y="17" font-family="Arial Black, Arial" font-weight="900" font-size="13" fill="#4D148C">Fed</text>
+              <text x="34" y="17" font-family="Arial Black, Arial" font-weight="900" font-size="13" fill="#FF6600">Ex</text>
+            </svg>
+          </div>
+
         </div>
+
+        <!-- Payment -->
         <span class="footer-small-text ml-4">Payment options:</span>
         <div class="payment-logos">
-          <img src="{% static 'images/visa-logo.png' %}" alt="Visa" class="payment-logo">
-          <img src="{% static 'images/mastercard-logo.png' %}" alt="Mastercard" class="payment-logo">
-          <img src="{% static 'images/amex-logo.png' %}" alt="American Express" class="payment-logo">
+
+          <!-- Visa -->
+          <div class="brand-badge" title="Visa">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 38" width="46" height="28">
+              <rect width="60" height="38" rx="4" fill="#1A1F71"/>
+              <text x="8" y="26" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#ffffff" letter-spacing="0.5">VISA</text>
+            </svg>
+          </div>
+
+          <!-- Mastercard -->
+          <div class="brand-badge" title="Mastercard">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 38" width="46" height="28">
+              <rect width="60" height="38" rx="4" fill="#252525"/>
+              <circle cx="22" cy="19" r="11" fill="#EB001B"/>
+              <circle cx="38" cy="19" r="11" fill="#F79E1B"/>
+              <path d="M30 10.3a11 11 0 0 1 0 17.4A11 11 0 0 1 30 10.3z" fill="#FF5F00"/>
+            </svg>
+          </div>
+
+          <!-- Amex -->
+          <div class="brand-badge" title="American Express">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 38" width="46" height="28">
+              <rect width="60" height="38" rx="4" fill="#2E77BC"/>
+              <text x="5" y="16" font-family="Arial, sans-serif" font-weight="700" font-size="7.5" fill="#ffffff" letter-spacing="0.3">AMERICAN</text>
+              <text x="5" y="26" font-family="Arial, sans-serif" font-weight="700" font-size="7.5" fill="#ffffff" letter-spacing="0.3">EXPRESS</text>
+            </svg>
+          </div>
+
+          <!-- UPI (bonus - common in India) -->
+          <div class="brand-badge" title="UPI">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 38" width="46" height="28">
+              <rect width="60" height="38" rx="4" fill="#ffffff"/>
+              <text x="8" y="17" font-family="Arial Black, Arial" font-weight="900" font-size="9" fill="#097939">UPI</text>
+              <rect x="8" y="21" width="44" height="2" fill="#FF6600"/>
+              <text x="8" y="32" font-family="Arial, sans-serif" font-size="6.5" fill="#555555" letter-spacing="0.2">Powered by NPCI</text>
+            </svg>
+          </div>
+
         </div>
       </div>
+
       <div class="copyright">
         <p>© Copyright 2025 Ceramic. Design by Fathima Raihana</p>
       </div>
+
     </div>
   </div>
 </footer>
@@ -103,14 +161,8 @@
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .footer-logo {
@@ -197,32 +249,38 @@
 .shipping-payment {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .footer-small-text {
   color: #666666;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .shipping-logos,
 .payment-logos {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
 }
 
-.shipping-logo,
-.payment-logo {
-  height: 20px;
-  filter: grayscale(100%) brightness(0.5);
-  transition: all 0.3s ease;
+/* Brand badge wrapper */
+.brand-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.45;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: default;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.shipping-logo:hover,
-.payment-logo:hover {
-  filter: grayscale(0%) brightness(1);
+.brand-badge:hover {
+  opacity: 1;
   transform: translateY(-2px);
 }
 
@@ -232,24 +290,17 @@
   letter-spacing: 0.5px;
 }
 
-.copyright p {
-  margin: 0;
-}
+.copyright p { margin: 0; }
 
-.ml-4 {
-  margin-left: 20px;
-}
+.ml-4 { margin-left: 16px; }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 1200px) {
   .footer-container {
     grid-template-columns: 2fr 1fr 1fr;
     gap: 40px;
   }
-  
-  .footer-section:last-child {
-    grid-column: 1 / -1;
-  }
+  .footer-section:last-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 768px) {
@@ -258,35 +309,22 @@
     gap: 40px;
     padding: 0 20px;
   }
-  
   .footer-bottom-content {
     flex-direction: column;
     text-align: center;
     padding: 0 20px;
   }
-  
   .shipping-payment {
     flex-direction: column;
     gap: 10px;
   }
-  
-  .ml-4 {
-    margin-left: 0;
-  }
+  .ml-4 { margin-left: 0; }
 }
 
 @media (max-width: 480px) {
-  .site-footer {
-    padding: 40px 0 0;
-  }
-  
-  .footer-logo {
-    font-size: 1.5rem;
-  }
-  
+  .site-footer { padding: 40px 0 0; }
+  .footer-logo { font-size: 1.5rem; }
   .shipping-logos,
-  .payment-logos {
-    justify-content: center;
-  }
+  .payment-logos { justify-content: center; }
 }
 </style>

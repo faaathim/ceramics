@@ -7,4 +7,7 @@ app_name = 'user_side'
 urlpatterns = [
     path('', views.home, name='home'), 
     path('shop/', views.shop, name='shop'),
+    path('about/', views.about, name='about'),
+    path('blog/', views.blog, name='blog'),
+    path('workshop/', views.workshop, name='workshop'),
 ]

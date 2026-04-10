@@ -75,18 +75,18 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     ORDER_STATUS_FLOW = {
-    'PENDING': ['CONFIRMED', 'CANCELLED'],
-    'CONFIRMED': ['SHIPPED', 'CANCELLED'],
-    'SHIPPED': ['OUT_FOR_DELIVERY'],
-    'OUT_FOR_DELIVERY': ['DELIVERED'],
-    'DELIVERED': ['RETURN_REQUESTED', 'PARTIAL_RETURN_REQUESTED'],
-    'RETURN_REQUESTED': ['RETURN_PROCESSING'],
-    'PARTIAL_RETURN_REQUESTED': ['PARTIAL_RETURN_PROCESSING'],
-    'RETURN_PROCESSING': ['RETURNED'],
-    'PARTIAL_RETURN_PROCESSING': ['PARTIALLY_RETURNED'],
-    'RETURNED': [],
-    'PARTIALLY_RETURNED': [],
-    'CANCELLED': [],
+        'PENDING': ['CONFIRMED', 'CANCELLED'],
+        'CONFIRMED': ['SHIPPED', 'CANCELLED'],
+        'SHIPPED': ['OUT_FOR_DELIVERY'],
+        'OUT_FOR_DELIVERY': ['DELIVERED'],
+        'DELIVERED': ['RETURN_REQUESTED', 'PARTIAL_RETURN_REQUESTED'],
+        'RETURN_REQUESTED': ['RETURN_PROCESSING'],
+        'PARTIAL_RETURN_REQUESTED': ['PARTIAL_RETURN_PROCESSING'],
+        'RETURN_PROCESSING': ['RETURNED'],
+        'PARTIAL_RETURN_PROCESSING': ['PARTIALLY_RETURNED'],
+        'RETURNED': [],
+        'PARTIALLY_RETURNED': [],
+        'CANCELLED': [],
     }
 
     coupon = models.ForeignKey(
@@ -104,36 +104,28 @@ class Order(models.Model):
         ]
 
     def recalculate_totals(self):
-
-        # Exclude cancelled and returned items
         active_items = self.items.exclude(
             item_status__in=['CANCELLED', 'RETURNED']
         )
 
         new_subtotal = sum((item.item_total for item in active_items), Decimal("0.00"))
 
-        # Coupon handling
         discount = Decimal("0.00")
         if self.coupon and new_subtotal > 0:
-
-            # Check minimum order condition
             if new_subtotal >= self.coupon.min_order_amount:
                 discount = (
                     Decimal(self.coupon.discount_percentage) / Decimal("100")
                 ) * new_subtotal
             else:
-                # Coupon becomes invalid
                 self.coupon = None
                 discount = Decimal("0.00")
 
-        # Shipping rule
         if new_subtotal >= Decimal("1000"):
             shipping = Decimal("0.00")
         elif new_subtotal > 0:
             shipping = Decimal("50.00")
         else:
             shipping = Decimal("0.00")
-
 
         self.subtotal = new_subtotal
         self.discount_amount = discount
@@ -144,7 +136,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.order_id} - {self.user}"
-
 
     def save(self, *args, **kwargs):
         if not self.order_id:
@@ -157,18 +148,13 @@ class Order(models.Model):
                 self.order_id = generate_order_id()
         super().save(*args, **kwargs)
 
-
     def get_absolute_url(self):
         return reverse('orders:order_detail', args=[self.order_id])
-
 
     def can_change_status(self, new_status):
         return new_status in self.ORDER_STATUS_FLOW.get(self.status, [])
     
     def calculate_refund(self, old_total):
-        """
-        Refund = old_total - new_total
-        """
         return old_total - self.total_amount
 
 
@@ -185,7 +171,7 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     item_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    item_status = models.CharField(max_length=30,choices=ITEM_STATUS_CHOICES,default='PENDING')
+    item_status = models.CharField(max_length=30, choices=ITEM_STATUS_CHOICES, default='PENDING')
 
     cancellation_reason = models.TextField(blank=True, null=True)
     return_reason = models.TextField(blank=True, null=True)
@@ -214,11 +200,9 @@ class OrderItem(models.Model):
 
     @transaction.atomic
     def process_return(self):
-        # Only delivered items can be returned
         if self.item_status != 'RETURN_REQUESTED':
             return
 
-        # Restore stock
         if self.variant:
             self.variant.stock += self.quantity
             self.variant.save()
@@ -226,7 +210,6 @@ class OrderItem(models.Model):
         self.item_status = 'RETURNED'
         self.save()
 
-        # Recalculate order totals
         self.order.recalculate_totals()
 
     def save(self, *args, **kwargs):

@@ -22,8 +22,10 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('custom-admin/', include('custom_admin.urls')),
-    path('', include('user_authentication.urls', namespace='user_authentication')),  
-    path('', include('user_side.urls', namespace='user_side')),  
+
+    path('auth/', include('user_authentication.urls', namespace='user_authentication')),
+    path('', include('user_side.urls', namespace='user_side')),
+
     path('accounts/', include('allauth.urls')),
     path('profiles/', include('profiles.urls', namespace='profiles')),
     path('cart/', include('cart.urls', namespace='cart')),
@@ -35,7 +37,6 @@ urlpatterns = [
     path("wallet/", include("wallet.urls", namespace='wallet')),
     path("reports/", include("reports.urls")),
     path('reviews/', include('reviews.urls', namespace='review')),
-
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

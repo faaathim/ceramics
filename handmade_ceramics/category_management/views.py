@@ -1,12 +1,10 @@
 # category_management/views.py
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.utils import timezone
-from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
 from .models import Category
@@ -14,8 +12,10 @@ from .forms import CategoryForm, CategorySearchForm
 
 import base64
 
+
 def superuser_check(user):
     return user.is_active and user.is_superuser
+
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
@@ -61,7 +61,6 @@ def category_create(request):
         post_data = request.POST.copy()
         files_data = request.FILES.copy()
 
-        # Handle cropped image (base64)
         cropped_data = post_data.get('image_cropped')
 
         if cropped_data and cropped_data.startswith('data:image'):
@@ -78,7 +77,6 @@ def category_create(request):
             except Exception:
                 messages.error(request, "Invalid image data. Please try again.")
 
-        # Remove cropped field before form validation
         post_data.pop('image_cropped', None)
 
         form = CategoryForm(post_data, files_data)
@@ -89,7 +87,6 @@ def category_create(request):
             return redirect('custom_admin:category_management:category_list')
         else:
             messages.error(request, "Please fix the errors below.")
-
     else:
         form = CategoryForm()
 
@@ -98,8 +95,6 @@ def category_create(request):
         'action': 'Create',
     })
 
-
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
@@ -110,7 +105,6 @@ def category_edit(request, pk):
         post_data = request.POST.copy()
         files_data = request.FILES.copy()
 
-        # Handle cropped image
         cropped_data = post_data.get('image_cropped')
 
         if cropped_data and cropped_data.startswith('data:image'):
@@ -127,7 +121,6 @@ def category_edit(request, pk):
             except Exception:
                 messages.error(request, "Invalid image data. Please try again.")
         else:
-            # Keep existing image if no new one uploaded
             files_data.pop('image', None)
 
         post_data.pop('image_cropped', None)
@@ -140,7 +133,6 @@ def category_edit(request, pk):
             return redirect('custom_admin:category_management:category_list')
         else:
             messages.error(request, "Please fix the errors below.")
-
     else:
         form = CategoryForm(instance=category)
 
@@ -149,6 +141,7 @@ def category_edit(request, pk):
         'action': 'Edit',
         'category': category,
     })
+
 
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
@@ -165,7 +158,6 @@ def category_delete_confirm(request, pk):
     })
 
 
-
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def category_toggle(request, category_id):
@@ -174,6 +166,7 @@ def category_toggle(request, category_id):
         id=category_id,
         is_deleted=False
     )
+
     if not category.is_listed and not category.products.filter(is_deleted=False).exists():
         messages.warning(request, "Cannot list a category with no products.")
         return redirect('custom_admin:category_management:category_list')

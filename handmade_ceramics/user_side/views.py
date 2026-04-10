@@ -1,3 +1,5 @@
+# user_side/views.py
+
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Prefetch
@@ -8,23 +10,17 @@ from user_side.forms import ShopFilterForm
 
 from product_management.models import Product, Variant
 from category_management.models import Category
-from wishlist.models import Wishlist  # Add this import
+from wishlist.models import Wishlist 
 
 
-# ======================================================
-# HOME PAGE
-# ======================================================
 @never_cache
 @login_required(login_url='user_authentication:login')
 def home(request):
-
-    # Only valid, visible variants
     listed_variants_qs = Variant.objects.filter(
         is_listed=True,
         is_deleted=False
     ).order_by('-created_at')
 
-    # Only valid, visible products
     products_qs = (
         Product.objects.filter(
             is_listed=True,
@@ -55,7 +51,6 @@ def home(request):
         is_listed=True
     ).order_by('-created_at')[:12]
 
-    # Get wishlist variant IDs for authenticated users
     wishlist_variant_ids = []
     if request.user.is_authenticated:
         wishlist_variant_ids = list(
@@ -66,24 +61,18 @@ def home(request):
     return render(request, 'user_side/home.html', {
         'products_page': products_page,
         'categories': categories,
-        'wishlist_variant_ids': wishlist_variant_ids,  # Add this
+        'wishlist_variant_ids': wishlist_variant_ids,
     })
 
 
-# ======================================================
-# SHOP PAGE
-# ======================================================
 def shop(request):
-
     form = ShopFilterForm(request.GET or None)
 
-    # Only valid, visible variants (same as home)
     listed_variants_qs = Variant.objects.filter(
         is_listed=True,
         is_deleted=False
     ).order_by('-created_at')
 
-    # Base queryset (same rules as home)
     products_qs = Product.objects.filter(
         is_listed=True,
         category__is_listed=True,
@@ -91,7 +80,6 @@ def shop(request):
         variants__is_deleted=False
     ).distinct()
 
-    # Prefetch only valid variants BEFORE filtering
     products_qs = products_qs.prefetch_related(
         Prefetch(
             'variants',
@@ -100,7 +88,6 @@ def shop(request):
         )
     )
 
-    # ---------------- FILTERS ----------------
     if form.is_valid():
         data = form.cleaned_data
 
@@ -137,7 +124,6 @@ def shop(request):
         else:
             products_qs = products_qs.order_by('-created_at')
 
-    # ---------------- PAGINATION ----------------
     paginator = Paginator(products_qs, 12)
     page = request.GET.get('page', 1)
 
@@ -146,11 +132,9 @@ def shop(request):
     except (EmptyPage, PageNotAnInteger):
         products_page = paginator.page(1)
 
-    # Preserve filters in pagination
     query_params = request.GET.copy()
     query_params.pop('page', None)
 
-    # Get wishlist variant IDs for authenticated users
     wishlist_variant_ids = []
     if request.user.is_authenticated:
         wishlist_variant_ids = list(
@@ -162,5 +146,20 @@ def shop(request):
         'form': form,
         'products_page': products_page,
         'query_string': query_params.urlencode(),
-        'wishlist_variant_ids': wishlist_variant_ids,  # Add this
+        'wishlist_variant_ids': wishlist_variant_ids,
     })
+
+
+@never_cache
+def about(request):
+    return render(request, 'user_side/about.html')
+
+
+@never_cache
+def blog(request):
+    return render(request, 'user_side/blog.html')
+
+
+@never_cache
+def workshop(request):
+    return render(request, 'user_side/workshop.html')

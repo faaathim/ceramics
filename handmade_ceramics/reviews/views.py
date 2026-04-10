@@ -1,3 +1,5 @@
+# reviews/views.py
+
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -5,9 +7,6 @@ from django.contrib import messages
 from .models import Review
 from product_management.models import Product
 from .utils import can_user_review
-
-
-# reviews/views.py
 
 @login_required
 def add_review(request, product_id):

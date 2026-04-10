@@ -1,3 +1,5 @@
+# user_authentication/views.py
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model, login, authenticate, logout
 from django.contrib import messages
@@ -11,16 +13,12 @@ from .models import OTP
 from .forms import SignupForm, OTPForm, LoginForm, ResetPasswordForm
 
 User = get_user_model()
-OTP_EXPIRY_SECONDS = 180  # 3 minutes
+OTP_EXPIRY_SECONDS = 180
 
-# ── Helper: Create & Send OTP ────────────────────────────────────────────────
 
 def create_and_send_otp(email, purpose, user=None, first_name=""):
-    """Creates an OTP record and attempts to send it via email."""
-    # 1. Invalidate old OTPs for this purpose
     OTP.objects.filter(email=email, purpose=purpose, is_used=False).update(is_used=True)
 
-    # 2. Generate and Save the OTP
     otp_code = OTP.generate_otp()
     hashed_code = OTP.hash_otp(otp_code)
     
@@ -31,7 +29,6 @@ def create_and_send_otp(email, purpose, user=None, first_name=""):
         purpose=purpose,
     )
 
-    # 3. Send Email
     try:
         subject = "Your Verification Code"
         text_content = f"Hi {first_name}, Your OTP is: {otp_code}"
@@ -46,10 +43,8 @@ def create_and_send_otp(email, purpose, user=None, first_name=""):
         print(f"Successfully sent email to {email}")
     except Exception as e:
         print(f"EMAIL SENDING FAILED: {e}")
-        # Logged for terminal testing if SMTP is blocked
         print(f"CRITICAL: Testing OTP is: {otp_code}")
 
-# ── Signup Logic ─────────────────────────────────────────────────────────────
 
 def signup_view(request):
     form = SignupForm(request.POST or None)
@@ -67,6 +62,7 @@ def signup_view(request):
         )
         return redirect('user_authentication:verify_otp')
     return render(request, 'user_authentication/signup.html', {'form': form})
+
 
 def verify_otp(request):
     signup_data = request.session.get('signup_data')
@@ -87,6 +83,7 @@ def verify_otp(request):
         'remaining_time': remaining
     })
 
+
 @require_POST
 def ajax_verify_signup_otp(request):
     signup_data = request.session.get('signup_data')
@@ -104,7 +101,6 @@ def ajax_verify_signup_otp(request):
         otp.save()
         return JsonResponse({'error': 'Incorrect OTP.'}, status=400)
 
-    # Success Logic
     otp.is_used = True
     otp.save()
     user = User.objects.create_user(
@@ -117,6 +113,7 @@ def ajax_verify_signup_otp(request):
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     del request.session['signup_data']
     return JsonResponse({'success': True})
+
 
 @require_POST
 def ajax_resend_signup_otp(request):
@@ -131,7 +128,6 @@ def ajax_resend_signup_otp(request):
     )
     return JsonResponse({'success': True, 'expiry': OTP_EXPIRY_SECONDS})
 
-# ── Password Reset Logic ─────────────────────────────────────────────────────
 
 def forgot_password_view(request):
     if request.method == 'POST':
@@ -150,10 +146,12 @@ def forgot_password_view(request):
         messages.error(request, "No account found with that email.")
     return render(request, 'user_authentication/forgot_password.html')
 
+
 def verify_reset_otp(request):
     if not request.session.get('reset_email'):
         return redirect('user_authentication:forgot_password')
     return render(request, 'user_authentication/verify_reset_otp.html')
+
 
 @require_POST
 def ajax_verify_reset_otp(request):
@@ -174,6 +172,7 @@ def ajax_verify_reset_otp(request):
     request.session['otp_verified_for_reset'] = True
     return JsonResponse({'success': True})
 
+
 @require_POST
 def ajax_resend_reset_otp(request):
     email = request.session.get('reset_email')
@@ -182,6 +181,7 @@ def ajax_resend_reset_otp(request):
         create_and_send_otp(email=email, purpose='reset', user=user, first_name=user.first_name if user else "")
         return JsonResponse({'success': True, 'expiry': OTP_EXPIRY_SECONDS})
     return JsonResponse({'error': 'Session error.'}, status=400)
+
 
 def reset_password(request):
     if not request.session.get('otp_verified_for_reset'):
@@ -200,19 +200,29 @@ def reset_password(request):
         return redirect('user_authentication:login')
     return render(request, 'user_authentication/reset.html', {'form': form})
 
-# ── Login / Logout ───────────────────────────────────────────────────────────
 
 def login_view(request):
     form = LoginForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user_obj = User.objects.filter(email=form.cleaned_data['email']).first()
-        if user_obj:
-            user = authenticate(request, username=user_obj.username, password=form.cleaned_data['password'])
-            if user:
+
+    if request.method == "POST":
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+
+            user = authenticate(request, username=email, password=password)
+
+            if user is not None:
                 login(request, user)
                 return redirect('user_side:home')
-        messages.error(request, "Invalid credentials.")
-    return render(request, 'user_authentication/login.html', {'form': form})
+
+            messages.error(request, "Invalid email or password.")
+        else:
+            print("FORM ERRORS:", form.errors)
+
+    return render(request, 'user_authentication/login.html', {
+        'form': form
+    })
+
 
 def logout_view(request):
     logout(request)

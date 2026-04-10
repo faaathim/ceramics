@@ -1,3 +1,5 @@
+# product_management/views.py
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib import messages
@@ -12,10 +14,6 @@ from .models import Product, Variant, VariantImage, product_average_rating, get_
 from .forms import ProductForm, ProductSearchForm, VariantForm
 
 
-# =========================
-# AUTH HELPERS
-# =========================
-
 def superuser_check(user):
     return user.is_active and user.is_superuser
 
@@ -27,16 +25,10 @@ def admin_required(view_func):
     )
 
 
-# =========================
-# PRODUCT VIEWS
-# =========================
-
 @admin_required
 def product_list(request):
-    """Backend search + pagination + optimized queries."""
     form = ProductSearchForm(request.GET or None)
 
-    # ✅ Prefetch variants to avoid N+1 queries
     qs = Product.objects.prefetch_related('variants')
 
     if form.is_valid():
@@ -64,12 +56,8 @@ def product_list(request):
 @admin_required
 @transaction.atomic
 def product_create(request):
-    """
-    Creates a product with a single main_image upload.
-    No gallery images belong to Product — they belong to VariantImage.
-    """
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)  # ✅ pass request.FILES
+        form = ProductForm(request.POST, request.FILES)
         main_file = request.FILES.get('main_image')
 
         if not main_file:
@@ -81,8 +69,8 @@ def product_create(request):
             })
 
         if form.is_valid():
-            product           = form.save(commit=False)
-            product.stock     = 0
+            product = form.save(commit=False)
+            product.stock = 0
             product.is_listed = False
             product.main_image = main_file
             product.save()
@@ -100,49 +88,39 @@ def product_create(request):
         'action': 'Create',
         'product': None,
     })
- 
+
+
 @admin_required
 @transaction.atomic
 def product_edit(request, pk):
-    """
-    Edits a product.  Only manages main_image (the one CloudinaryField on Product).
- 
-    POST keys handled:
-      remove_main_image  — if present (any value), nullify current main_image
-      main_image         — optional file; replaces / sets new main_image
-                           (takes priority: if both remove flag and new file
-                            are present the new file wins)
-    """
     product = get_object_or_404(Product.all_objects, pk=pk)
- 
+
     if request.method == "POST":
-        form        = ProductForm(request.POST, instance=product)
-        main_file   = request.FILES.get("main_image")
+        form = ProductForm(request.POST, instance=product)
+        main_file = request.FILES.get("main_image")
         remove_main = "remove_main_image" in request.POST
- 
+
         if form.is_valid():
             product = form.save(commit=False)
- 
+
             if remove_main and not main_file:
-                # Only delete from Cloudinary when not immediately replacing
                 if product.main_image:
                     try:
                         product.main_image.delete(save=False)
                     except Exception:
-                        pass  # don't let Cloudinary errors block a save
+                        pass
                 product.main_image = None
- 
+
             if main_file:
-                # Cloudinary replaces the old resource automatically on save
                 product.main_image = main_file
- 
+
             product.save()
             messages.success(request, "Product updated successfully!")
             return redirect("custom_admin:product_management:product_list")
- 
+
     else:
         form = ProductForm(instance=product)
- 
+
     return render(request, "product_management/product_edit.html", {
         "form": form,
         "product": product,
@@ -178,10 +156,6 @@ def product_toggle_listing(request, pk):
     return redirect(reverse('custom_admin:product_management:product_list'))
 
 
-# =========================
-# VARIANT VIEWS
-# =========================
-
 @admin_required
 def variant_list(request, product_pk):
     product = get_object_or_404(Product.all_objects, pk=product_pk)
@@ -192,7 +166,6 @@ def variant_list(request, product_pk):
 
     q = request.GET.get('q', '').strip()
 
-    # ✅ Prefetch images for performance
     qs = product.variants.filter(is_deleted=False).prefetch_related('images')
 
     if q:
@@ -299,7 +272,6 @@ def variant_edit(request, product_pk, pk):
         if variant.stock == 0:
             variant.is_listed = False
 
-        # ✅ Proper Cloudinary cleanup
         if gallery_files:
             for img in variant.images.all():
                 img.image.delete()
@@ -381,10 +353,6 @@ def variant_toggle_listing(request, product_pk, pk):
         reverse('custom_admin:product_management:variant_list', args=[product.id])
     )
 
-
-# =========================
-# FRONTEND VIEWS
-# =========================
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk, is_deleted=False)

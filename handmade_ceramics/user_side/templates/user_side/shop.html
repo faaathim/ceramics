@@ -794,7 +794,7 @@
                       </form>
                     {% endif %}
                   {% else %}
-                    <a href="{% url 'user_auth:login' %}?next={{ request.path }}" class="wishlist-btn" title="Login to wishlist">
+                    <a href="{% url 'user_authentication:login' %}?next={{ request.path }}" class="wishlist-btn" title="Login to wishlist">
                       🤍
                     </a>
                   {% endif %}

@@ -2,602 +2,1074 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handmade Ceramic Products</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ceramic | Handmade with Intention</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            overflow-x: hidden;
-            background-color: #ffffff;
-        }
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Hero Section */
-        .hero-section {
-            position: relative;
-            width: 100%;
-            min-height: 100vh;
-            background-color: #2b2d31;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            display: flex;
-            align-items: center;
-            padding-top: 120px;
-        }
+    body {
+      font-family: 'Jost', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      background-color: #0a0a0a;
+      color: #ffffff;
+    }
 
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
-            z-index: 1;
-        }
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.15; }
+      50%       { opacity: 0.6; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 650px;
-            padding: 0 4rem;
-            animation: fadeInUp 1s ease-out;
-        }
+    /* ── SHARED ── */
+    .section-eyebrow {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #5a5a5a;
+      display: block;
+      margin-bottom: 1.2rem;
+    }
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1.1;
+      color: #ffffff;
+    }
+    .section-heading em { font-style: italic; color: #7a7a7a; }
+    .section-body { font-size: 0.85rem; line-height: 2; color: #5a5a5a; }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to   { opacity: 1; transform: translateY(0);    }
-        }
+    .btn-outline-ceramic {
+      display: inline-block;
+      padding: 13px 30px;
+      background: transparent;
+      color: #ffffff;
+      border: 1px solid #2a2a2a;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      font-family: 'Jost', sans-serif;
+    }
+    .btn-outline-ceramic:hover { background: #ffffff; color: #000000; border-color: #ffffff; }
+    .btn-outline-ceramic:active { transform: scale(0.98); }
 
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 300;
-            color: #ffffff;
-            letter-spacing: 8px;
-            line-height: 1.3;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            animation: fadeInUp 1s ease-out 0.2s both;
-            font-family: 'Georgia', 'Times New Roman', serif;
-        }
+    .btn-solid-ceramic {
+      display: inline-block;
+      padding: 13px 30px;
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid #ffffff;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      font-family: 'Jost', sans-serif;
+    }
+    .btn-solid-ceramic:hover { background: transparent; color: #ffffff; border-color: #ffffff; }
 
-        .hero-description {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.75);
-            line-height: 1.7;
-            margin-bottom: 3rem;
-            font-weight: 300;
-            letter-spacing: 0.3px;
-            animation: fadeInUp 1s ease-out 0.4s both;
-            max-width: 520px;
-        }
+    /* ══════════ HERO ══════════ */
+    .hero-section {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      background-color: #0a0a0a;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 6rem;
+      overflow: hidden;
+    }
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.1) 100%);
+      z-index: 1;
+    }
+    .hero-bg-text {
+      position: absolute;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(10rem, 28vw, 28rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.04);
+      letter-spacing: -6px;
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap;
+      line-height: 1;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 0 4rem;
+    }
+    .hero-eyebrow {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #5a5a5a;
+      display: block;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s ease forwards;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 10vw, 9rem);
+      font-weight: 300;
+      line-height: 0.92;
+      letter-spacing: -2px;
+      color: #ffffff;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.35s ease forwards;
+    }
+    .hero-title em { font-style: italic; color: #9a9a9a; }
+    .hero-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.55s ease forwards;
+    }
+    .hero-desc {
+      font-size: 0.83rem;
+      color: #5a5a5a;
+      line-height: 2;
+      max-width: 380px;
+    }
+    .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .hero-scroll {
+      position: absolute;
+      right: 4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 2;
+      opacity: 0;
+      animation: fadeUp 1s 1s ease forwards;
+    }
+    .hero-scroll span {
+      font-size: 0.55rem;
+      letter-spacing: 4px;
+      color: #3a3a3a;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, #ffffff, transparent);
+      animation: scrollPulse 2.2s ease-in-out infinite;
+    }
 
-        .btn-buy-now {
-            display: inline-block;
-            padding: 1rem 3rem;
-            background: transparent;
-            color: #ffffff;
-            border: 2px solid #ffffff;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 2.5px;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 1s ease-out 0.6s both;
-        }
+    /* ══════════ MARQUEE ══════════ */
+    .marquee-band {
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+      background: #000000;
+      padding: 1.8rem 0;
+      overflow: hidden;
+    }
+    .marquee-inner {
+      display: flex;
+      gap: 3rem;
+      width: max-content;
+      animation: marquee 30s linear infinite;
+    }
+    .marquee-inner:hover { animation-play-state: paused; }
+    .marquee-word {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 5px;
+      color: #2a2a2a;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color 0.3s;
+      cursor: default;
+    }
+    .marquee-word:hover { color: #7a7a7a; }
+    .marquee-sep { color: #2a2a2a; font-size: 0.6rem; align-self: center; }
 
-        .btn-buy-now::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-            transition: left 0.4s ease;
-            z-index: -1;
-        }
+    /* ══════════ LATEST ARRIVALS ══════════ */
+    .arrivals-section {
+      padding: 8rem 0;
+      border-bottom: 1px solid #1a1a1a;
+      background: #0a0a0a;
+    }
 
-        .btn-buy-now:hover { color: #2b2d31; }
-        .btn-buy-now:hover::before { left: 0; }
+    /* Product Cards */
+    .product-card {
+      background: #000000;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.4s, transform 0.4s, box-shadow 0.4s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+      border-color: #3a3a3a;
+    }
+    .product-card a { display: block; text-decoration: none; color: inherit; }
+    .product-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      overflow: hidden;
+      background: #111111;
+    }
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.75) contrast(1.1);
+      transition: transform 0.6s ease, filter 0.4s ease;
+    }
+    .product-card:hover .product-image {
+      transform: scale(1.08);
+      filter: grayscale(100%) brightness(0.95) contrast(1.1);
+    }
+    .product-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-card:hover .product-overlay { background: rgba(0,0,0,0.3); }
+    .quick-view-btn {
+      padding: 11px 22px;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Jost', sans-serif;
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    .product-card:hover .quick-view-btn { transform: translateY(0); opacity: 1; }
+    .quick-view-btn:hover { background: #e0e0e0; }
+    .image-discount-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #ffffff;
+      color: #000000;
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      letter-spacing: 1.5px;
+      z-index: 2;
+      text-transform: uppercase;
+    }
+    .product-info { padding: 1.5rem; }
+    .product-category {
+      font-size: 0.6rem;
+      color: #3a3a3a;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-weight: 300;
+      color: #ffffff;
+      margin-bottom: 0.8rem;
+      line-height: 1.3;
+    }
+    .product-price {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .product-price-original {
+      font-size: 0.82rem;
+      color: #3a3a3a;
+      text-decoration: line-through;
+      font-weight: 300;
+    }
+    .price-discount-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      background: #ffffff;
+      color: #000000;
+      padding: 2px 8px;
+      letter-spacing: 1px;
+    }
 
-        /* Latest Arrivals Section */
-        .latest-arrivals-section {
-            padding: 100px 0;
-            background-color: #fafafa;
-        }
+    /* Pagination */
+    .pagination-wrapper { display: flex; justify-content: center; margin-top: 4rem; }
+    .pagination { gap: 8px; }
+    .page-link {
+      color: #ffffff;
+      background: transparent;
+      border: 1px solid #2a2a2a;
+      padding: 10px 18px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      font-family: 'Jost', sans-serif;
+    }
+    .page-link:hover { background: #ffffff; border-color: #ffffff; color: #000000; }
+    .page-item.active .page-link { background: #ffffff; border-color: #ffffff; color: #000000; }
+    .page-item.disabled .page-link { background: transparent; border-color: #1a1a1a; color: #3a3a3a; }
 
-        .section-header {
-            text-align: center;
-            margin-bottom: 70px;
-        }
+    /* ══════════ FEATURE SPLIT ══════════ */
+    .feature-section {
+      padding: 0;
+      border-bottom: 1px solid #1a1a1a;
+      background: #000000;
+      overflow: hidden;
+    }
+    .feature-img-col {
+      position: relative;
+      overflow: hidden;
+      min-height: 600px;
+    }
+    .feature-img-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.75) contrast(1.1);
+      transition: transform 0.8s ease, filter 0.5s ease;
+      position: absolute;
+      inset: 0;
+    }
+    .feature-img-col:hover img {
+      transform: scale(1.04);
+      filter: grayscale(100%) brightness(0.9) contrast(1.1);
+    }
+    .feature-content-col {
+      display: flex;
+      align-items: center;
+      padding: 6rem 5rem;
+      background: #000000;
+    }
+    .feature-year {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 5rem;
+      font-weight: 300;
+      color: #1a1a1a;
+      line-height: 1;
+      margin-bottom: -0.5rem;
+    }
 
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            color: #1a1a1a;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-            font-family: 'Georgia', 'Times New Roman', serif;
-        }
+    /* ══════════ STATS ══════════ */
+    .stat-strip {
+      background: #000000;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+      padding: 5rem 0;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      transition: transform 0.3s;
+      cursor: default;
+    }
+    .stat-item:hover { transform: translateY(-5px); }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 5vw, 4.5rem);
+      font-weight: 300;
+      color: #ffffff;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #3a3a3a;
+      margin-top: 0.8rem;
+    }
+    .stat-divider { width: 1px; background: #1a1a1a; align-self: stretch; }
 
-        .section-subtitle {
-            font-size: 0.95rem;
-            color: #666666;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.7;
-            font-weight: 300;
-        }
+    /* ══════════ WORKSHOPS TEASER ══════════ */
+    .workshops-section {
+      padding: 8rem 0;
+      border-bottom: 1px solid #1a1a1a;
+      background: #0a0a0a;
+    }
+    .workshop-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: #1a1a1a;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 4rem;
+    }
+    .workshop-tile {
+      background: #000000;
+      padding: 2.8rem 2.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.4s;
+      cursor: default;
+    }
+    .workshop-tile:hover { background: #0d0d0d; }
+    .workshop-tile::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 2.4rem; right: 2.4rem;
+      height: 1px;
+      background: #1a1a1a;
+    }
+    .tile-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: #1a1a1a;
+      line-height: 1;
+      margin-bottom: 1.2rem;
+      transition: color 0.4s;
+    }
+    .workshop-tile:hover .tile-num { color: #2a2a2a; }
+    .tile-tag {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #3a3a3a;
+      margin-bottom: 0.7rem;
+      display: block;
+    }
+    .tile-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: #ffffff;
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+    .tile-title em { font-style: italic; color: #7a7a7a; }
+    .tile-desc {
+      font-size: 0.8rem;
+      line-height: 1.9;
+      color: #4a4a4a;
+      margin-bottom: 1.5rem;
+      transition: color 0.3s;
+    }
+    .workshop-tile:hover .tile-desc { color: #6a6a6a; }
+    .tile-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: #ffffff;
+    }
+    .tile-price span {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.65rem;
+      color: #3a3a3a;
+      font-weight: 300;
+    }
+    .tile-badge {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #3a3a3a;
+      border: 1px solid #2a2a2a;
+      padding: 4px 10px;
+    }
+    .workshop-cta {
+      margin-top: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .workshop-cta-text {
+      font-size: 0.8rem;
+      color: #4a4a4a;
+      max-width: 380px;
+      line-height: 1.9;
+    }
 
-        /* Product Cards */
-        .product-card {
-            background: #ffffff;
-            border: 1px solid #e5e5e5;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            margin-bottom: 30px;
-        }
+    /* ══════════ BLOG TEASER ══════════ */
+    .blog-section {
+      padding: 8rem 0;
+      border-bottom: 1px solid #1a1a1a;
+      background: #000000;
+    }
+    .blog-featured {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1px;
+      background: #1a1a1a;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 4rem;
+    }
+    .blog-featured-img {
+      position: relative;
+      overflow: hidden;
+      min-height: 480px;
+    }
+    .blog-featured-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.7) contrast(1.1);
+      transition: filter 0.5s, transform 0.5s;
+      position: absolute;
+      inset: 0;
+    }
+    .blog-featured-img:hover img {
+      filter: grayscale(100%) brightness(0.9) contrast(1.1);
+      transform: scale(1.04);
+    }
+    .blog-featured-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+      z-index: 1;
+    }
+    .blog-featured-label {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #000000;
+      background: #ffffff;
+      padding: 5px 12px;
+      z-index: 2;
+    }
+    .blog-featured-body {
+      background: #0a0a0a;
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .blog-posts-stack { display: flex; flex-direction: column; gap: 1px; background: #1a1a1a; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; margin-top: 1rem; }
+    .blog-post-row {
+      background: #000000;
+      padding: 2rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      transition: background 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .blog-post-row:hover { background: #0d0d0d; }
+    .blog-post-img {
+      width: 72px;
+      height: 72px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+      filter: grayscale(100%) brightness(0.7) contrast(1.1);
+      transition: filter 0.3s;
+      border: 1px solid #1a1a1a;
+    }
+    .blog-post-row:hover .blog-post-img { filter: grayscale(100%) brightness(0.9) contrast(1.1); }
+    .blog-post-meta {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #3a3a3a;
+      margin-bottom: 0.4rem;
+    }
+    .blog-post-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 300;
+      color: #ffffff;
+      line-height: 1.3;
+      margin-bottom: 0.3rem;
+    }
+    .blog-post-title em { font-style: italic; color: #7a7a7a; }
+    .blog-post-tag {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4a4a4a;
+    }
 
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-            border-color: #000;
-        }
+    /* ══════════ NEWSLETTER ══════════ */
+    .newsletter-section {
+      padding: 7rem 0;
+      text-align: center;
+      background: #0a0a0a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .nl-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+    .nl-title em { font-style: italic; color: #7a7a7a; }
+    .email-form {
+      display: flex;
+      max-width: 420px;
+      margin: 2.5rem auto 0;
+      border: 1px solid #2a2a2a;
+      transition: border-color 0.25s;
+    }
+    .email-form:focus-within { border-color: #5a5a5a; }
+    .email-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 14px 18px;
+      color: #ffffff;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.82rem;
+    }
+    .email-form input::placeholder { color: #3a3a3a; }
+    .email-form button {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 14px 22px;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+    .email-form button:hover { background: #e0e0e0; }
 
-        .product-card a {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-        }
+    /* No products */
+    .no-products-msg {
+      text-align: center;
+      padding: 5rem 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: #3a3a3a;
+    }
 
-        .product-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 280px;
-            overflow: hidden;
-            background: #f5f5f5;
-            border-radius: 16px 16px 0 0;
-        }
-
-        .product-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.6s ease;
-        }
-
-        .product-card:hover .product-image { transform: scale(1.1); }
-
-        .product-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0);
-            transition: background 0.4s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-        }
-
-        .product-card:hover .product-overlay {
-            background: rgba(0, 0, 0, 0.3);
-            opacity: 1;
-        }
-
-        .quick-view-btn {
-            padding: 12px 24px;
-            background: #000;
-            color: #fff;
-            border: none;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            transform: translateY(10px);
-            opacity: 0;
-        }
-
-        .product-card:hover .quick-view-btn {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .quick-view-btn:hover { background: #333; }
-
-        /* ===== DISCOUNT BADGE ON IMAGE ===== */
-        .image-discount-badge {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: #1a1a1a;
-            color: #ffffff;
-            font-size: 0.62rem;
-            font-weight: 900;
-            padding: 5px 10px;
-            border-radius: 8px;
-            letter-spacing: 1.5px;
-            z-index: 2;
-            text-transform: uppercase;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .product-info { padding: 20px; }
-
-        .product-category {
-            font-size: 0.7rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .product-name {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #000;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        /* ===== PRICE STYLES ===== */
-        .product-price {
-            font-size: 1.15rem;
-            font-weight: 900;
-            color: #000;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .product-price-original {
-            font-size: 0.9rem;
-            color: #999;
-            text-decoration: line-through;
-            font-weight: 600;
-        }
-
-        .price-discount-badge {
-            font-size: 0.62rem;
-            font-weight: 800;
-            background: #1a1a1a;
-            color: #ffffff;
-            padding: 3px 8px;
-            border-radius: 6px;
-            letter-spacing: 1px;
-        }
-
-        /* Pagination */
-        .pagination-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-top: 60px;
-        }
-
-        .pagination { gap: 10px; }
-
-        .page-link {
-            color: #000;
-            background: #fff;
-            border: 2px solid #000;
-            padding: 12px 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-        }
-
-        .page-link:hover {
-            background-color: #000;
-            border-color: #000;
-            color: #fff;
-            transform: translateY(-3px);
-        }
-
-        .page-item.active .page-link {
-            background-color: #000;
-            border-color: #000;
-            color: #fff;
-        }
-
-        .page-item.disabled .page-link {
-            background-color: #f5f5f5;
-            border-color: #ddd;
-            color: #999;
-        }
-
-        /* No Products Message */
-        .no-products-message {
-            text-align: center;
-            padding: 100px 30px;
-        }
-
-        .no-products-message h3 {
-            font-size: 1.3rem;
-            color: #999;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        /* Craftsmanship Section */
-        .craftsmanship-section {
-            padding: 0;
-            background-color: #ffffff;
-            overflow: hidden;
-        }
-
-        .craftsmanship-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 700px;
-            overflow: hidden;
-            background-color: #f8f8f8;
-        }
-
-        .craftsmanship-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s ease;
-        }
-
-        .craftsmanship-image-wrapper:hover .craftsmanship-image { transform: scale(1.05); }
-
-        .craftsmanship-content {
-            padding: 80px 100px;
-            background-color: #ffffff;
-        }
-
-        .craftsmanship-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            color: #1a1a1a;
-            letter-spacing: 2px;
-            line-height: 1.4;
-            margin-bottom: 2rem;
-            font-family: 'Georgia', 'Times New Roman', serif;
-        }
-
-        .craftsmanship-text {
-            font-size: 0.95rem;
-            color: #666666;
-            line-height: 1.8;
-            margin-bottom: 3rem;
-            font-weight: 300;
-        }
-
-        .btn-learn-more {
-            display: inline-block;
-            padding: 1rem 3rem;
-            background: #1a1a1a;
-            color: #ffffff;
-            border: 2px solid #1a1a1a;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 2.5px;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-learn-more::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-            transition: left 0.4s ease;
-            z-index: 0;
-        }
-
-        .btn-learn-more:hover { color: #1a1a1a; background: #ffffff; }
-        .btn-learn-more:hover::before { left: 0; }
-        .btn-learn-more span { position: relative; z-index: 1; }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .craftsmanship-image-wrapper { height: 500px; }
-            .craftsmanship-content { padding: 60px 60px; }
-            .craftsmanship-title { font-size: 2rem; }
-            .hero-content { padding: 0 3rem; }
-            .hero-title { font-size: 3.2rem; letter-spacing: 6px; }
-            .latest-arrivals-section { padding: 70px 0; }
-            .section-title { font-size: 2rem; letter-spacing: 4px; }
-        }
-
-        @media (max-width: 768px) {
-            .craftsmanship-image-wrapper { height: 400px; }
-            .craftsmanship-content { padding: 50px 40px; }
-            .craftsmanship-title { font-size: 1.8rem; letter-spacing: 1px; }
-            .hero-section { padding-top: 140px; min-height: 90vh; }
-            .hero-content { padding: 0 2rem; max-width: 100%; }
-            .hero-title { font-size: 2.5rem; letter-spacing: 4px; margin-bottom: 1.5rem; }
-            .hero-description { font-size: 0.85rem; margin-bottom: 2.5rem; }
-            .latest-arrivals-section { padding: 50px 0; }
-            .section-header { margin-bottom: 50px; }
-            .section-title { font-size: 1.8rem; letter-spacing: 3px; }
-            .section-subtitle { font-size: 0.85rem; }
-            .product-image-wrapper { height: 300px; }
-        }
-
-        @media (max-width: 576px) {
-            .craftsmanship-image-wrapper { height: 350px; }
-            .craftsmanship-content { padding: 40px 25px; }
-            .craftsmanship-title { font-size: 1.5rem; }
-            .btn-learn-more { padding: 0.8rem 2rem; font-size: 0.7rem; }
-            .hero-content { padding: 0 1.5rem; }
-            .hero-title { font-size: 2rem; letter-spacing: 3px; }
-            .section-title { font-size: 1.5rem; letter-spacing: 2px; }
-            .product-info { padding: 1rem; }
-            .product-name { font-size: 0.9rem; }
-            .product-price { font-size: 1rem; }
-        }
-    </style>
+    /* ── RESPONSIVE ── */
+    @media (max-width: 992px) {
+      .hero-content { padding: 0 2.5rem; }
+      .workshop-row { grid-template-columns: 1fr; }
+      .blog-featured { grid-template-columns: 1fr; }
+      .blog-featured-img { min-height: 320px; position: relative; }
+      .blog-featured-img img { position: relative; height: 320px; }
+      .feature-content-col { padding: 4rem 2.5rem; }
+      .feature-img-col { min-height: 400px; }
+      .hero-scroll { display: none; }
+    }
+    @media (max-width: 768px) {
+      .hero-content { padding: 0 1.5rem; }
+      .hero-title { letter-spacing: -1px; }
+      .email-form { flex-direction: column; }
+      .workshop-cta { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Navbar -->
-    {% include 'user_navbar.html' %}
 
-    <!-- Hero Section -->
-    <section class="hero-section" style="background-image: url('{% static "user_authentication/images/background.png" %}');">
-        <div class="hero-content">
-            <h1 class="hero-title">Handmade Ceramic Products</h1>
-            <p class="hero-description">
-                Handmade ceramic products bring a unique blend of artistry and functionality to any home or workspace.
-            </p>
-            <a href="#latest-arrivals" class="btn-buy-now">Shop Now</a>
+  {% include 'user_navbar.html' %}
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero-section" style="background-image: url('{% static "user_authentication/images/background.png" %}');">
+    <div class="hero-bg-text">CERAMIC</div>
+    <div class="hero-content">
+      <span class="hero-eyebrow">Est. 2025 · Phoenix, Arizona · Handmade</span>
+      <h1 class="hero-title">
+        Earth<br>Shaped by<br><em>Hand</em>
+      </h1>
+      <div class="hero-bottom">
+        <p class="hero-desc">Handmade ceramic products that carry the memory of the hands that shaped them. Each piece is slow-made, honest, and built to last.</p>
+        <div class="hero-ctas">
+          <a href="#latest-arrivals" class="btn-solid-ceramic">Shop Now</a>
+          <a href="{% url 'user_side:about' %}" class="btn-outline-ceramic">Our Story</a>
         </div>
-    </section>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
 
-    <!-- Latest Arrivals Section -->
-    <section id="latest-arrivals" class="latest-arrivals-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Latest Arrivals</h2>
-                <p class="section-subtitle">
-                    Whether you're looking for stylish home décor, unique handmade pieces, or innovative essentials, our fresh collection has something special for everyone.
-                </p>
-            </div>
+  <!-- ══════════ MARQUEE ══════════ -->
+  <div class="marquee-band">
+    <div class="marquee-inner" id="marqueeInner"></div>
+  </div>
 
-            {% if products_page %}
-                <div class="row">
-                    {% for product in products_page %}
-                    {% with v=product.listed_variants.0 %}
-                    <div class="col-lg-3 col-md-4 col-sm-6">
-                        <div class="product-card">
-                            <a href="{% url 'custom_admin:product_management:product_detail' product.id %}{% if v %}?variant={{ v.id }}{% endif %}">
-                                <!-- Product Image -->
-                                <div class="product-image-wrapper">
-                                    {% if v and v.main_image %}
-                                        <img src="{{ v.main_image.url }}" alt="{{ product.name }}" class="product-image">
-                                    {% elif v and v.images.first %}
-                                        <img src="{{ v.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
-                                    {% elif product.images.first %}
-                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
-                                    {% else %}
-                                        <img src="https://via.placeholder.com/400x480/f5f5f5/cccccc?text=No+Image"
-                                             alt="{{ product.name }}" class="product-image">
-                                    {% endif %}
+  <!-- ══════════ LATEST ARRIVALS ══════════ -->
+  <section id="latest-arrivals" class="arrivals-section">
+    <div class="container-xl px-4 px-lg-5">
+      <div class="row mb-5 align-items-end">
+        <div class="col-lg-6">
+          <span class="section-eyebrow">Fresh from the Kiln</span>
+          <h2 class="section-heading">Latest <em>Arrivals</em></h2>
+        </div>
+        <div class="col-lg-5 offset-lg-1 d-flex align-items-end justify-content-lg-end mt-3 mt-lg-0">
+          <a href="{% url 'user_side:shop' %}" class="btn-outline-ceramic">View All Pieces</a>
+        </div>
+      </div>
 
-                                    <div class="product-overlay">
-                                        <button class="quick-view-btn">Quick View</button>
-                                    </div>
-
-                                    {# ===== DISCOUNT BADGE ON IMAGE ===== #}
-                                    {% if product.get_best_discount_percentage > 0 %}
-                                        <div class="image-discount-badge">-{{ product.get_best_discount_percentage }}%</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Product Info -->
-                                <div class="product-info">
-                                    <div class="product-category">
-                                        {{ product.category.name|default:"Ceramics" }}
-                                    </div>
-
-                                    <h3 class="product-name">{{ product.name }}</h3>
-
-                                    {# ===== UPDATED PRICE BLOCK ===== #}
-                                    <div class="product-price">
-                                        {% with best_discount=product.get_best_discount_percentage %}
-                                            {% if best_discount > 0 %}
-                                                ₹{{ product.get_discounted_price }}
-                                                <span class="product-price-original">₹{{ product.price }}</span>
-                                                <span class="price-discount-badge">-{{ best_discount }}%</span>
-                                            {% else %}
-                                                ₹{{ product.price }}
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+      {% if products_page %}
+        <div class="row g-4">
+          {% for product in products_page %}
+          {% with v=product.listed_variants.0 %}
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="product-card reveal-card">
+              <a href="{% url 'custom_admin:product_management:product_detail' product.id %}{% if v %}?variant={{ v.id }}{% endif %}">
+                <div class="product-image-wrapper">
+                  {% if v and v.main_image %}
+                    <img src="{{ v.main_image.url }}" alt="{{ product.name }}" class="product-image">
+                  {% elif v and v.images.first %}
+                    <img src="{{ v.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                  {% elif product.images.first %}
+                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                  {% else %}
+                    <img src="https://via.placeholder.com/400x480/111111/333333?text=No+Image" alt="{{ product.name }}" class="product-image">
+                  {% endif %}
+                  <div class="product-overlay">
+                    <button class="quick-view-btn">Quick View</button>
+                  </div>
+                  {% if product.get_best_discount_percentage > 0 %}
+                    <div class="image-discount-badge">-{{ product.get_best_discount_percentage }}%</div>
+                  {% endif %}
+                </div>
+                <div class="product-info">
+                  <div class="product-category">{{ product.category.name|default:"Ceramics" }}</div>
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  <div class="product-price">
+                    {% with best_discount=product.get_best_discount_percentage %}
+                      {% if best_discount > 0 %}
+                        ₹{{ product.get_discounted_price }}
+                        <span class="product-price-original">₹{{ product.price }}</span>
+                        <span class="price-discount-badge">-{{ best_discount }}%</span>
+                      {% else %}
+                        ₹{{ product.price }}
+                      {% endif %}
                     {% endwith %}
-                    {% endfor %}
+                  </div>
                 </div>
-
-                <!-- Pagination -->
-                {% if products_page.has_other_pages %}
-                <div class="pagination-wrapper">
-                    <nav aria-label="Product pagination">
-                        <ul class="pagination">
-                            {% if products_page.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ products_page.previous_page_number }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">&laquo;</span>
-                                </li>
-                            {% endif %}
-
-                            {% for num in products_page.paginator.page_range %}
-                                {% if products_page.number == num %}
-                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                {% elif num > products_page.number|add:'-3' and num < products_page.number|add:'3' %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if products_page.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ products_page.next_page_number }}" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">&raquo;</span>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                </div>
-                {% endif %}
-
-            {% else %}
-                <div class="no-products-message">
-                    <h3>No products available at the moment</h3>
-                </div>
-            {% endif %}
+              </a>
+            </div>
+          </div>
+          {% endwith %}
+          {% endfor %}
         </div>
-    </section>
 
-    {% comment %} Craftsmanship section commented out as in original {% endcomment %}
+        {% if products_page.has_other_pages %}
+        <div class="pagination-wrapper">
+          <nav aria-label="Product pagination">
+            <ul class="pagination">
+              {% if products_page.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ products_page.previous_page_number }}">&laquo;</a></li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+              {% endif %}
+              {% for num in products_page.paginator.page_range %}
+                {% if products_page.number == num %}
+                  <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > products_page.number|add:'-3' and num < products_page.number|add:'3' %}
+                  <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if products_page.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ products_page.next_page_number }}">&raquo;</a></li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="no-products-msg">No pieces available at the moment.</div>
+      {% endif %}
+    </div>
+  </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- ══════════ CRAFTSMANSHIP FEATURE ══════════ -->
+  <section class="feature-section">
+    <div class="row g-0">
+      <div class="col-lg-6 feature-img-col" style="min-height:600px;">
+        <img src="{% static 'images/IMG.png' %}" alt="Craftsmanship">
+      </div>
+      <div class="col-lg-6 feature-content-col">
+        <div>
+          <div class="feature-year">2025</div>
+          <span class="section-eyebrow">Made in Phoenix</span>
+          <h2 class="section-heading mb-4">Born from clay,<br><em>shaped by passion</em></h2>
+          <p class="section-body mb-3">Every piece we create begins as raw earth. We source our clay locally, fire slowly, and finish entirely by hand. No shortcuts, no mass production.</p>
+          <p class="section-body mb-5">The result is functional work that carries the memory of the hands that shaped it — each variation in surface and tone a signature of intention, not error.</p>
+          <a href="{% url 'user_side:about' %}" class="btn-outline-ceramic">Read Our Story</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ STATS ══════════ -->
+  <div class="stat-strip">
+    <div class="container-xl px-4 px-lg-5">
+      <div class="row g-0 align-items-center justify-content-center">
+        <div class="col-6 col-md-3">
+          <div class="stat-item">
+            <div class="stat-num">200+</div>
+            <div class="stat-label">Pieces Crafted</div>
+          </div>
+        </div>
+        <div class="d-none d-md-flex col-md-auto align-items-center">
+          <div class="stat-divider" style="height:70px;"></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-item">
+            <div class="stat-num">12</div>
+            <div class="stat-label">Collections</div>
+          </div>
+        </div>
+        <div class="d-none d-md-flex col-md-auto align-items-center">
+          <div class="stat-divider" style="height:70px;"></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-item">
+            <div class="stat-num">40+</div>
+            <div class="stat-label">Happy Clients</div>
+          </div>
+        </div>
+        <div class="d-none d-md-flex col-md-auto align-items-center">
+          <div class="stat-divider" style="height:70px;"></div>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="stat-item">
+            <div class="stat-num">6</div>
+            <div class="stat-label">Per Workshop</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ WORKSHOPS TEASER ══════════ -->
+  <section class="workshops-section">
+    <div class="container-xl px-4 px-lg-5">
+      <div class="row align-items-end mb-0">
+        <div class="col-lg-6">
+          <span class="section-eyebrow">Get Your Hands Dirty</span>
+          <h2 class="section-heading">Learn to shape <em>clay</em></h2>
+        </div>
+        <div class="col-lg-5 offset-lg-1 d-flex align-items-end mt-3 mt-lg-0">
+          <p class="section-body">Intimate studio sessions for all skill levels. Small groups, real instruction, and a piece to take home — all fired and glazed by us.</p>
+        </div>
+      </div>
+
+      <div class="workshop-row">
+        <div class="workshop-tile">
+          <div class="tile-badge">4 Spots Left</div>
+          <div class="tile-num">01</div>
+          <span class="tile-tag">Beginner · 2 hrs</span>
+          <h3 class="tile-title">Wheel <em>Throwing</em></h3>
+          <p class="tile-desc">Your first session on the wheel. Centring, opening, pulling up walls — everything you need to fall in love with clay.</p>
+          <div class="tile-price">₹6,500 <span>/ person</span></div>
+        </div>
+        <div class="workshop-tile">
+          <div class="tile-badge">6 Spots Left</div>
+          <div class="tile-num">02</div>
+          <span class="tile-tag">All Levels · 2.5 hrs</span>
+          <h3 class="tile-title">Hand<em>building</em></h3>
+          <p class="tile-desc">Pinch pots, coiling, slab work. No wheel required — a slower, more meditative approach to the craft.</p>
+          <div class="tile-price">₹5,500 <span>/ person</span></div>
+        </div>
+        <div class="workshop-tile">
+          <div class="tile-badge">Private</div>
+          <div class="tile-num">03</div>
+          <span class="tile-tag">Flexible · Up to 6</span>
+          <h3 class="tile-title">Private <em>Studio</em></h3>
+          <p class="tile-desc">The whole studio for you and your group. Birthdays, team events, or anyone who wants undivided attention.</p>
+          <div class="tile-price">From ₹24,000</div>
+        </div>
+      </div>
+
+      <div class="workshop-cta">
+        <p class="workshop-cta-text">Sessions run every weekend. All clay, tools, and glazing are included — wear clothes you don't mind getting dirty.</p>
+        <a href="{% url 'user_side:workshop' %}" class="btn-solid-ceramic">See All Workshops</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ BLOG TEASER ══════════ -->
+  <section class="blog-section">
+    <div class="container-xl px-4 px-lg-5">
+      <div class="row align-items-end mb-0">
+        <div class="col-lg-6">
+          <span class="section-eyebrow">From the Studio</span>
+          <h2 class="section-heading">The Ceramic <em>Journal</em></h2>
+        </div>
+        <div class="col-lg-5 offset-lg-1 d-flex align-items-end justify-content-lg-end mt-3 mt-lg-0">
+          <a href="{% url 'user_side:blog' %}" class="btn-outline-ceramic">All Articles</a>
+        </div>
+      </div>
+
+      <div class="blog-featured">
+        <!-- Featured post -->
+        <div class="blog-featured-img">
+          <img src="{% static 'images/IMG.png' %}" alt="Slow Fire">
+          <div class="blog-featured-img-overlay"></div>
+          <div class="blog-featured-label">Featured</div>
+        </div>
+        <div class="blog-featured-body">
+          <div>
+            <div style="font-size:0.6rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#3a3a3a;margin-bottom:1rem;">Jan 2025 · 6 min read</div>
+            <h3 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:300;color:#ffffff;line-height:1.15;margin-bottom:1.2rem;">The Art of the <em style="font-style:italic;color:#7a7a7a;">Slow Fire</em></h3>
+            <p style="font-size:0.83rem;line-height:2;color:#5a5a5a;margin-bottom:2rem;">There is no rushing a kiln. A meditation on firing, waiting, and why the best things take exactly the time they need.</p>
+            <span style="font-size:0.6rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#4a4a4a;border:1px solid #2a2a2a;padding:5px 12px;">Craft & Making</span>
+          </div>
+          <div style="border-top:1px solid #1a1a1a;padding-top:2rem;margin-top:2rem;">
+            <a href="{% url 'user_side:blog' %}" class="btn-outline-ceramic">Read Article</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-posts-stack">
+        <a href="{% url 'user_side:blog' %}" class="blog-post-row">
+          <img src="{% static 'images/IMG (1).png' %}" alt="Japanese Bottles" class="blog-post-img">
+          <div>
+            <div class="blog-post-meta">Jan 2025 · 4 min</div>
+            <div class="blog-post-title">Introducing our <em>Japanese Bottle Series</em></div>
+            <div class="blog-post-tag">Collections</div>
+          </div>
+        </a>
+        <a href="{% url 'user_side:blog' %}" class="blog-post-row">
+          <img src="{% static 'images/IMG (2).png' %}" alt="Beginner Wheel" class="blog-post-img">
+          <div>
+            <div class="blog-post-meta">Feb 2025 · 5 min</div>
+            <div class="blog-post-title">What Happens in a <em>Beginner Wheel Session</em></div>
+            <div class="blog-post-tag">Workshops</div>
+          </div>
+        </a>
+        <a href="{% url 'user_side:blog' %}" class="blog-post-row">
+          <img src="{% static 'images/IMG (3).png' %}" alt="Glaze" class="blog-post-img">
+          <div>
+            <div class="blog-post-meta">Mar 2025 · 8 min</div>
+            <div class="blog-post-title">Why the Same Glaze Looks <em>Different Every Time</em></div>
+            <div class="blog-post-tag">Craft & Making</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ NEWSLETTER ══════════ -->
+  <section class="newsletter-section">
+    <div class="container-xl px-4 px-lg-5">
+      <span class="section-eyebrow">Stay Connected</span>
+      <h2 class="nl-title">New pieces, <em>first</em></h2>
+      <p class="section-body" style="max-width:340px;margin-inline:auto;">Collections, workshop dates, and studio notes — straight to your inbox before anyone else.</p>
+      <form class="email-form" onsubmit="return false;">
+        <input type="email" placeholder="Enter your email" aria-label="Email address">
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+  </section>
+
+  {% include "footer.html" %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Marquee
+    const words = ['Handcrafted','Wheel Thrown','Phoenix Studio','Slow Made','Glazed by Hand','Small Batch','Honest Clay'];
+    const inner = document.getElementById('marqueeInner');
+    if (inner) {
+      let html = '';
+      for (let i = 0; i < 2; i++) {
+        words.forEach(w => {
+          html += `<span class="marquee-word">${w}</span><span class="marquee-sep">✦</span>`;
+        });
+      }
+      inner.innerHTML = html;
+    }
+
+    // Scroll reveal for cards
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal-card, .workshop-tile, .blog-post-row').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
 </body>
 </html>

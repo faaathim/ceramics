@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Blog | Ceramic{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    font-family: 'Jost', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .blog-hero {
+    padding: 6rem 0 4rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    display: block;
+    margin-bottom: 1.2rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.1s ease forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -1px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.25s ease forwards;
+  }
+
+  .hero-title em { font-style: italic; color: #7a7a7a; }
+
+  .hero-desc {
+    font-size: 0.85rem;
+    color: #5a5a5a;
+    line-height: 2;
+    max-width: 400px;
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── POSTS ── */
+  .posts-section { padding: 5rem 0; }
+
+  /* Blog post card */
+  .post-card {
+    border-bottom: 1px solid #1a1a1a;
+    padding: 3rem 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+    align-items: start;
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+
+  .post-card:first-child { padding-top: 0; }
+  .post-card:last-child { border-bottom: none; }
+  .post-card:hover { opacity: 0.75; }
+
+  .post-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%) brightness(0.75) contrast(1.1);
+    border-radius: 8px;
+    border: 1px solid #1a1a1a;
+    transition: filter 0.4s, transform 0.4s;
+  }
+
+  .post-card:hover .post-img {
+    filter: grayscale(100%) brightness(0.9) contrast(1.1);
+    transform: scale(1.02);
+  }
+
+  .post-body { padding-top: 0.3rem; }
+
+  .post-meta {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #3a3a3a;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .meta-sep { color: #2a2a2a; }
+
+  .post-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 300;
+    line-height: 1.2;
+    color: #ffffff;
+    margin-bottom: 1rem;
+  }
+
+  .post-title em { font-style: italic; color: #7a7a7a; }
+
+  .post-excerpt {
+    font-size: 0.83rem;
+    color: #5a5a5a;
+    line-height: 1.95;
+    margin-bottom: 1.5rem;
+    max-width: 520px;
+  }
+
+  .post-category {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    display: inline-block;
+    transition: all 0.25s;
+  }
+
+  .post-card:hover .post-category {
+    border-color: #5a5a5a;
+    color: #9a9a9a;
+  }
+
+  /* ── NEWSLETTER ── */
+  .newsletter-section {
+    padding: 5rem 0;
+    border-top: 1px solid #1a1a1a;
+    text-align: center;
+    background: #000000;
+  }
+
+  .nl-eyebrow {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .nl-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+  }
+
+  .nl-title em { font-style: italic; color: #7a7a7a; }
+
+  .email-form {
+    display: flex;
+    max-width: 400px;
+    margin: 0 auto;
+    border: 1px solid #2a2a2a;
+    transition: border-color 0.25s;
+  }
+
+  .email-form:focus-within { border-color: #5a5a5a; }
+
+  .email-form input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 13px 18px;
+    color: #ffffff;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+  }
+
+  .email-form input::placeholder { color: #3a3a3a; }
+
+  .email-form button {
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    padding: 13px 22px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+
+  .email-form button:hover { background: #e0e0e0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .post-card {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 2rem 0;
+    }
+    .email-form { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block top %}
+  {% include "user_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="blog-hero">
+  <div class="container-xl px-4 px-lg-5">
+    <span class="hero-eyebrow">Stories from the studio</span>
+    <h1 class="hero-title">The Ceramic <em>Journal</em></h1>
+    <p class="hero-desc">Craft notes, collection stories, and slow thoughts on the art of making things by hand.</p>
+  </div>
+</section>
+
+<!-- ── POSTS ── -->
+<section class="posts-section">
+  <div class="container-xl px-4 px-lg-5">
+
+    <!-- Post 1 -->
+    <div class="post-card">
+      <div class="post-img-wrap" style="overflow:hidden;border-radius:8px;">
+        <img src="{% static 'images/IMG.png' %}" alt="The Art of the Slow Fire" class="post-img">
+      </div>
+      <div class="post-body">
+        <div class="post-meta">
+          <span>Jan 2025</span>
+          <span class="meta-sep">·</span>
+          <span>6 min read</span>
+        </div>
+        <h2 class="post-title">The Art of the <em>Slow Fire</em></h2>
+        <p class="post-excerpt">There is no rushing a kiln. A meditation on firing, waiting, and why the best things take the time they take.</p>
+        <span class="post-category">Craft & Making</span>
+      </div>
+    </div>
+
+    <!-- Post 2 -->
+    <div class="post-card">
+      <div style="overflow:hidden;border-radius:8px;">
+        <img src="{% static 'images/IMG (1).png' %}" alt="Japanese Bottles" class="post-img">
+      </div>
+      <div class="post-body">
+        <div class="post-meta">
+          <span>Jan 2025</span>
+          <span class="meta-sep">·</span>
+          <span>4 min read</span>
+        </div>
+        <h2 class="post-title">Introducing our <em>Japanese Bottle Series</em></h2>
+        <p class="post-excerpt">Delicate, functional, deeply considered — the story behind our first drop and the hours of testing that went into each form.</p>
+        <span class="post-category">Collections</span>
+      </div>
+    </div>
+
+    <!-- Post 3 -->
+    <div class="post-card">
+      <div style="overflow:hidden;border-radius:8px;">
+        <img src="{% static 'images/IMG (2).png' %}" alt="Workshop">
+        <img src="{% static 'images/IMG (2).png' %}" alt="Workshop" class="post-img">
+      </div>
+      <div class="post-body">
+        <div class="post-meta">
+          <span>Feb 2025</span>
+          <span class="meta-sep">·</span>
+          <span>5 min read</span>
+        </div>
+        <h2 class="post-title">What Happens in a <em>Beginner Wheel Session</em></h2>
+        <p class="post-excerpt">Most people leave covered in clay and smiling. An honest look at what to expect when you join us at the wheel for the first time.</p>
+        <span class="post-category">Workshops</span>
+      </div>
+    </div>
+
+    <!-- Post 4 -->
+    <div class="post-card">
+      <div style="overflow:hidden;border-radius:8px;">
+        <img src="{% static 'images/IMG (3).png' %}" alt="Glaze" class="post-img">
+      </div>
+      <div class="post-body">
+        <div class="post-meta">
+          <span>Mar 2025</span>
+          <span class="meta-sep">·</span>
+          <span>8 min read</span>
+        </div>
+        <h2 class="post-title">Why the Same Glaze Looks <em>Different Every Time</em></h2>
+        <p class="post-excerpt">Temperature, humidity, clay body, thickness — glaze is a living thing. We break down the beautiful unpredictability of the kiln.</p>
+        <span class="post-category">Craft & Making</span>
+      </div>
+    </div>
+
+    <!-- Post 5 -->
+    <div class="post-card">
+      <div style="overflow:hidden;border-radius:8px;">
+        <img src="{% static 'images/IMG.png' %}" alt="Care Guide" class="post-img">
+      </div>
+      <div class="post-body">
+        <div class="post-meta">
+          <span>May 2025</span>
+          <span class="meta-sep">·</span>
+          <span>3 min read</span>
+        </div>
+        <h2 class="post-title">How to <em>Care for Your Ceramics</em></h2>
+        <p class="post-excerpt">Handmade pieces deserve a little more love than factory ware. Our simple guide to washing, storing, and keeping your pieces for life.</p>
+        <span class="post-category">Guides</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── NEWSLETTER ── -->
+<section class="newsletter-section">
+  <div class="container-xl px-4 px-lg-5">
+    <span class="nl-eyebrow">Stay in the loop</span>
+    <h2 class="nl-title">Sign up for <em>news & collections</em></h2>
+    <form class="email-form" onsubmit="return false;">
+      <input type="email" placeholder="Enter your email">
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+{% include "footer.html" %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

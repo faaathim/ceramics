@@ -1,3 +1,5 @@
+# wallet/admin_views.py
+
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
@@ -5,11 +7,11 @@ from django.db.models import Q
 
 from .models import WalletTransaction
 
+
 def superuser_check(user):
     return user.is_active and user.is_superuser
 
 
-# admin wallet transaction list
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def admin_wallet_transaction_list(request):
@@ -18,7 +20,6 @@ def admin_wallet_transaction_list(request):
         'wallet__user', 'order'
     ).all()
 
-    # Search
     q = request.GET.get('q', '').strip()
     if q:
         transactions = transactions.filter(
@@ -26,12 +27,10 @@ def admin_wallet_transaction_list(request):
             Q(wallet__user__email__icontains=q)
         )
 
-    # Transaction type
     transaction_type = request.GET.get('type')
     if transaction_type and transaction_type != "":
         transactions = transactions.filter(transaction_type=transaction_type)
 
-    # Source
     source = request.GET.get('source')
     if source and source != "":
         transactions = transactions.filter(source=source)
@@ -48,8 +47,6 @@ def admin_wallet_transaction_list(request):
     return render(request, 'wallet/admin_transaction_list.html', context)
 
 
-
-# admin wallet transaction detail
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def admin_wallet_transaction_detail(request, transaction_id):
@@ -63,7 +60,7 @@ def admin_wallet_transaction_detail(request, transaction_id):
     context = {
         'transaction': transaction,
         'wallet': transaction.wallet,
-        'user':transaction.wallet.user,
+        'user': transaction.wallet.user,
     }
 
     return render(request, 'wallet/admin_transaction_detail.html', context)

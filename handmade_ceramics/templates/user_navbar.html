@@ -287,10 +287,10 @@
     <!-- Navigation Links -->
     <ul class="nav-links">
       <li><a href="{% url 'user_side:home' %}" class="nav-link" data-page="home">Home</a></li>
-      <li><a href="#about" class="nav-link" data-page="about">About</a></li>
-      <li><a href="#blog" class="nav-link" data-page="blog">Blog</a></li>
+      <li><a href="{% url 'user_side:about' %}" class="nav-link" data-page="about">About</a></li>
+      <li><a href="{% url 'user_side:blog' %}" class="nav-link" data-page="blog">Blog</a></li>
       <li><a href="{% url 'user_side:shop' %}" class="nav-link" data-page="shop">Shop</a></li>
-      <li><a href="#workshop" class="nav-link" data-page="workshop">Workshop</a></li>
+      <li><a href="{% url 'user_side:workshop' %}" class="nav-link" data-page="workshop">Workshop</a></li>
       {% if user.is_authenticated %}
         <li><a href="{% url 'user_authentication:logout' %}" class="nav-link">Logout</a></li>
       {% else %}

@@ -1,0 +1,912 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About | Ceramic{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .about-hero {
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #1a1a1a;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-text {
+    position: absolute;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(8rem, 22vw, 22rem);
+    font-weight: 300;
+    color: #111111;
+    letter-spacing: -4px;
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 0 1.5rem;
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s ease forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -1px;
+    color: #ffffff;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.35s ease forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: #9a9a9a;
+  }
+
+  .hero-sub {
+    margin-top: 2.5rem;
+    font-size: 0.82rem;
+    letter-spacing: 1.5px;
+    color: #5a5a5a;
+    max-width: 400px;
+    margin-inline: auto;
+    line-height: 1.95;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.5s ease forwards;
+  }
+
+  .hero-scroll {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s ease forwards;
+  }
+
+  .hero-scroll span {
+    font-size: 0.6rem;
+    letter-spacing: 4px;
+    color: #3a3a3a;
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 55px;
+    background: linear-gradient(to bottom, #ffffff, transparent);
+    animation: scrollPulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.2; }
+    50%       { opacity: 0.7; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-band {
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    background: #000000;
+    padding: 2rem 0;
+    overflow: hidden;
+  }
+
+  .marquee-inner {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: marquee 24s linear infinite;
+  }
+
+  .marquee-inner:hover { animation-play-state: paused; }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .marquee-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 5px;
+    color: #2a2a2a;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 0.3s;
+    cursor: default;
+  }
+
+  .marquee-word:hover { color: #7a7a7a; }
+
+  .marquee-sep {
+    color: #2a2a2a;
+    font-size: 0.6rem;
+    align-self: center;
+  }
+
+  /* ── SHARED ── */
+  .section-eyebrow {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    display: block;
+    margin-bottom: 1.2rem;
+  }
+
+  .section-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: #ffffff;
+  }
+
+  .section-heading em {
+    font-style: italic;
+    color: #7a7a7a;
+  }
+
+  .section-body {
+    font-size: 0.85rem;
+    line-height: 2;
+    color: #5a5a5a;
+  }
+
+  /* ── STORY ── */
+  .story-section {
+    padding: 8rem 0;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
+  }
+
+  .story-img-wrap {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #1a1a1a;
+    transition: border-color 0.4s;
+  }
+
+  .story-img-wrap:hover { border-color: #3a3a3a; }
+
+  .story-img-wrap img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%) brightness(0.8) contrast(1.1);
+    transition: filter 0.5s ease, transform 0.5s ease;
+  }
+
+  .story-img-wrap:hover img {
+    filter: grayscale(100%) brightness(0.95) contrast(1.1);
+    transform: scale(1.03);
+  }
+
+  .story-float-badge {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    background: #ffffff;
+    color: #000000;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0.7rem 1.2rem;
+    transition: transform 0.3s;
+  }
+
+  .story-img-wrap:hover .story-float-badge { transform: translateY(-4px); }
+
+  .story-content { padding-left: clamp(1rem, 5vw, 4rem); }
+
+  .story-year {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    font-weight: 300;
+    color: #1a1a1a;
+    line-height: 1;
+    margin-bottom: -0.8rem;
+  }
+
+  .btn-outline-ceramic {
+    display: inline-block;
+    padding: 14px 32px;
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid #2a2a2a;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-outline-ceramic:hover {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+  }
+
+  .btn-outline-ceramic:active { transform: scale(0.98); }
+
+  /* ── STATS ── */
+  .stat-strip {
+    background: #000000;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 5rem 0;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    transition: transform 0.3s;
+    cursor: default;
+  }
+
+  .stat-item:hover { transform: translateY(-5px); }
+
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-weight: 300;
+    color: #ffffff;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #3a3a3a;
+    margin-top: 0.8rem;
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: #1a1a1a;
+    align-self: stretch;
+  }
+
+  /* ── VALUES ── */
+  .values-section {
+    padding: 8rem 0;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
+  }
+
+  .value-card {
+    padding: 2.8rem 2.2rem;
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    background: #000000;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s, transform 0.4s, box-shadow 0.4s;
+    cursor: default;
+    height: 100%;
+  }
+
+  .value-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #111111;
+    opacity: 0;
+    transition: opacity 0.4s;
+    border-radius: inherit;
+  }
+
+  .value-card:hover {
+    border-color: #2a2a2a;
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .value-card:hover::before { opacity: 1; }
+
+  .value-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: #1a1a1a;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: color 0.4s;
+  }
+
+  .value-card:hover .value-number { color: #2a2a2a; }
+
+  .value-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .value-desc {
+    font-size: 0.82rem;
+    line-height: 1.95;
+    color: #5a5a5a;
+    position: relative;
+    transition: color 0.4s;
+  }
+
+  .value-card:hover .value-desc { color: #7a7a7a; }
+
+  /* ── TIMELINE ── */
+  .timeline-section {
+    padding: 8rem 0;
+    border-bottom: 1px solid #1a1a1a;
+    background: #000000;
+  }
+
+  .timeline-wrap {
+    position: relative;
+    padding-left: 2.5rem;
+  }
+
+  .timeline-wrap::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #2a2a2a, transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 4rem;
+    opacity: 0;
+    transform: translateX(-16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .timeline-item.visible { opacity: 1; transform: translateX(0); }
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .timeline-dot {
+    position: absolute;
+    left: -2.85rem;
+    top: 0.4rem;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid #2a2a2a;
+    background: #000000;
+    transition: background 0.3s, border-color 0.3s, transform 0.3s;
+  }
+
+  .timeline-item:hover .timeline-dot {
+    background: #ffffff;
+    border-color: #ffffff;
+    transform: scale(1.4);
+  }
+
+  .timeline-month {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-desc {
+    font-size: 0.83rem;
+    color: #5a5a5a;
+    line-height: 1.9;
+  }
+
+  .timeline-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #1a1a1a;
+    filter: grayscale(100%) brightness(0.75) contrast(1.1);
+    transition: filter 0.5s, transform 0.5s, border-color 0.4s;
+    display: block;
+  }
+
+  .timeline-item:hover .timeline-img {
+    filter: grayscale(100%) brightness(0.95) contrast(1.1);
+    transform: scale(1.01);
+    border-color: #2a2a2a;
+  }
+
+  .timeline-coming {
+    margin-top: 1.5rem;
+    padding: 2rem;
+    border: 1px dashed #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    letter-spacing: 4px;
+    color: #3a3a3a;
+    text-transform: uppercase;
+    border-radius: 8px;
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  .timeline-item:hover .timeline-coming {
+    border-color: #3a3a3a;
+    color: #5a5a5a;
+  }
+
+  /* ── GALLERY ── */
+  .gallery-section {
+    padding: 8rem 0;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background-color: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    aspect-ratio: 1;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1),
+                box-shadow 0.4s cubic-bezier(0.4,0,0.2,1),
+                border-color 0.4s;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%) brightness(0.75) contrast(1.1);
+    transition: filter 0.4s cubic-bezier(0.4,0,0.2,1),
+                transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    border-color: #2a2a2a;
+  }
+
+  .gallery-item:hover img {
+    filter: grayscale(100%) brightness(0.95) contrast(1.1);
+    transform: scale(1.05);
+  }
+
+  .gallery-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+
+  .gallery-item:hover .gallery-caption { transform: translateY(0); }
+
+  .gallery-caption-text {
+    font-size: 0.62rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #9a9a9a;
+    font-weight: 600;
+  }
+
+  /* ── NEWSLETTER ── */
+  .newsletter-section {
+    padding: 8rem 0;
+    text-align: center;
+    background: #000000;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .newsletter-section .section-heading {
+    max-width: 500px;
+    margin-inline: auto;
+    margin-bottom: 1rem;
+  }
+
+  .newsletter-section .section-body {
+    max-width: 340px;
+    margin-inline: auto;
+    margin-bottom: 3rem;
+  }
+
+  .email-form {
+    display: flex;
+    max-width: 440px;
+    margin: 0 auto;
+    border: 1px solid #2a2a2a;
+    transition: border-color 0.25s;
+  }
+
+  .email-form:focus-within { border-color: #5a5a5a; }
+
+  .email-form input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 14px 20px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+  }
+
+  .email-form input::placeholder { color: #3a3a3a; }
+
+  .email-form button {
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    padding: 14px 24px;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .email-form button:hover { background: #e0e0e0; }
+  .email-form button:active { transform: scale(0.98); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 992px) {
+    .story-content { padding-left: 0; padding-top: 3rem; }
+  }
+
+  @media (max-width: 768px) {
+    .about-hero { min-height: 80vh; }
+    .story-year { font-size: 3.5rem; }
+    .gallery-grid { gap: 10px; }
+    .email-form { flex-direction: column; }
+    .timeline-wrap { padding-left: 2rem; }
+    .timeline-dot { left: -2.35rem; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title { line-height: 1; }
+    .gallery-item { border-radius: 8px; }
+    .email-form button { letter-spacing: 1px; }
+  }
+</style>
+{% endblock %}
+
+{% block top %}
+  {% include "user_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+<!-- ══════════ HERO ══════════ -->
+<section class="about-hero">
+  <div class="hero-bg-text">CERAMIC</div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">Est. 2025 · Phoenix, Arizona</span>
+    <h1 class="hero-title">
+      The Art of<br><em>Imperfection</em>
+    </h1>
+    <p class="hero-sub">
+      We believe the finest ceramics carry the memory of hands that shaped them — each crack, each grain, a signature of intention.
+    </p>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MARQUEE ══════════ -->
+<div class="marquee-band">
+  <div class="marquee-inner" id="marqueeInner"></div>
+</div>
+
+<!-- ══════════ STORY ══════════ -->
+<section class="story-section">
+  <div class="container-xl px-4 px-lg-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <div class="story-img-wrap">
+          <img src="{% static 'images/IMG.png' %}" alt="Ceramic workshop">
+          <div class="story-float-badge">Since 2025</div>
+        </div>
+      </div>
+      <div class="col-lg-7 story-content">
+        <div class="story-year">2025</div>
+        <span class="section-eyebrow">Our Story</span>
+        <h2 class="section-heading mb-4">
+          Born from clay,<br><em>shaped by passion</em>
+        </h2>
+        <p class="section-body mb-4">
+          Ceramic began as a small studio in Phoenix, Arizona — a single potter's wheel and an obsession with the ancient art of shaping earth. Every piece we create is a conversation between maker and material.
+        </p>
+        <p class="section-body mb-5">
+          We source our clay locally, fire slowly, and finish by hand. No shortcuts, no mass production. Just honest craft, made for people who appreciate the beauty of things that last.
+        </p>
+        <a href="{% url 'user_side:shop' %}" class="btn-outline-ceramic">Explore Shop</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STATS ══════════ -->
+<div class="stat-strip">
+  <div class="container-xl px-4 px-lg-5">
+    <div class="row g-0 align-items-center justify-content-center">
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">200+</div>
+          <div class="stat-label">Pieces Crafted</div>
+        </div>
+      </div>
+      <div class="d-none d-md-flex col-md-auto align-items-center">
+        <div class="stat-divider" style="height:70px;"></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">12</div>
+          <div class="stat-label">Collections</div>
+        </div>
+      </div>
+      <div class="d-none d-md-flex col-md-auto align-items-center">
+        <div class="stat-divider" style="height:70px;"></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">40+</div>
+          <div class="stat-label">Happy Clients</div>
+        </div>
+      </div>
+      <div class="d-none d-md-flex col-md-auto align-items-center">
+        <div class="stat-divider" style="height:70px;"></div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="stat-item">
+          <div class="stat-num">1</div>
+          <div class="stat-label">Studio</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ VALUES ══════════ -->
+<section class="values-section">
+  <div class="container-xl px-4 px-lg-5">
+    <div class="row mb-5">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">What We Stand For</span>
+        <h2 class="section-heading">Our core <em>values</em></h2>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="value-card">
+          <div class="value-number">01</div>
+          <h3 class="value-title">Authenticity</h3>
+          <p class="value-desc">Every mark left by our hands tells a story. We embrace the imperfect, the organic, the real.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="value-card">
+          <div class="value-number">02</div>
+          <h3 class="value-title">Sustainability</h3>
+          <p class="value-desc">Locally sourced clay, low-waste processes, and pieces designed to outlast trends — and decades.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="value-card">
+          <div class="value-number">03</div>
+          <h3 class="value-title">Craft First</h3>
+          <p class="value-desc">Slow production. No shortcuts. Each piece spends exactly the time it needs on the wheel.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="value-card">
+          <div class="value-number">04</div>
+          <h3 class="value-title">Community</h3>
+          <p class="value-desc">Our workshops invite you to get your hands dirty alongside us. Clay is meant to be shared.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TIMELINE ══════════ -->
+<section class="timeline-section">
+  <div class="container-xl px-4 px-lg-5">
+    <div class="row mb-5">
+      <div class="col-lg-5">
+        <span class="section-eyebrow">Our Journey</span>
+        <h2 class="section-heading">Milestones in <em>clay</em></h2>
+      </div>
+      <div class="col-lg-6 offset-lg-1 d-flex align-items-end">
+        <p class="section-body">From a single studio to a growing collection — here's how our story has unfolded through the months.</p>
+      </div>
+    </div>
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <div class="timeline-wrap">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-month">January</div>
+            <p class="timeline-desc">Introduced cute Japanese bottles — minimalism meets function, delicate forms for daily ritual.</p>
+            <img src="{% static 'images/IMG.png' %}" alt="January collection" class="timeline-img">
+          </div>
+          <div class="timeline-item" style="transition-delay:0.15s">
+            <div class="timeline-dot"></div>
+            <div class="timeline-month">March</div>
+            <p class="timeline-desc">Launched the muddy varnished ceramics series — earthy tones, matte finishes, raw texture.</p>
+            <img src="{% static 'images/IMG (1).png' %}" alt="March collection" class="timeline-img">
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="timeline-wrap" style="padding-top: 4rem;">
+          <div class="timeline-item" style="transition-delay:0.3s">
+            <div class="timeline-dot"></div>
+            <div class="timeline-month">May</div>
+            <p class="timeline-desc">Introduced glaze gloss flower pots — a celebration of surface, colour, and light.</p>
+            <img src="{% static 'images/IMG (2).png' %}" alt="May collection" class="timeline-img">
+          </div>
+          <div class="timeline-item" style="transition-delay:0.45s">
+            <div class="timeline-dot"></div>
+            <div class="timeline-month">Coming Soon</div>
+            <p class="timeline-desc">Our winter collection — warm stoneware built for cold mornings and quiet tables.</p>
+            <div class="timeline-coming">Unveiling Winter 2025</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ GALLERY ══════════ -->
+<section class="gallery-section">
+  <div class="container-xl px-4 px-lg-5">
+    <div class="row mb-5">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">The Studio</span>
+        <h2 class="section-heading">Where every piece<br><em>begins</em></h2>
+      </div>
+    </div>
+    <div class="row g-4 align-items-center">
+      <div class="col-md-6">
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <img src="{% static 'images/IMG.png' %}" alt="Pottery work">
+            <div class="gallery-caption"><span class="gallery-caption-text">The Wheel</span></div>
+          </div>
+          <div class="gallery-item">
+            <img src="{% static 'images/IMG (1).png' %}" alt="Ceramic cylinders">
+            <div class="gallery-caption"><span class="gallery-caption-text">Raw Clay</span></div>
+          </div>
+          <div class="gallery-item">
+            <img src="{% static 'images/IMG (2).png' %}" alt="Ceramic collection">
+            <div class="gallery-caption"><span class="gallery-caption-text">Glaze Room</span></div>
+          </div>
+          <div class="gallery-item">
+            <img src="{% static 'images/IMG (3).png' %}" alt="Pottery wheel">
+            <div class="gallery-caption"><span class="gallery-caption-text">The Kiln</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 ps-md-5">
+        <p class="section-body mb-4">
+          Our Phoenix studio is where every piece begins — raw clay pressed into form by hands that have spent years learning to listen to the material.
+        </p>
+        <p class="section-body mb-5">
+          Each firing is its own surprise. The kiln transforms, the glaze moves, and no two pieces ever come out the same. That's not a flaw. That's the whole point.
+        </p>
+        <a href="{% url 'user_side:shop' %}" class="btn-outline-ceramic">View Collection</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ NEWSLETTER ══════════ -->
+<section class="newsletter-section">
+  <div class="container-xl px-4 px-lg-5">
+    <span class="section-eyebrow">Stay Connected</span>
+    <h2 class="section-heading">Sign up for emails</h2>
+    <p class="section-body mt-3 mb-0">For news, collections &amp; more from the studio.</p>
+    <br><br>
+    <form class="email-form" onsubmit="return false;">
+      <input type="email" placeholder="Enter your email" aria-label="Email address">
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+</section>
+
+{% include "footer.html" %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Build marquee
+  const words = ['Handcrafted','Timeless','Honest','Earthy','Intentional','Slow','Soulful'];
+  const inner = document.getElementById('marqueeInner');
+  if (inner) {
+    let html = '';
+    for (let i = 0; i < 2; i++) {
+      words.forEach(w => {
+        html += `<span class="marquee-word">${w}</span><span class="marquee-sep">✦</span>`;
+      });
+    }
+    inner.innerHTML = html;
+  }
+
+  // Timeline scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.timeline-item').forEach(el => observer.observe(el));
+</script>
+
+{% endblock %}

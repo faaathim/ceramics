@@ -1,3 +1,5 @@
+# product_management/models.py
+
 from django.db import models
 from django.utils import timezone
 from django.db.models import Avg, Count, Sum
@@ -7,7 +9,6 @@ from cloudinary.models import CloudinaryField
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-
 
 
 class ProductQuerySet(models.QuerySet):
@@ -36,13 +37,10 @@ class Product(models.Model):
         related_name='products'
     )
 
-    # ✅ Keep price only here
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    # ✅ Total stock (sum of variants)
     stock = models.PositiveIntegerField(default=0, editable=False)
 
-    # ✅ Only one image for product list
     main_image = CloudinaryField('product_main_image', blank=True, null=True)
 
     is_listed = models.BooleanField(default=False)
@@ -63,7 +61,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    # ✅ Sum of all variant stock
     def update_stock(self):
         total = self.variants.filter(
             is_deleted=False
@@ -84,7 +81,6 @@ class Product(models.Model):
                 stock=0,
                 is_listed=False
             )
-
 
     def get_active_product_offer(self):
         now = timezone.now()
@@ -121,7 +117,6 @@ class Product(models.Model):
         final_price = self.price - discount_amount
 
         return final_price.quantize(Decimal('0.01'))
-        
 
 
 class Variant(models.Model):
@@ -131,7 +126,6 @@ class Variant(models.Model):
         related_name='variants'
     )
 
-    # ✅ simple + enforced
     color = models.CharField(max_length=64)
 
     stock = models.PositiveIntegerField(default=0)
@@ -144,19 +138,17 @@ class Variant(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = ('product', 'color')  # ✅ prevent duplicate colors
+        unique_together = ('product', 'color') 
 
     def __str__(self):
         return f"{self.product.name} — {self.color}"
 
     def save(self, *args, **kwargs):
-        # auto unlist if no stock
         if self.stock == 0:
             self.is_listed = False
 
         super().save(*args, **kwargs)
 
-        # update product stock
         try:
             self.product.update_stock()
         except Exception:
@@ -171,7 +163,6 @@ class VariantImage(models.Model):
     )
     image = CloudinaryField('variant_image')
 
-    # first image = main image
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
