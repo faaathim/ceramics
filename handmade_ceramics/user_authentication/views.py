@@ -17,11 +17,17 @@ OTP_EXPIRY_SECONDS = 180
 
 
 def create_and_send_otp(email, purpose, user=None, first_name=""):
+    last_otp = OTP.objects.filter(email=email, purpose=purpose).last()
+
+    # Prevent spam (30 sec cooldown)
+    if last_otp and (timezone.now() - last_otp.created_at).total_seconds() < 30:
+        raise Exception("Please wait before requesting another OTP.")
+
     OTP.objects.filter(email=email, purpose=purpose, is_used=False).update(is_used=True)
 
     otp_code = OTP.generate_otp()
     hashed_code = OTP.hash_otp(otp_code)
-    
+
     OTP.objects.create(
         user=user,
         email=email,
@@ -32,7 +38,7 @@ def create_and_send_otp(email, purpose, user=None, first_name=""):
     try:
         subject = "Your Verification Code"
         text_content = f"Hi {first_name}, Your OTP is: {otp_code}"
-        
+
         email_msg = EmailMultiAlternatives(
             subject,
             text_content,
@@ -40,27 +46,37 @@ def create_and_send_otp(email, purpose, user=None, first_name=""):
             [email],
         )
         email_msg.send()
-        print(f"Successfully sent email to {email}")
     except Exception as e:
-        print(f"EMAIL SENDING FAILED: {e}")
-        print(f"CRITICAL: Testing OTP is: {otp_code}")
+        print(f"EMAIL ERROR: {e}")
+        print(f"OTP (DEV ONLY): {otp_code}")
 
 
 def signup_view(request):
     form = SignupForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        request.session['signup_data'] = {
-            'email': form.cleaned_data['email'],
-            'password': form.cleaned_data['password1'],
-            'first_name': form.cleaned_data['first_name'],
-            'last_name': form.cleaned_data.get('last_name', ''),
-        }
-        create_and_send_otp(
-            email=form.cleaned_data['email'],
-            purpose='signup',
-            first_name=form.cleaned_data['first_name']
-        )
-        return redirect('user_authentication:verify_otp')
+
+    if request.method == 'POST':
+        if form.is_valid():
+            request.session['signup_data'] = {
+                'email': form.cleaned_data['email'],
+                'password': form.cleaned_data['password1'],
+                'first_name': form.cleaned_data['first_name'],
+                'last_name': form.cleaned_data.get('last_name', ''),
+            }
+
+            try:
+                create_and_send_otp(
+                    email=form.cleaned_data['email'],
+                    purpose='signup',
+                    first_name=form.cleaned_data['first_name']
+                )
+            except Exception as e:
+                messages.error(request, str(e))
+                return redirect('user_authentication:signup')
+
+            return redirect('user_authentication:verify_otp')
+        else:
+            messages.error(request, "Please correct the errors below.")
+
     return render(request, 'user_authentication/signup.html', {'form': form})
 
 
@@ -87,14 +103,26 @@ def verify_otp(request):
 @require_POST
 def ajax_verify_signup_otp(request):
     signup_data = request.session.get('signup_data')
+
     if not signup_data:
         return JsonResponse({'error': 'Session expired.'}, status=400)
 
     code = request.POST.get('code', '').strip()
-    otp = OTP.objects.filter(email=signup_data['email'], purpose='signup', is_used=False).last()
 
-    if not otp or otp.is_expired():
+    otp = OTP.objects.filter(
+        email=signup_data['email'],
+        purpose='signup',
+        is_used=False
+    ).last()
+
+    if not otp:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+    if otp.is_expired():
         return JsonResponse({'error': 'OTP expired.'}, status=400)
+
+    if otp.attempts >= OTP.MAX_ATTEMPTS:
+        return JsonResponse({'error': 'Too many attempts. Request new OTP.'}, status=400)
 
     if not otp.verify(code):
         otp.attempts += 1
@@ -103,6 +131,7 @@ def ajax_verify_signup_otp(request):
 
     otp.is_used = True
     otp.save()
+
     user = User.objects.create_user(
         username=signup_data['email'],
         email=signup_data['email'],
@@ -110,8 +139,10 @@ def ajax_verify_signup_otp(request):
         first_name=signup_data['first_name'],
         last_name=signup_data['last_name']
     )
-    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-    del request.session['signup_data']
+
+    login(request, user)
+    request.session.flush()
+
     return JsonResponse({'success': True})
 
 
@@ -152,15 +183,21 @@ def verify_reset_otp(request):
         return redirect('user_authentication:forgot_password')
     return render(request, 'user_authentication/verify_reset_otp.html')
 
-
 @require_POST
 def ajax_verify_reset_otp(request):
     email = request.session.get('reset_email')
     code = request.POST.get('code', '').strip()
-    
+
     otp = OTP.objects.filter(email=email, purpose='reset', is_used=False).last()
-    if not otp or otp.is_expired():
+
+    if not otp:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+    if otp.is_expired():
         return JsonResponse({'error': 'OTP expired.'}, status=400)
+
+    if otp.attempts >= OTP.MAX_ATTEMPTS:
+        return JsonResponse({'error': 'Too many attempts.'}, status=400)
 
     if not otp.verify(code):
         otp.attempts += 1
@@ -169,7 +206,9 @@ def ajax_verify_reset_otp(request):
 
     otp.is_used = True
     otp.save()
+
     request.session['otp_verified_for_reset'] = True
+
     return JsonResponse({'success': True})
 
 
@@ -211,18 +250,15 @@ def login_view(request):
 
             user = authenticate(request, username=email, password=password)
 
-            if user is not None:
+            if user:
                 login(request, user)
                 return redirect('user_side:home')
 
             messages.error(request, "Invalid email or password.")
         else:
-            print("FORM ERRORS:", form.errors)
+            messages.error(request, "Invalid input.")
 
-    return render(request, 'user_authentication/login.html', {
-        'form': form
-    })
-
+    return render(request, 'user_authentication/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
