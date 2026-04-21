@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.db import IntegrityError
 
 from .models import OTP
 from .forms import SignupForm, OTPForm, LoginForm, ResetPasswordForm
@@ -36,8 +37,13 @@ def create_and_send_otp(email, purpose, user=None, first_name=""):
     )
 
     try:
-        subject = "Your Verification Code"
-        text_content = f"Hi {first_name}, Your OTP is: {otp_code}"
+        subject = f"Your Verification Code for {purpose.capitalize()}"
+        text_content = (
+            f"Hi {first_name},\n\n"
+            f"Your OTP for {purpose} is: {otp_code}\n"
+            f"This code will expire in {OTP_EXPIRY_SECONDS // 60} minutes.\n\n"
+            f"If you did not request this, please ignore this email."
+        )
 
         email_msg = EmailMultiAlternatives(
             subject,
@@ -132,15 +138,20 @@ def ajax_verify_signup_otp(request):
     otp.is_used = True
     otp.save()
 
-    user = User.objects.create_user(
-        username=signup_data['email'],
-        email=signup_data['email'],
-        password=signup_data['password'],
-        first_name=signup_data['first_name'],
-        last_name=signup_data['last_name']
-    )
+    try:
+        user = User.objects.create_user(
+            username=signup_data['email'],
+            email=signup_data['email'],
+            password=signup_data['password'],
+            first_name=signup_data['first_name'],
+            last_name=signup_data['last_name']
+        )
+    except IntegrityError:
+        return JsonResponse({'error': 'An account with this email already exists.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': 'Account creation failed. Please try again.'}, status=500)
 
-    login(request, user)
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     request.session.flush()
 
     return JsonResponse({'success': True})
@@ -152,11 +163,14 @@ def ajax_resend_signup_otp(request):
     if not signup_data:
         return JsonResponse({'error': 'Session expired.'}, status=400)
 
-    create_and_send_otp(
-        email=signup_data['email'],
-        purpose='signup',
-        first_name=signup_data['first_name']
-    )
+    try:
+        create_and_send_otp(
+            email=signup_data['email'],
+            purpose='signup',
+            first_name=signup_data['first_name']
+        )
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'success': True, 'expiry': OTP_EXPIRY_SECONDS})
 
 

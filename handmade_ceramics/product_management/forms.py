@@ -1,3 +1,5 @@
+# product_management/forms.py
+
 from django import forms
 from django.db.models import Q
 
@@ -10,13 +12,11 @@ from category_management.models import Category
 # =========================
 
 class ProductForm(forms.ModelForm):
+    main_image = forms.ImageField(required=False)
+
     class Meta:
         model = Product
         fields = ['name', 'description', 'category', 'price', 'main_image', 'is_listed']
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
-            'category': forms.Select(attrs={'class': 'form-select'}),
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,29 +28,33 @@ class ProductForm(forms.ModelForm):
                 Q(is_listed=True) | Q(pk=self.instance.category.pk)
             )
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not name or len(name.strip()) < 3:
+            raise forms.ValidationError("Minimum 3 characters required.")
+        return name.strip()
+
     def clean_price(self):
         price = self.cleaned_data.get('price')
         if price is None or price <= 0:
-            raise forms.ValidationError("Price must be a positive number.")
+            raise forms.ValidationError("Enter a valid price.")
         return price
 
-    # ✅ REMOVED the clean() override that checked main_image.
-    # Image presence is validated in the view (product_create / product_edit)
-    # because the cropped blob is injected via fetch() outside normal form fields.
+    def clean_main_image(self):
+        image = self.cleaned_data.get('main_image')
+
+        if not self.instance.pk and not image:
+            raise forms.ValidationError("Main image is required.")
+
+        return image
 
 
 # =========================
-# PRODUCT SEARCH FORM
+# SEARCH FORM
 # =========================
 
 class ProductSearchForm(forms.Form):
-    q = forms.CharField(
-        required=False,
-        label='Search',
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Search by name or description'
-        })
-    )
+    q = forms.CharField(required=False)
 
 
 # =========================
@@ -58,26 +62,46 @@ class ProductSearchForm(forms.Form):
 # =========================
 
 class VariantForm(forms.ModelForm):
+
     class Meta:
         model = Variant
         fields = ['color', 'stock', 'is_listed']
-        widgets = {
-            'color': forms.TextInput(attrs={
-                'placeholder': 'Color (e.g., Matte Black, White, Terracotta)'
-            }),
-        }
-
-    def clean_stock(self):
-        stock = self.cleaned_data.get('stock')
-        if stock is None or stock < 0:
-            raise forms.ValidationError("Stock must be 0 or greater.")
-        return stock
 
     def clean_color(self):
         color = self.cleaned_data.get('color')
 
         if not color:
-            raise forms.ValidationError("Color is required.")
+            raise forms.ValidationError("Color required.")
 
-        # ✅ Normalize (avoid duplicates like 'Red' vs 'red')
-        return color.strip().title()
+        color = color.strip().title()
+
+        product = self.instance.product if self.instance.pk else self.initial.get('product')
+
+        if product:
+            if Variant.objects.filter(
+                product=product,
+                color__iexact=color,
+                is_deleted=False
+            ).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Color already exists.")
+
+        return color
+
+    def clean_stock(self):
+        stock = self.cleaned_data.get('stock')
+
+        if stock is None or stock < 0:
+            raise forms.ValidationError("Stock must be >= 0.")
+
+        return stock
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        stock = cleaned_data.get('stock')
+        is_listed = cleaned_data.get('is_listed')
+
+        if stock == 0 and is_listed:
+            self.add_error('is_listed', "Cannot list with zero stock.")
+
+        return cleaned_data
