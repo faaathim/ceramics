@@ -13,6 +13,9 @@ from django.db import IntegrityError
 from .models import OTP
 from .forms import SignupForm, OTPForm, LoginForm, ResetPasswordForm
 
+import logging
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
 OTP_EXPIRY_SECONDS = 180
 

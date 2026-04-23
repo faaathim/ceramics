@@ -225,6 +225,10 @@
       color: #aaa;
     }
 
+    .totals-row.discount {
+      color: #4caf50;
+    }
+
     .totals-divider {
       border: none;
       border-top: 1px solid #3a3a3a;
@@ -284,7 +288,7 @@
       </div>
       <div class="info-row">
         <span class="info-label">Date</span>
-        <span class="info-value">{{ order.created_at|date:"d M Y" }}</span>
+        <span class="info-value">{{ order.created_at|date:"d M Y, g:i A" }}</span>
       </div>
       <div class="info-row">
         <span class="info-label">Status</span>
@@ -294,14 +298,50 @@
           </span>
         </span>
       </div>
+      <div class="info-row">
+        <span class="info-label">Payment Method</span>
+        <span class="info-value">{{ order.payment_method }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Payment Status</span>
+        <span class="info-value">
+          {% if order.is_paid %}
+            <span style="color:#4caf50;font-weight:700;">&#10003; Paid</span>
+          {% else %}
+            <span style="color:#ffc107;font-weight:700;">Pending</span>
+          {% endif %}
+        </span>
+      </div>
+      {% if order.coupon %}
+      <div class="info-row">
+        <span class="info-label">Coupon</span>
+        <span class="info-value" style="color:#4caf50;font-family:monospace;letter-spacing:1px;">{{ order.coupon }}</span>
+      </div>
+      {% endif %}
+      {% if order.is_refunded %}
+      <div class="info-row" style="margin-bottom:0;">
+        <span class="info-label">Refund</span>
+        <span class="info-value" style="color:#4caf50;">&#8377;{{ order.total_amount }} &#8594; Wallet</span>
+      </div>
+      {% endif %}
     </div>
 
     <div class="info-card">
       <div class="info-card-title">Shipping Address</div>
       <div class="address-block">
-        <strong style="color:#fff;">{{ order.shipping_full_name }}</strong><br>
+        <strong style="color:#fff;display:block;margin-bottom:6px;">{{ order.shipping_full_name }}</strong>
         {{ order.shipping_address_line }}<br>
-        {{ order.shipping_city }}, {{ order.shipping_state }} — {{ order.shipping_pincode }}
+        {{ order.shipping_city }}, {{ order.shipping_state }} &#8212; {{ order.shipping_pincode }}<br>
+        {{ order.shipping_country }}
+      </div>
+      <div style="height:1px;background:#3a3a3a;margin:14px 0;"></div>
+      <div class="info-row">
+        <span class="info-label">Phone</span>
+        <span class="info-value">{{ order.shipping_phone }}</span>
+      </div>
+      <div class="info-row" style="margin-bottom:0;">
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ order.shipping_email }}</span>
       </div>
     </div>
 
@@ -319,7 +359,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for item in order.items.all %}
+      {% for item in items %}
       <tr>
         <td>
           <span class="product-name">{{ item.product_name }}</span>
@@ -328,8 +368,8 @@
           {% endif %}
         </td>
         <td class="text-right">{{ item.quantity }}</td>
-        <td class="text-right">₹{{ item.unit_price }}</td>
-        <td class="text-right">₹{{ item.item_total }}</td>
+        <td class="text-right">₹{{ item.unit_price|floatformat:2 }}</td>
+        <td class="text-right">₹{{ item.item_total|floatformat:2 }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -340,16 +380,38 @@
     <div class="totals-box">
       <div class="totals-row">
         <span>Subtotal</span>
-        <span>₹{{ order.total_amount }}</span>
+        <span>&#8377;{{ subtotal|floatformat:2 }}</span>
       </div>
+      {% if tax %}
+      <div class="totals-row">
+        <span>Tax</span>
+        <span>&#8377;{{ tax|floatformat:2 }}</span>
+      </div>
+      {% endif %}
       <div class="totals-row">
         <span>Shipping</span>
-        <span>Free</span>
+        {% if shipping %}
+          <span>&#8377;{{ shipping|floatformat:2 }}</span>
+        {% else %}
+          <span style="color:#4caf50;font-weight:600;">FREE</span>
+        {% endif %}
       </div>
+      {% if discount %}
+      <div class="totals-row" style="color:#4caf50;">
+        <span>Discount{% if order.coupon %} ({{ order.coupon }}){% endif %}</span>
+        <span>&#8722; &#8377;{{ discount|floatformat:2 }}</span>
+      </div>
+      {% endif %}
+      {% if order.is_refunded %}
+      <div class="totals-row" style="color:#4caf50;">
+        <span>Refunded to Wallet</span>
+        <span>&#8377;{{ order.total_amount }}</span>
+      </div>
+      {% endif %}
       <hr class="totals-divider">
       <div class="totals-row grand-total">
         <span>Total Amount</span>
-        <span>₹{{ order.total_amount }}</span>
+        <span>&#8377;{{ total|floatformat:2 }}</span>
       </div>
     </div>
   </div>

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block top %}
-    {% include "user_navbar.html" %}
+{% include "user_navbar.html" %}
 {% endblock %}
 
 {% block content %}
@@ -19,7 +19,6 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
 
-    /* ===== TOAST ===== */
     #toast-container {
         position: fixed;
         top: 20px;
@@ -30,6 +29,7 @@
         gap: 10px;
         pointer-events: none;
     }
+
     .toast {
         pointer-events: all;
         display: flex;
@@ -41,23 +41,126 @@
         font-weight: 500;
         min-width: 280px;
         max-width: 380px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-        animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         border: 1px solid transparent;
     }
-    .toast.toast-success { background:#1b2e1f; border-color:#2e7d32; color:#a5d6a7; }
-    .toast.toast-error   { background:#2e1b1b; border-color:#c62828; color:#ef9a9a; }
-    .toast.toast-warning { background:#2e2618; border-color:#e65100; color:#ffcc80; }
-    .toast.toast-info    { background:#1b2535; border-color:#1565c0; color:#90caf9; }
-    .toast-icon  { font-size:16px; flex-shrink:0; margin-top:1px; }
-    .toast-body  { flex:1; line-height:1.5; }
-    .toast-close { background:transparent; border:none; color:inherit; opacity:.6; cursor:pointer; font-size:18px; line-height:1; padding:0; transition:opacity .2s; }
-    .toast-close:hover { opacity:1; }
-    .toast.toast-hiding { animation: toastOut .3s ease forwards; }
-    @keyframes toastIn  { from{opacity:0;transform:translateX(100%) scale(.9)} to{opacity:1;transform:translateX(0) scale(1)} }
-    @keyframes toastOut { from{opacity:1;transform:translateX(0) scale(1)} to{opacity:0;transform:translateX(100%) scale(.9)} }
 
-    /* ===== LAYOUT ===== */
+    .toast.toast-success {
+        background: #1b2e1f;
+        border-color: #2e7d32;
+        color: #a5d6a7;
+    }
+
+    .toast.toast-error {
+        background: #2e1b1b;
+        border-color: #c62828;
+        color: #ef9a9a;
+    }
+
+    .toast.toast-warning {
+        background: #2e2618;
+        border-color: #e65100;
+        color: #ffcc80;
+    }
+
+    .toast.toast-info {
+        background: #1b2535;
+        border-color: #1565c0;
+        color: #90caf9;
+    }
+
+    .toast.toast-limit {
+        background: #2a1a2e;
+        border-color: #7b1fa2;
+        color: #ce93d8;
+    }
+
+    @keyframes qtyShake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        20% {
+            transform: translateX(-5px);
+        }
+
+        40% {
+            transform: translateX(5px);
+        }
+
+        60% {
+            transform: translateX(-4px);
+        }
+
+        80% {
+            transform: translateX(4px);
+        }
+    }
+
+    .qty-limit-flash {
+        border-color: #7c4dff !important;
+        box-shadow: 0 0 0 3px rgba(124, 77, 255, .25) !important;
+        animation: qtyShake .4s ease;
+    }
+
+    .toast-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .toast-body {
+        flex: 1;
+        line-height: 1.5;
+    }
+
+    .toast-close {
+        background: transparent;
+        border: none;
+        color: inherit;
+        opacity: .6;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        padding: 0;
+        transition: opacity .2s;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    .toast.toast-hiding {
+        animation: toastOut .3s ease forwards;
+    }
+
+    @keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%) scale(.9)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0) scale(1)
+        }
+    }
+
+    @keyframes toastOut {
+        from {
+            opacity: 1;
+            transform: translateX(0) scale(1)
+        }
+
+        to {
+            opacity: 0;
+            transform: translateX(100%) scale(.9)
+        }
+    }
+
     .cart-main-container {
         max-width: 1200px;
         margin: 40px auto;
@@ -72,7 +175,10 @@
         text-transform: uppercase;
         color: #ffffff;
     }
-    .cart-title span { font-weight: 700; }
+
+    .cart-title span {
+        font-weight: 700;
+    }
 
     .cart-header-row {
         display: grid;
@@ -99,169 +205,527 @@
         transition: all 0.3s ease;
         position: relative;
     }
-    .cart-product-row:hover { background-color: #333333; transform: translateX(5px); }
+
+    .cart-product-row:hover {
+        background-color: #333333;
+        transform: translateX(5px);
+    }
+
     .cart-product-row::after {
         content: '';
         position: absolute;
-        left: 0; top: 0;
-        height: 100%; width: 3px;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
         background-color: #ff6b35;
         transform: scaleY(0);
         transition: transform 0.3s ease;
     }
-    .cart-product-row:hover::after { transform: scaleY(1); }
 
-    .delete-column { display:flex; align-items:center; justify-content:center; }
-    .delete-btn {
-        width:30px; height:30px;
-        background:transparent; border:2px solid #404040;
-        color:#b0b0b0; cursor:pointer; font-size:20px;
-        display:flex; align-items:center; justify-content:center;
-        transition:all .3s ease; border-radius:4px;
+    .cart-product-row:hover::after {
+        transform: scaleY(1);
     }
-    .delete-btn:hover { background:#dc3545; border-color:#dc3545; color:white; transform:rotate(90deg); }
+
+    .delete-column {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-btn {
+        width: 30px;
+        height: 30px;
+        background: transparent;
+        border: 2px solid #404040;
+        color: #b0b0b0;
+        cursor: pointer;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .3s ease;
+        border-radius: 4px;
+    }
+
+    .delete-btn:hover {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        transform: rotate(90deg);
+    }
 
     .image-column img {
-        width:100%; height:100px;
-        object-fit:cover; border-radius:4px;
-        transition:transform .3s ease;
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        transition: transform .3s ease;
     }
-    .cart-product-row:hover .image-column img { transform:scale(1.05); }
 
-    .product-info-column { display:flex; flex-direction:column; gap:5px; }
-    .product-name { font-size:.95rem; font-weight:500; text-transform:uppercase; letter-spacing:1px; color:#fff; }
-    .product-variant { font-size:.8rem; color:#b0b0b0; }
+    .cart-product-row:hover .image-column img {
+        transform: scale(1.05);
+    }
 
-    .price-column { font-size:1rem; font-weight:500; color:#fff; }
-    .price-discounted { display:block; font-weight:600; }
-    .price-original   { display:block; font-size:.8rem; color:#666; text-decoration:line-through; margin-top:2px; }
+    .product-info-column {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .product-name {
+        font-size: .95rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #fff;
+    }
+
+    .product-variant {
+        font-size: .8rem;
+        color: #b0b0b0;
+    }
+
+    .price-column {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #fff;
+    }
+
+    .price-discounted {
+        display: block;
+        font-weight: 600;
+    }
+
+    .price-original {
+        display: block;
+        font-size: .8rem;
+        color: #666;
+        text-decoration: line-through;
+        margin-top: 2px;
+    }
+
     .price-badge {
-        display:inline-block; font-size:.7rem; font-weight:800;
-        background:linear-gradient(135deg,#70c090,#4a8a6a);
-        color:#0a0a0a; padding:2px 7px; border-radius:10px; margin-top:3px;
+        display: inline-block;
+        font-size: .7rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #70c090, #4a8a6a);
+        color: #0a0a0a;
+        padding: 2px 7px;
+        border-radius: 10px;
+        margin-top: 3px;
     }
 
-    /* QUANTITY */
     .quantity-column {
-        display:flex; align-items:center; gap:10px;
-        background:#1f1f1f; border:1px solid #404040;
-        border-radius:4px; padding:5px 10px;
-        width:fit-content;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #1f1f1f;
+        border: 1px solid #404040;
+        border-radius: 4px;
+        padding: 5px 10px;
+        width: fit-content;
     }
+
     .qty-btn {
-        background:transparent; border:none;
-        color:#fff; font-size:1.2rem;
-        cursor:pointer; padding:5px 10px;
-        transition:all .2s ease; line-height:1;
-        border-radius:4px; user-select:none;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 5px 10px;
+        transition: all .2s ease;
+        line-height: 1;
+        border-radius: 4px;
+        user-select: none;
     }
-    .qty-btn:hover  { color:#ff6b35; transform:scale(1.2); }
-    .qty-btn:disabled { color:#444; cursor:not-allowed; transform:none; }
+
+    .qty-btn:hover {
+        color: #ff6b35;
+        transform: scale(1.2);
+    }
+
+    .qty-btn:disabled {
+        color: #444;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @keyframes flashLimit {
+        0% {
+            border-color: #7b1fa2;
+            box-shadow: 0 0 0 0 rgba(123, 31, 162, 0.6);
+        }
+
+        40% {
+            border-color: #ab47bc;
+            box-shadow: 0 0 0 6px rgba(123, 31, 162, 0.2);
+        }
+
+        100% {
+            border-color: #404040;
+            box-shadow: none;
+        }
+    }
+
+    .qty-limit-flash {
+        animation: flashLimit 0.6s ease forwards;
+    }
 
     .qty-display {
-        min-width:30px; text-align:center;
-        font-weight:500; font-size:1rem; color:#fff;
+        min-width: 30px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 1rem;
+        color: #fff;
     }
 
-    .subtotal-column { font-size:1.1rem; font-weight:600; color:#fff; }
+    .subtotal-column {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+    }
 
-    /* BOTTOM */
     .cart-bottom-section {
-        display:grid; grid-template-columns:1fr 400px;
-        gap:30px; margin-top:30px;
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 30px;
+        margin-top: 30px;
     }
 
-    .coupon-area { display:flex; gap:10px; margin-bottom:15px; }
-    .coupon-input {
-        flex:1; background:#1f1f1f;
-        border:1px solid #404040; color:#fff;
-        padding:15px; border-radius:4px; font-size:.95rem;
-        transition:all .3s ease;
+    .coupon-area {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
     }
-    .coupon-input:focus { outline:none; border-color:#ff6b35; box-shadow:0 0 0 3px rgba(255,107,53,.1); }
-    .coupon-input::placeholder { color:#b0b0b0; text-transform:uppercase; letter-spacing:1px; font-size:.85rem; }
+
+    .coupon-input {
+        flex: 1;
+        background: #1f1f1f;
+        border: 1px solid #404040;
+        color: #fff;
+        padding: 15px;
+        border-radius: 4px;
+        font-size: .95rem;
+        transition: all .3s ease;
+    }
+
+    .coupon-input:focus {
+        outline: none;
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, .1);
+    }
+
+    .coupon-input::placeholder {
+        color: #b0b0b0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: .85rem;
+    }
 
     .btn-apply-coupon {
-        background:#2a2a2a; border:none; color:#fff;
-        padding:15px 30px; text-transform:uppercase; letter-spacing:2px;
-        font-weight:600; cursor:pointer; transition:all .3s ease;
-        border-radius:4px; font-size:.85rem;
+        background: #2a2a2a;
+        border: none;
+        color: #fff;
+        padding: 15px 30px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .3s ease;
+        border-radius: 4px;
+        font-size: .85rem;
     }
-    .btn-apply-coupon:hover { background:#333; transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.3); }
+
+    .btn-apply-coupon:hover {
+        background: #333;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, .3);
+    }
 
     .coupon-status {
-        display:flex; justify-content:space-between; align-items:center;
-        background:#0d0d0d; border:1px solid #4caf50;
-        border-radius:4px; padding:14px 16px; gap:12px; margin-bottom:15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0d0d0d;
+        border: 1px solid #4caf50;
+        border-radius: 4px;
+        padding: 14px 16px;
+        gap: 12px;
+        margin-bottom: 15px;
     }
-    .coupon-status p { margin:0; color:#4caf50; font-size:.9rem; font-weight:500; }
+
+    .coupon-status p {
+        margin: 0;
+        color: #4caf50;
+        font-size: .9rem;
+        font-weight: 500;
+    }
+
     .btn-remove-coupon {
-        background:transparent; border:1px solid #f44336; color:#f44336;
-        padding:6px 14px; text-transform:uppercase; letter-spacing:1px;
-        font-weight:600; cursor:pointer; transition:all .3s; border-radius:4px;
-        font-size:.72rem; text-decoration:none; white-space:nowrap;
+        background: transparent;
+        border: 1px solid #f44336;
+        color: #f44336;
+        padding: 6px 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .3s;
+        border-radius: 4px;
+        font-size: .72rem;
+        text-decoration: none;
+        white-space: nowrap;
     }
-    .btn-remove-coupon:hover { background:#f44336; color:#fff; }
+
+    .btn-remove-coupon:hover {
+        background: #f44336;
+        color: #fff;
+    }
 
     .cart-totals-box {
-        background:#0d0d0d; padding:30px;
-        border-radius:8px; border:1px solid #404040;
+        background: #0d0d0d;
+        padding: 30px;
+        border-radius: 8px;
+        border: 1px solid #404040;
     }
+
     .totals-title {
-        font-size:1.3rem; font-weight:600;
-        margin-bottom:25px; padding-bottom:15px;
-        border-bottom:1px solid #404040; color:#fff;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #404040;
+        color: #fff;
     }
+
     .totals-line {
-        display:flex; justify-content:space-between;
-        margin-bottom:15px; font-size:1rem; color:#fff;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 1rem;
+        color: #fff;
     }
-    .totals-line.coupon-discount { color:#4caf50; }
-    .totals-line.coupon-discount.hidden { display:none; }
+
+    .totals-line.coupon-discount {
+        color: #4caf50;
+    }
+
+    .totals-line.coupon-discount.hidden {
+        display: none;
+    }
+
     .totals-line.final-total {
-        font-size:1.2rem; font-weight:700;
-        margin-top:20px; padding-top:20px;
-        border-top:1px solid #404040;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #404040;
     }
 
     .cod-limit-notice {
-        display:flex; align-items:flex-start; gap:10px;
-        background:rgba(255,152,0,.08); border:1px solid rgba(255,152,0,.35);
-        border-radius:8px; padding:12px 14px; margin-top:16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: rgba(255, 152, 0, .08);
+        border: 1px solid rgba(255, 152, 0, .35);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 16px;
     }
-    .cod-limit-notice .notice-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
-    .cod-limit-notice .notice-text { font-size:13px; color:#ffb74d; line-height:1.5; }
-    .cod-limit-notice .notice-text strong { display:block; font-weight:600; margin-bottom:2px; }
+
+    .cod-limit-notice .notice-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .cod-limit-notice .notice-text {
+        font-size: 13px;
+        color: #ffb74d;
+        line-height: 1.5;
+    }
+
+    .cod-limit-notice .notice-text strong {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
 
     .btn-proceed-checkout {
-        width:100%; background:transparent;
-        border:2px solid #fff; color:#fff;
-        padding:18px; text-transform:uppercase; letter-spacing:2px;
-        font-weight:600; cursor:pointer; margin-top:20px;
-        transition:all .3s ease; border-radius:4px; font-size:.95rem;
-        position:relative; overflow:hidden;
-        text-decoration:none; display:block; text-align:center;
+        width: 100%;
+        background: transparent;
+        border: 2px solid #fff;
+        color: #fff;
+        padding: 18px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all .3s ease;
+        border-radius: 4px;
+        font-size: .95rem;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: block;
+        text-align: center;
     }
-    .btn-proceed-checkout::before {
-        content:''; position:absolute; top:0; left:-100%;
-        width:100%; height:100%; background:#fff;
-        transition:left .3s ease; z-index:0;
-    }
-    .btn-proceed-checkout span { position:relative; z-index:1; }
-    .btn-proceed-checkout:hover { color:#0d0d0d; }
-    .btn-proceed-checkout:hover::before { left:0; }
 
-    .empty-message { text-align:center; padding:60px 20px; font-size:1.2rem; color:#b0b0b0; }
-    .empty-message a { color:#ff6b35; text-decoration:none; transition:all .3s ease; }
-    .empty-message a:hover { text-decoration:underline; letter-spacing:2px; }
+    .btn-proceed-checkout::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        transition: left .3s ease;
+        z-index: 0;
+    }
+
+    .btn-proceed-checkout span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-proceed-checkout:hover {
+        color: #0d0d0d;
+    }
+
+    .btn-proceed-checkout:hover::before {
+        left: 0;
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 60px 20px;
+        font-size: 1.2rem;
+        color: #b0b0b0;
+    }
+
+    .empty-message a {
+        color: #ff6b35;
+        text-decoration: none;
+        transition: all .3s ease;
+    }
+
+    .empty-message a:hover {
+        text-decoration: underline;
+        letter-spacing: 2px;
+    }
+
+    .unavailable-item {
+        opacity: 0.6;
+        background-color: #2a1a1a;
+    }
+
+    .unavailable-badge {
+        display: inline-block;
+        background-color: #dc3545;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .messages {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .alert {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid transparent;
+        line-height: 1.5;
+        animation: alertSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes alertSlideIn {
+        from { opacity: 0; transform: translateY(-10px) scale(.97); }
+        to   { opacity: 1; transform: translateY(0)     scale(1);   }
+    }
+
+    .alert::before {
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .alert-success {
+        background: #1b2e1f;
+        border-color: #2e7d32;
+        color: #a5d6a7;
+    }
+    .alert-success::before { content: '✅'; }
+
+    .alert-error {
+        background: #2e1b1b;
+        border-color: #c62828;
+        color: #ef9a9a;
+    }
+    .alert-error::before { content: '⚠️'; }
+
+    .alert-warning {
+        background: #2e2618;
+        border-color: #e65100;
+        color: #ffcc80;
+    }
+    .alert-warning::before { content: '⚠️'; }
+
+    .alert-info {
+        background: #1b2535;
+        border-color: #1565c0;
+        color: #90caf9;
+    }
+    .alert-info::before { content: 'ℹ️'; }
+
+    /* fallback for untagged messages */
+    .alert:not([class*="alert-"]) {
+        background: #1b2535;
+        border-color: #1565c0;
+        color: #90caf9;
+    }
+    .alert:not([class*="alert-"])::before { content: 'ℹ️'; }
 
     @media (max-width: 968px) {
-        .cart-header-row { display:none; }
-        .cart-product-row { grid-template-columns:1fr; gap:15px; }
-        .cart-bottom-section { grid-template-columns:1fr; }
-        .quantity-column { justify-content:center; }
-        #toast-container { top:12px; right:12px; left:12px; }
-        .toast { min-width:unset; max-width:100%; }
+        .cart-header-row {
+            display: none;
+        }
+
+        .cart-product-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .cart-bottom-section {
+            grid-template-columns: 1fr;
+        }
+
+        .quantity-column {
+            justify-content: center;
+        }
+
+        #toast-container {
+            top: 12px;
+            right: 12px;
+            left: 12px;
+        }
+
+        .toast {
+            min-width: unset;
+            max-width: 100%;
+        }
     }
 </style>
 
@@ -269,252 +733,263 @@
 
 <div class="cart-main-container">
 
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <h1 class="cart-title">
         CART <span id="cart-item-count">({{ items|length }} ITEM{% if items|length != 1 %}S{% endif %})</span>
     </h1>
 
     {% if items %}
 
-        <div class="cart-header-row">
-            <div>🗑️</div>
-            <div>PHOTO</div>
-            <div>PRODUCT</div>
-            <div>PRICE</div>
-            <div>QUANTITY</div>
-            <div>SUBTOTAL</div>
+    <div class="cart-header-row">
+        <div>🗑️</div>
+        <div>PHOTO</div>
+        <div>PRODUCT</div>
+        <div>PRICE</div>
+        <div>QUANTITY</div>
+        <div>SUBTOTAL</div>
+    </div>
+
+    {% for item in items %}
+    <div class="cart-product-row {% if not item.is_available %}unavailable-item{% endif %}"
+        data-item-id="{{ item.id }}">
+
+        <div class="delete-column">
+            <form method="POST" action="{% url 'cart:remove_cart_item' item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="delete-btn" title="Remove">×</button>
+            </form>
         </div>
 
-        {% for item in items %}
-        <div class="cart-product-row" data-item-id="{{ item.id }}">
-
-            <div class="delete-column">
-                <form method="POST" action="{% url 'cart:remove_cart_item' item.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="delete-btn" title="Remove">×</button>
-                </form>
-            </div>
-
-            <div class="image-column">
-                {% with img=item.variant.images.all.first %}
-                    {% if img %}
-                        <img src="{{ img.image.url }}" alt="{{ item.variant.product.name }}">
-                    {% else %}
-                        <img src="https://via.placeholder.com/120x100/1a1a1a/666?text=No+Image" alt="No image">
-                    {% endif %}
-                {% endwith %}
-            </div>
-
-            <div class="product-info-column">
-                <div class="product-name">{{ item.variant.product.name }}</div>
-                <div class="product-variant">Color: {{ item.variant.color|default:"N/A" }}</div>
-            </div>
-
-            <div class="price-column" data-price="{{ item.variant.product.get_discounted_price }}">
-                {% with best_discount=item.variant.product.get_best_discount_percentage %}
-                    {% if best_discount > 0 %}
-                        <span class="price-discounted">₹{{ item.variant.product.get_discounted_price }}</span>
-                        <span class="price-original">₹{{ item.variant.product.price }}</span>
-                        <span class="price-badge">-{{ best_discount }}%</span>
-                    {% else %}
-                        <span class="price-discounted">₹{{ item.variant.product.price }}</span>
-                    {% endif %}
-                {% endwith %}
-            </div>
-
-            <div class="quantity-column">
-                <button type="button"
-                        class="qty-btn qty-decrement"
-                        data-item-id="{{ item.id }}"
-                        {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
-                <span class="qty-display" data-item-id="{{ item.id }}">{{ item.quantity }}</span>
-                <button type="button"
-                        class="qty-btn qty-increment"
-                        data-item-id="{{ item.id }}">+</button>
-            </div>
-
-            <div class="subtotal-column" data-item-id="{{ item.id }}">
-                ₹{{ item.item_total|floatformat:0 }}
-            </div>
-
+        <div class="image-column">
+            {% with img=item.variant.images.all.first %}
+            {% if img %}
+            <img src="{{ img.image.url }}" alt="{{ item.variant.product.name }}">
+            {% else %}
+            <img src="https://via.placeholder.com/120x100/1a1a1a/666?text=No+Image" alt="No image">
+            {% endif %}
+            {% endwith %}
         </div>
-        {% endfor %}
 
-        <div class="cart-bottom-section">
-
-            <!-- COUPON SECTION
-                 Logic:
-                 - If a coupon is already applied server-side → show the "applied" banner,
-                   hide the input form.
-                 - Otherwise → show the input form, hide the banner.
-                 In both cases the *other* element exists in the DOM (display:none) so JS
-                 can toggle them after an AJAX coupon-removal without a page reload. -->
-            <div>
-                {% if coupon %}
-                    {# Server confirmed a coupon is active #}
-                    <div class="coupon-status" id="coupon-applied-block">
-                        <p id="coupon-applied-text">✓ {{ coupon.code }} — ₹{{ discount|floatformat:0 }} OFF</p>
-                        <a href="{% url 'coupons:remove_coupon' %}" class="btn-remove-coupon" id="coupon-remove-link">Remove</a>
-                    </div>
-                    <div id="coupon-input-block" style="display:none;" class="coupon-area">
-                        <input type="text" name="coupon_code" class="coupon-input" id="coupon-code-input" placeholder="Coupon Code">
-                        <button type="button" class="btn-apply-coupon" id="btn-apply-coupon">Apply Coupon</button>
-                    </div>
-                {% else %}
-                    {# No active coupon — show the input form #}
-                    <div id="coupon-applied-block" class="coupon-status" style="display:none;">
-                        <p id="coupon-applied-text"></p>
-                        <a href="{% url 'coupons:remove_coupon' %}" class="btn-remove-coupon" id="coupon-remove-link">Remove</a>
-                    </div>
-                    <div id="coupon-input-block" class="coupon-area">
-                        <input type="text" name="coupon_code" class="coupon-input" id="coupon-code-input" placeholder="Coupon Code">
-                        <button type="button" class="btn-apply-coupon" id="btn-apply-coupon">Apply Coupon</button>
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- TOTALS -->
-            <div class="cart-totals-box">
-                <h3 class="totals-title">Cart Totals</h3>
-
-                <div class="totals-line">
-                    <span>Subtotal</span>
-                    <span id="cart-subtotal">₹{{ subtotal|floatformat:0 }}</span>
-                </div>
-
-                <div class="totals-line coupon-discount {% if not discount or discount == 0 %}hidden{% endif %}"
-                     id="coupon-discount-row">
-                    <span>Coupon Discount</span>
-                    <span id="cart-discount">− ₹{{ discount|floatformat:0 }}</span>
-                </div>
-
-                <div class="totals-line">
-                    <span>Shipping</span>
-                    <span>₹0</span>
-                </div>
-
-                <div class="totals-line final-total">
-                    <span>Total</span>
-                    <span id="cart-total">₹{{ total_price|floatformat:0 }}</span>
-                </div>
-
-                <div class="cod-limit-notice" id="cod-limit-notice"
-                     style="{% if total_price <= cod_limit %}display:none;{% endif %}">
-                    <span class="notice-icon">⚠️</span>
-                    <div class="notice-text">
-                        <strong>Cash on Delivery unavailable</strong>
-                        COD is not available for orders above ₹{{ cod_limit }}.
-                        Please use Razorpay / UPI or your Wallet at checkout.
-                    </div>
-                </div>
-
-                <a href="{% url 'checkout:checkout' %}" class="btn-proceed-checkout">
-                    <span>Proceed to Checkout</span>
-                </a>
-            </div>
-
+        <div class="product-info-column">
+            <div class="product-name">{{ item.variant.product.name }}</div>
+            <div class="product-variant">Color: {{ item.variant.color|default:"N/A" }}</div>
+            {% if not item.is_available %}
+            <span class="unavailable-badge">Currently Unavailable</span>
+            {% endif %}
         </div>
+
+        <div class="price-column" data-price="{{ item.variant.product.get_discounted_price }}">
+            {% with best_discount=item.variant.product.get_best_discount_percentage %}
+            {% if best_discount > 0 %}
+            <span class="price-discounted">₹{{ item.variant.product.get_discounted_price }}</span>
+            <span class="price-original">₹{{ item.variant.product.price }}</span>
+            <span class="price-badge">-{{ best_discount }}%</span>
+            {% else %}
+            <span class="price-discounted">₹{{ item.variant.product.price }}</span>
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="quantity-column" data-item-id="{{ item.id }}">
+            {% if item.is_available %}
+            <button type="button" class="qty-btn qty-decrement" data-item-id="{{ item.id }}" {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
+            <span class="qty-display" data-item-id="{{ item.id }}">{{ item.quantity }}</span>
+            <button type="button" class="qty-btn qty-increment" data-item-id="{{ item.id }}"
+                data-allowed-max="{{ item.allowed_max }}" {% if item.quantity >= item.allowed_max %}disabled{% endif %}>+</button>
+            {% else %}
+            <span class="qty-display" style="font-size: 0.85rem;">N/A</span>
+            {% endif %}
+        </div>
+
+        <div class="subtotal-column" data-item-id="{{ item.id }}">
+            {% if item.is_available %}
+            ₹{{ item.item_total|floatformat:0 }}
+            {% else %}
+            —
+            {% endif %}
+        </div>
+
+    </div>
+    {% endfor %}
+
+    <div class="cart-bottom-section">
+
+        <div>
+            {% if coupon %}
+            <div class="coupon-status" id="coupon-applied-block">
+                <p id="coupon-applied-text">✓ {{ coupon.code }} — ₹{{ discount|floatformat:0 }} OFF</p>
+                <a href="{% url 'coupons:remove_coupon' %}" class="btn-remove-coupon" id="coupon-remove-link">Remove</a>
+            </div>
+            {% else %}
+            <form method="POST" action="{% url 'coupons:apply_coupon' %}" id="coupon-input-block" class="coupon-area">
+                {% csrf_token %}
+                <input type="text" name="coupon_code" class="coupon-input" id="coupon-code-input"
+                    placeholder="Coupon Code" required>
+                <button type="submit" class="btn-apply-coupon" id="btn-apply-coupon">Apply Coupon</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="cart-totals-box">
+            <h3 class="totals-title">Cart Totals</h3>
+
+            <div class="totals-line">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">₹{{ subtotal|floatformat:0 }}</span>
+            </div>
+
+            <div class="totals-line coupon-discount {% if not discount or discount == 0 %}hidden{% endif %}"
+                id="coupon-discount-row">
+                <span>Coupon Discount</span>
+                <span id="cart-discount">− ₹{{ discount|floatformat:0 }}</span>
+            </div>
+
+            <div class="totals-line">
+                <span>Shipping</span>
+                <span>₹0</span>
+            </div>
+
+            <div class="totals-line final-total">
+                <span>Total</span>
+                <span id="cart-total">₹{{ total_price|floatformat:0 }}</span>
+            </div>
+
+            <div class="cod-limit-notice" id="cod-limit-notice"
+                style="{% if total_price <= cod_limit %}display:none;{% endif %}">
+                <span class="notice-icon">⚠️</span>
+                <div class="notice-text">
+                    <strong>Cash on Delivery unavailable</strong>
+                    COD is not available for orders above ₹{{ cod_limit }}.
+                    Please use Razorpay / UPI or your Wallet at checkout.
+                </div>
+            </div>
+
+            {% if has_unavailable_items %}
+            <button type="button" class="btn-proceed-checkout" style="opacity: 0.5; cursor: not-allowed;"
+                onclick="showToast('Please remove unavailable items from your cart to proceed to checkout.', 'warning')">
+                <span>Proceed to Checkout</span>
+            </button>
+            {% else %}
+            <a href="{% url 'checkout:checkout' %}" class="btn-proceed-checkout">
+                <span>Proceed to Checkout</span>
+            </a>
+            {% endif %}
+        </div>
+
+    </div>
 
     {% else %}
-        <div class="empty-message">
-            <p>Your cart is empty.</p>
-            <a href="{% url 'user_side:shop' %}">Continue Shopping →</a>
-        </div>
+    <div class="empty-message">
+        <p>Your cart is empty.</p>
+        <a href="{% url 'user_side:shop' %}">Continue Shopping →</a>
+    </div>
     {% endif %}
 
 </div>
 
+<ul id="django-messages" hidden>
+    {% for message in messages %}
+    <li data-text="{{ message|escapejs }}" data-tags="{{ message.level_tag|escapejs }}"></li>
+    {% endfor %}
+</ul>
+
 <script>
-const COD_LIMIT = {{ cod_limit }};
+    const COD_LIMIT = {{ cod_limit }};
 
-// ── Toast system ──────────────────────────────────────────────────────────
-const TOAST_ICONS = { success:'✅', error:'⚠️', warning:'⚠️', info:'ℹ️' };
+    const TOAST_ICONS = { success: '✅', error: '⚠️', warning: '⚠️', info: 'ℹ️', limit: '🔒' };
 
-function showToast(message, type = 'info', duration = 5000) {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
+    function showToast(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
         <span class="toast-icon">${TOAST_ICONS[type] || 'ℹ️'}</span>
         <span class="toast-body">${message}</span>
         <button class="toast-close" aria-label="Dismiss">×</button>`;
-    toast.querySelector('.toast-close').addEventListener('click', () => dismissToast(toast));
-    container.appendChild(toast);
-    if (duration > 0) setTimeout(() => dismissToast(toast), duration);
-}
-
-function dismissToast(toast) {
-    if (!toast || toast.classList.contains('toast-hiding')) return;
-    toast.classList.add('toast-hiding');
-    toast.addEventListener('animationend', () => toast.remove(), { once: true });
-}
-
-// ── Render Django flash messages as toasts on page load ───────────────────
-// These fire after redirects (e.g. add-to-cart, remove item, coupon apply).
-const DJANGO_MESSAGES = [
-    {% for message in messages %}
-    { text: "{{ message|escapejs }}", tags: "{{ message.tags|escapejs }}" }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-];
-
-function djangoTagToType(tags) {
-    if (!tags) return 'info';
-    if (tags.includes('success')) return 'success';
-    if (tags.includes('error'))   return 'error';
-    if (tags.includes('warning')) return 'warning';
-    return 'info';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    DJANGO_MESSAGES.forEach(m => showToast(m.text, djangoTagToType(m.tags)));
-});
-
-// ── Utilities ─────────────────────────────────────────────────────────────
-function getCookie(name) {
-    for (const c of document.cookie.split(';')) {
-        const t = c.trim();
-        if (t.startsWith(name + '=')) return decodeURIComponent(t.slice(name.length + 1));
+        toast.querySelector('.toast-close').addEventListener('click', () => dismissToast(toast));
+        container.appendChild(toast);
+        if (duration > 0) setTimeout(() => dismissToast(toast), duration);
     }
-    return null;
-}
-const csrftoken = getCookie('csrftoken');
 
-function updateCodNotice(total) {
-    const el = document.getElementById('cod-limit-notice');
-    if (el) el.style.display = total > COD_LIMIT ? 'flex' : 'none';
-}
+    function dismissToast(toast) {
+        if (!toast || toast.classList.contains('toast-hiding')) return;
+        toast.classList.add('toast-hiding');
+        toast.addEventListener('animationend', () => toast.remove(), { once: true });
+    }
 
-// Called when a coupon is removed (either via AJAX coupon-removed signal
-// or when the user clicks the "Remove" link and we intercept it).
-function handleCouponRemoved() {
-    const applied  = document.getElementById('coupon-applied-block');
-    const input    = document.getElementById('coupon-input-block');
-    const row      = document.getElementById('coupon-discount-row');
-    const discEl   = document.getElementById('cart-discount');
-    if (applied) applied.style.display = 'none';
-    if (input)   input.style.display   = 'flex';
-    if (row)     row.classList.add('hidden');
-    if (discEl)  discEl.textContent = '− ₹0';
-}
+    function djangoTagToType(tags) {
+        if (!tags) return 'info';
+        if (tags.includes('success')) return 'success';
+        if (tags.includes('error')) return 'error';
+        if (tags.includes('warning')) return 'warning';
+        return 'info';
+    }
 
-// ── Coupon — AJAX apply ───────────────────────────────────────────────────
-const applyBtn  = document.getElementById('btn-apply-coupon');
-const codeInput = document.getElementById('coupon-code-input');
+    (function () {
+        const msgList = document.getElementById('django-messages');
+        if (!msgList) return;
+        msgList.querySelectorAll('li').forEach(li => {
+            if (li.dataset.text) showToast(li.dataset.text, djangoTagToType(li.dataset.tags));
+        });
+        msgList.remove();
+    })();
 
-if (applyBtn && codeInput) {
-    applyBtn.addEventListener('click', () => {
-        const code = codeInput.value.trim();
-        if (!code) {
-            showToast('Please enter a coupon code.', 'warning');
+    function getCookie(name) {
+        for (const c of document.cookie.split(';')) {
+            const t = c.trim();
+            if (t.startsWith(name + '=')) return decodeURIComponent(t.slice(name.length + 1));
+        }
+        return null;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function updateCodNotice(total) {
+        const el = document.getElementById('cod-limit-notice');
+        if (el) el.style.display = total > COD_LIMIT ? 'flex' : 'none';
+    }
+
+    function flashQtyRow(itemId) {
+        const col = document.querySelector(`.quantity-column[data-item-id="${itemId}"]`);
+        if (!col) return;
+        col.classList.remove('qty-limit-flash');
+        void col.offsetWidth;
+        col.classList.add('qty-limit-flash');
+        col.addEventListener('animationend', () => col.classList.remove('qty-limit-flash'), { once: true });
+    }
+
+    function updateQuantity(itemId, action) {
+        const decBtn = document.querySelector(`.qty-decrement[data-item-id="${itemId}"]`);
+        const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
+        const qtyEl = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
+
+        const currentQty = qtyEl ? parseInt(qtyEl.textContent, 10) : null;
+        const maxAllowed = incBtn ? parseInt(incBtn.dataset.allowedMax, 10) : null;
+
+        if (action === 'increment' && maxAllowed !== null && currentQty >= maxAllowed) {
+            flashQtyRow(itemId);
+            showToast(`🚫 Maximum limit reached! You can only order <strong>${maxAllowed}</strong> of this item.`, 'limit', 4000);
+            return;
+        }
+        if (action === 'decrement' && currentQty <= 1) {
+            flashQtyRow(itemId);
+            showToast('⚠️ Minimum quantity is <strong>1</strong>. Remove the item if you don\'t want it.', 'limit', 4000);
             return;
         }
 
-        applyBtn.disabled = true;
-        applyBtn.textContent = 'Applying…';
+        if (decBtn) decBtn.disabled = true;
+        if (incBtn) incBtn.disabled = true;
 
         const body = new FormData();
-        body.append('coupon_code', code);
+        body.append('action', action);
 
-        fetch("{% url 'coupons:apply_coupon' %}", {
+        fetch(`/cart/item/${itemId}/update/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
@@ -522,195 +997,95 @@ if (applyBtn && codeInput) {
             },
             body,
         })
-        .then(r => r.json())
-        .then(data => {
-            if (data.error) {
-                showToast(data.error, 'error');
-            } else {
-                // Update totals
-                const sub     = Math.round(data.cart_subtotal ?? 0);
-                const disc    = Math.round(data.discount ?? 0);
-                const tot     = Math.round(data.cart_total ?? 0);
+            .then(r => r.json())
+            .then(data => {
 
-                const elSub  = document.getElementById('cart-subtotal');
+                if (data.coupon_removed) {
+                    showToast(data.error, 'warning', 7000);
+                    window.location.reload();
+                    return;
+                }
+
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    reEnable(itemId, currentQty, maxAllowed);
+                    return;
+                }
+
+                if (data.message) {
+                    flashQtyRow(itemId);
+                    showToast(data.message, 'limit', 4000);
+                }
+
+                refreshRow(itemId, data);
+
+                const elSub = document.getElementById('cart-subtotal');
+                const elTot = document.getElementById('cart-total');
                 const elDisc = document.getElementById('cart-discount');
-                const elTot  = document.getElementById('cart-total');
-                const row    = document.getElementById('coupon-discount-row');
+                const discRow = document.getElementById('coupon-discount-row');
 
-                if (elSub)  elSub.textContent  = `₹${sub}`;
-                if (elDisc) elDisc.textContent = `− ₹${disc}`;
-                if (elTot)  elTot.textContent  = `₹${tot}`;
-                if (row && disc > 0) row.classList.remove('hidden');
-                updateCodNotice(tot);
+                if (elSub) elSub.textContent = `₹${Math.round(data.cart_subtotal)}`;
 
-                // Show the applied banner
-                const appliedText  = document.getElementById('coupon-applied-text');
-                const appliedBlock = document.getElementById('coupon-applied-block');
-                const inputBlock   = document.getElementById('coupon-input-block');
-                if (appliedText)  appliedText.textContent = `✓ ${data.coupon_code} — ₹${disc} OFF`;
-                if (appliedBlock) appliedBlock.style.display = 'flex';
-                if (inputBlock)   inputBlock.style.display   = 'none';
+                if (data.discount > 0) {
+                    if (discRow) discRow.classList.remove('hidden');
+                    if (elDisc) elDisc.textContent = `− ₹${Math.round(data.discount)}`;
+                } else {
+                    if (discRow) discRow.classList.add('hidden');
+                }
 
-                showToast(data.message || 'Coupon applied!', 'success');
-            }
-        })
-        .catch(() => showToast('Failed to apply coupon. Please try again.', 'error'))
-        .finally(() => {
-            applyBtn.disabled = false;
-            applyBtn.textContent = 'Apply Coupon';
+                const newTotal = Math.round(data.cart_total);
+                if (elTot) elTot.textContent = `₹${newTotal}`;
+                updateCodNotice(newTotal);
+                refreshCount(data.cart_items);
+                reEnable(itemId, data.quantity, data.allowed_max);
+            })
+            .catch(err => {
+                console.error('Cart update error:', err);
+                showToast('Failed to update quantity. Please try again.', 'error');
+                reEnable(itemId, currentQty, maxAllowed);
+            });
+    }
+
+    function refreshRow(itemId, data) {
+        const qtyEl = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
+        const subEl = document.querySelector(`.subtotal-column[data-item-id="${itemId}"]`);
+        const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
+        if (qtyEl && data.quantity != null) qtyEl.textContent = data.quantity;
+        if (subEl && data.item_total != null) subEl.textContent = `₹${Math.round(data.item_total)}`;
+        if (incBtn && data.allowed_max != null) incBtn.dataset.allowedMax = data.allowed_max;
+    }
+
+    function refreshCount(count) {
+        const el = document.getElementById('cart-item-count');
+        if (el && count != null) el.textContent = `(${count} ITEM${count !== 1 ? 'S' : ''})`;
+    }
+
+    function reEnable(itemId, qty, allowedMax) {
+        const decBtn = document.querySelector(`.qty-decrement[data-item-id="${itemId}"]`);
+        const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
+        if (incBtn) incBtn.disabled = (qty != null && allowedMax != null && qty >= allowedMax);
+        if (decBtn) decBtn.disabled = (qty != null && qty <= 1);
+    }
+
+    document.querySelectorAll('.qty-increment').forEach(btn => {
+        btn.addEventListener('click', function () {
+            updateQuantity(this.dataset.itemId, 'increment');
         });
     });
-}
-
-// ── Coupon — AJAX remove (intercept the "Remove" link) ────────────────────
-const removeLink = document.getElementById('coupon-remove-link');
-if (removeLink) {
-    removeLink.addEventListener('click', e => {
-        e.preventDefault();
-
-        fetch(removeLink.href, {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        })
-        .then(r => {
-            // The view may redirect (302) or return JSON — handle both.
-            // If it returns JSON we parse it; otherwise just treat as success.
-            const ct = r.headers.get('Content-Type') || '';
-            if (ct.includes('application/json')) return r.json();
-            return { removed: true };
-        })
-        .then(data => {
-            // Recalculate total client-side: subtotal is unchanged, just drop discount
-            const elSub = document.getElementById('cart-subtotal');
-            const rawSub = elSub ? parseFloat(elSub.textContent.replace(/[^0-9.]/g, '')) : 0;
-
-            if (data.cart_subtotal !== undefined) {
-                const sub = Math.round(data.cart_subtotal);
-                const tot = Math.round(data.cart_total ?? data.cart_subtotal);
-                if (elSub) elSub.textContent = `₹${sub}`;
-                document.getElementById('cart-total').textContent = `₹${tot}`;
-                updateCodNotice(tot);
-            } else {
-                // Fallback: just use current subtotal as new total
-                document.getElementById('cart-total').textContent = `₹${Math.round(rawSub)}`;
-                updateCodNotice(rawSub);
-            }
-
-            handleCouponRemoved();
-            showToast('Coupon removed.', 'info');
-        })
-        .catch(() => {
-            // On any network failure fall back to a full page reload
-            window.location.href = removeLink.href;
+    document.querySelectorAll('.qty-decrement').forEach(btn => {
+        btn.addEventListener('click', function () {
+            updateQuantity(this.dataset.itemId, 'decrement');
         });
     });
-}
 
-// ── Core AJAX quantity update ─────────────────────────────────────────────
-function updateQuantity(itemId, action) {
-    const decBtn = document.querySelector(`.qty-decrement[data-item-id="${itemId}"]`);
-    const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
-    if (decBtn) decBtn.disabled = true;
-    if (incBtn) incBtn.disabled = true;
-
-    const body = new FormData();
-    body.append('action', action);
-
-    fetch(`/cart/item/${itemId}/update/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrftoken,
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        body,
-    })
-    .then(r => r.json())
-    .then(data => {
-
-        // ── Coupon auto-removed (subtotal fell below minimum) ─────────────
-        if (data.coupon_removed) {
-            showToast(data.error, 'warning', 7000);
-            handleCouponRemoved();
-            const sub = Math.round(data.cart_subtotal);
-            const tot = Math.round(data.cart_total);
-            const elSub = document.getElementById('cart-subtotal');
-            const elTot = document.getElementById('cart-total');
-            if (elSub) elSub.textContent = `₹${sub}`;
-            if (elTot) elTot.textContent = `₹${tot}`;
-            updateCodNotice(tot);
-            refreshRow(itemId, data);
-            refreshCount(data.cart_items);
-            reEnable(itemId, data.quantity);
-            return;
-        }
-
-        // ── Any other error ───────────────────────────────────────────────
-        if (data.error) {
-            showToast(data.error, 'error');
-            reEnable(itemId, null);
-            return;
-        }
-
-        // ── Success ───────────────────────────────────────────────────────
-        refreshRow(itemId, data);
-
-        const elSub   = document.getElementById('cart-subtotal');
-        const elTot   = document.getElementById('cart-total');
-        const elDisc  = document.getElementById('cart-discount');
-        const discRow = document.getElementById('coupon-discount-row');
-
-        if (elSub) elSub.textContent = `₹${Math.round(data.cart_subtotal)}`;
-
-        if (data.discount > 0) {
-            if (discRow) discRow.classList.remove('hidden');
-            if (elDisc)  elDisc.textContent = `− ₹${Math.round(data.discount)}`;
-        } else {
-            if (discRow) discRow.classList.add('hidden');
-        }
-
-        const newTotal = Math.round(data.cart_total);
-        if (elTot) elTot.textContent = `₹${newTotal}`;
-        updateCodNotice(newTotal);
-        refreshCount(data.cart_items);
-        reEnable(itemId, data.quantity);
-    })
-    .catch(err => {
-        console.error('Cart update error:', err);
-        showToast('Failed to update quantity. Please try again.', 'error');
-        reEnable(itemId, null);
+    document.querySelectorAll('.alert').forEach(el => {
+        setTimeout(() => {
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-6px)';
+            setTimeout(() => el.remove(), 400);
+        }, 1500);
     });
-}
-
-function refreshRow(itemId, data) {
-    const qtyEl = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
-    const subEl = document.querySelector(`.subtotal-column[data-item-id="${itemId}"]`);
-    if (qtyEl && data.quantity   != null) qtyEl.textContent = data.quantity;
-    if (subEl && data.item_total != null) subEl.textContent = `₹${Math.round(data.item_total)}`;
-}
-
-function refreshCount(count) {
-    const el = document.getElementById('cart-item-count');
-    if (el && count != null) el.textContent = `(${count} ITEM${count !== 1 ? 'S' : ''})`;
-}
-
-function reEnable(itemId, qty) {
-    const decBtn = document.querySelector(`.qty-decrement[data-item-id="${itemId}"]`);
-    const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
-    if (incBtn) incBtn.disabled = false;
-    if (decBtn) decBtn.disabled = (qty != null && qty <= 1);
-}
-
-// ── Bind quantity buttons ─────────────────────────────────────────────────
-document.querySelectorAll('.qty-increment').forEach(btn => {
-    btn.addEventListener('click', function () {
-        updateQuantity(this.dataset.itemId, 'increment');
-    });
-});
-document.querySelectorAll('.qty-decrement').forEach(btn => {
-    btn.addEventListener('click', function () {
-        updateQuantity(this.dataset.itemId, 'decrement');
-    });
-});
 </script>
 
 {% endblock %}

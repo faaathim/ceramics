@@ -94,6 +94,10 @@ def verify_payment(request):
             order.payment_method = "RAZORPAY"
             order.save()
 
+            if order.coupon:
+                from coupons.models import CouponUsage
+                CouponUsage.objects.get_or_create(user=order.user, coupon=order.coupon, order=order)
+
             order_items = OrderItem.objects.select_related("variant").filter(order=order)
             for item in order_items:
                 item.variant.stock -= item.quantity

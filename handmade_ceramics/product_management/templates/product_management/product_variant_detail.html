@@ -776,7 +776,7 @@
     <div class="gallery">
       <div class="zoom-wrapper" id="zoomWrapper">
         {% if variant.main_image %}
-          <img id="mainImage" src="{{ variant.main_image.url }}" alt="{{ product.name }}">
+          <img id="mainImage" src="{{ variant.main_image.image.url }}" alt="{{ product.name }}">
         {% elif variant.images.first %}
           <img id="mainImage" src="{{ variant.images.first.image.url }}" alt="{{ product.name }}">
         {% else %}
@@ -790,7 +790,7 @@
 
       <div class="thumbnails">
         {% if variant.main_image %}
-          <img class="thumb active" src="{{ variant.main_image.url }}" data-src="{{ variant.main_image.url }}" alt="Main image">
+          <img class="thumb active" src="{{ variant.main_image.image.url }}" data-src="{{ variant.main_image.image.url }}" alt="Main image">
         {% endif %}
         {% for img in variant.images.all %}
           <img class="thumb {% if not variant.main_image and forloop.first %}active{% endif %}"
@@ -958,6 +958,12 @@
                 </button>
               </form>
 
+            {% elif already_reviewed %}
+              <div class="write-review-divider"></div>
+              <div class="review-login-prompt">
+                <span>⭐</span>
+                <span>You have already shared your thoughts on this product. Thank you for your feedback!</span>
+              </div>
             {% else %}
               <div class="write-review-divider"></div>
               <div class="review-login-prompt">

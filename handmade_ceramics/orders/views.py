@@ -65,56 +65,13 @@ def order_detail(request, order_id):
 @require_POST
 @transaction.atomic
 def cancel_order(request, order_id):
-
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
 
     if order.status not in ['PENDING', 'CONFIRMED']:
         messages.error(request, "Order cannot be cancelled.")
         return redirect(order.get_absolute_url())
 
-    for item in order.items.all():
-
-        if item.item_status not in ['CANCELLED', 'RETURNED']:
-
-            if item.variant:
-                item.variant.stock += item.quantity
-                item.variant.save()
-
-            item.item_status = 'CANCELLED'
-            item.save()
-
-    order.status = 'CANCELLED'
-    order.save()
-
-    if order.is_paid and not order.is_refunded and order.payment_method != "COD":
-
-        wallet, _ = Wallet.objects.select_for_update().get_or_create(
-            user=request.user,
-            defaults={'balance': 0}
-        )
-
-        wallet.balance = F('balance') + order.total_amount
-        wallet.save()
-        wallet.refresh_from_db()
-
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type=WalletTransaction.CREDIT,
-            source='CANCEL_REFUND',
-            amount=order.total_amount,
-            description=f"Refund for cancelled order {order.order_id}",
-            order=order
-        )
-
-        order.is_refunded = True
-        order.save()
-
-    if order.coupon:
-        CouponUsage.objects.filter(
-            user=request.user,
-            coupon=order.coupon,
-            order=order
-        ).delete()
+    OrderService.cancel_order(order)
 
     messages.success(request, "Order cancelled successfully.")
     return redirect(order.get_absolute_url())
@@ -212,17 +169,30 @@ def request_item_return(request, item_id):
     return redirect(order.get_absolute_url())
 
 
-@login_required
 def download_invoice(request, order_id):
-
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    items = order.items.all()
 
-    html = render_to_string("orders/invoice.html", {"order": order})
+    for item in items:
+        item.item_total = item.unit_price * item.quantity
+
+    subtotal = getattr(order, 'subtotal', None) or sum(item.item_total for item in items)
+    discount = getattr(order, 'discount_amount', 0) or 0
+    tax      = getattr(order, 'tax_amount',      0) or 0
+    shipping = getattr(order, 'shipping_charge', 0) or 0
+    total    = getattr(order, 'total_amount', subtotal - discount + tax + shipping)
+
+    html = render_to_string("orders/invoice.html", {
+        "order":    order,
+        "items":    items,
+        "subtotal": subtotal,
+        "discount": discount,
+        "tax":      tax,
+        "shipping": shipping,
+        "total":    total,
+    })
 
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="invoice_{order.order_id}.pdf"'
-
     weasyprint.HTML(string=html).write_pdf(response)
-
     return response
-

@@ -192,7 +192,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # maximum number of units allowed per single cart item (site-wide)
-CART_MAX_QTY_PER_ITEM = 10
+CART_MAX_QTY_PER_ITEM = 5
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),

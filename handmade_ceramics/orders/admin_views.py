@@ -141,35 +141,8 @@ def admin_order_detail(request, order_id):
             order.items.update(item_status='RETURN_PROCESSING')
 
         if new_status == 'RETURNED':
-
-            for item in order.items.select_related('variant'):
-
-                if item.variant:
-                    item.variant.stock += item.quantity
-                    item.variant.save()
-
-            order.items.update(item_status='RETURNED')
-
-            if (order.is_paid or order.payment_method == 'COD') and not order.is_refunded:
-
-                wallet, _ = Wallet.objects.select_for_update().get_or_create(
-                    user=order.user,
-                    defaults={'balance': 0}
-                )
-
-                wallet.balance += order.total_amount
-                wallet.save()
-
-                WalletTransaction.objects.create(
-                    wallet=wallet,
-                    transaction_type=WalletTransaction.CREDIT,
-                    source='RETURN_REFUND',
-                    amount=order.total_amount,
-                    description=f"Refund for returned order {order.order_id}",
-                    order=order
-                )
-
-                order.is_refunded = True
+            from orders.services.return_service import ReturnService
+            ReturnService.complete_order_return(order)
 
         order.save()
 
@@ -318,54 +291,7 @@ def admin_cancel_order(request, order_id):
             order_id=order.order_id
         )
 
-    # Cancel all items and restore stock
-    for item in order.items.select_related('variant'):
-
-        if item.item_status not in ['CANCELLED', 'RETURNED']:
-
-            if item.variant:
-                item.variant.stock += item.quantity
-                item.variant.save()
-
-            item.item_status = 'CANCELLED'
-            item.save()
-
-    # Update order status
-    order.status = 'CANCELLED'
-    order.save()
-
-
-    # Refund to wallet (ONLY for prepaid orders)
-    if order.is_paid and order.payment_method != "COD" and not order.is_refunded:
-
-        wallet, _ = Wallet.objects.select_for_update().get_or_create(
-            user=order.user,
-            defaults={'balance': 0}
-        )
-
-        wallet.balance = F('balance') + order.total_amount
-        wallet.save()
-        wallet.refresh_from_db()
-
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type=WalletTransaction.CREDIT,
-            source='ADMIN_CANCEL_REFUND',
-            amount=order.total_amount,
-            description=f"Admin cancelled order {order.order_id}",
-            order=order
-        )
-
-        order.is_refunded = True
-        order.save()
-
-    # Remove coupon usage
-    if order.coupon:
-        CouponUsage.objects.filter(
-            user=order.user,
-            coupon=order.coupon,
-            order=order
-        ).delete()
+    OrderService.cancel_order(order)
 
     messages.success(request, "Order cancelled successfully by admin.")
 

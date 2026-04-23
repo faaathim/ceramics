@@ -498,6 +498,19 @@
             color: #f08080;
         }
 
+        .btn-toggle {
+            background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
+            color: #d0c070;
+            border-color: #6a6a4a;
+        }
+
+        .btn-toggle:hover {
+            background: linear-gradient(135deg, #5a5a3a, #6a6a4a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(208, 192, 112, 0.3);
+            color: #e0d080;
+        }
+
         .pagination-container {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             border-radius: 15px;
@@ -708,7 +721,7 @@
                             <td>{{ forloop.counter0|add:variants.start_index }}</td>
                             <td>
                                 {% if variant.main_image %}
-                                    <img src="{{ variant.main_image.url }}" alt="{{ variant.color }}" class="variant-img">
+                                    <img src="{{ variant.main_image.image.url }}" alt="{{ variant.color }}" class="variant-img">
                                 {% else %}
                                     <div class="no-image">
                                         <i class="fas fa-image"></i>
@@ -760,6 +773,13 @@
                                         <i class="fas fa-edit"></i>
                                         Edit
                                     </a>
+                                    <form action="{% url 'custom_admin:product_management:variant_toggle_listing' product.id variant.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-btn btn-toggle">
+                                            <i class="fas {% if variant.is_listed %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
+                                            {% if variant.is_listed %}Unlist{% else %}List{% endif %}
+                                        </button>
+                                    </form>
                                     <form action="{% url 'custom_admin:product_management:variant_delete_confirm' product.id variant.id %}" method="post" style="display:inline;">
                                         {% csrf_token %}
                                         <button type="submit" class="action-btn btn-delete" onclick="return confirm('Are you sure you want to delete this variant?')">

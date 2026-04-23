@@ -6,9 +6,8 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import Coupon, CouponUsage
+from coupons.models import Coupon, CouponUsage
 from cart.models import CartItem
-
 
 @login_required
 def apply_coupon(request):
@@ -32,6 +31,12 @@ def apply_coupon(request):
         messages.error(request, 'This coupon has expired.')
         return redirect('cart:cart_page')
 
+    # ── Already applied to the current session ────────────────────────────────
+    if request.session.get('coupon_id') == coupon.id:
+        messages.warning(request, f'Coupon "{coupon.code}" is already applied to your cart.')
+        return redirect('cart:cart_page')
+
+    # ── Already used in a completed order ─────────────────────────────────────
     if CouponUsage.objects.filter(user=request.user, coupon=coupon).exists():
         messages.error(request, 'You have already used this coupon.')
         return redirect('cart:cart_page')

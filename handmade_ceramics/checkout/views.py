@@ -27,6 +27,22 @@ def checkout_page(request):
         variant__product__isnull=False
     ).select_related("variant", "variant__product")
 
+    has_unavailable_items = False
+    for item in cart_items:
+        variant = item.variant
+        product = variant.product
+        category = getattr(product, 'category', None)
+        
+        if (variant.is_deleted or not variant.is_listed or 
+            product.is_deleted or not product.is_listed or
+            (category and getattr(category, 'is_blocked', False))):
+            has_unavailable_items = True
+            break
+
+    if has_unavailable_items:
+        messages.warning(request, "Please remove unavailable items from your cart before proceeding to checkout.")
+        return redirect("cart:cart_page")
+
     if not cart_items.exists():
         return redirect("cart:cart_page")
 
@@ -165,22 +181,38 @@ def place_order(request):
     )
 
     if coupon:
-        CouponUsage.objects.create(user=user, coupon=coupon, order=order)
         request.session.pop('coupon_id', None)
         request.session.pop('discount_amount', None)
 
     for item in cart_items:
+        item_unit_price = item.variant.product.get_discounted_price()
+        item_subtotal = item_unit_price * item.quantity
+        
+        # Calculate proportional discount
+        item_discount = Decimal("0.00")
+        if coupon and subtotal > 0:
+            # We use the same percentage that was applied to the whole order
+            # item_discount = (item_subtotal / subtotal) * discount
+            # Since our coupons are percentage-based, this is equivalent to:
+            item_discount = (item_subtotal * Decimal(coupon.discount_percentage)) / Decimal("100")
+            # Rounding to 2 decimal places to avoid precision issues
+            item_discount = item_discount.quantize(Decimal("0.01"))
+
         OrderItem.objects.create(
             order=order,
             product=item.variant.product,
             variant=item.variant,
             product_name=item.variant.product.name,
             variant_color=item.variant.color or "",
-            unit_price=item.variant.product.get_discounted_price(),
-            quantity=item.quantity
+            unit_price=item_unit_price,
+            quantity=item.quantity,
+            coupon_discount_amount=item_discount
         )
 
     if payment_method == "COD":
+        if coupon:
+            CouponUsage.objects.create(user=user, coupon=coupon, order=order)
+
         for item in cart_items:
             item.variant.stock -= item.quantity
             item.variant.save()
@@ -201,6 +233,9 @@ def place_order(request):
         order.payment_method = "WALLET"
         order.status = "CONFIRMED"
         order.save()
+
+        if coupon:
+            CouponUsage.objects.create(user=user, coupon=coupon, order=order)
 
         for item in cart_items:
             item.variant.stock -= item.quantity

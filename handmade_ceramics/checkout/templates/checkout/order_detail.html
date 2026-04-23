@@ -99,7 +99,7 @@
         <div class="item-card">
           <div class="item-image">
             {% if item.variant.main_image %}
-              <img src="{{ item.variant.main_image.url }}" alt="{{ item.product_name }}">
+              <img src="{{ item.variant.main_image.image.url }}" alt="{{ item.product_name }}">
             {% else %}
               <div class="image-placeholder">
                 <span>📦</span>

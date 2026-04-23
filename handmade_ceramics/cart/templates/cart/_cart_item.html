@@ -387,7 +387,7 @@
 
             <div class="image-column">
                 {% if item.variant.main_image %}
-                    <img src="{{ item.variant.main_image.url }}" alt="{{ item.variant.product.name }}">
+                    <img src="{{ item.variant.main_image.image.url }}" alt="{{ item.variant.product.name }}">
                 {% else %}
                     <img src="https://via.placeholder.com/120x100/1a1a1a/666?text=No+Image" alt="No image">
                 {% endif %}

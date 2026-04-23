@@ -860,7 +860,7 @@
                             </div>
                             <div class="preview-grid">
                                 <div class="preview-item" id="currentMainImageItem">
-                                    <img src="{{ variant.main_image.url }}" alt="Current main">
+                                    <img src="{{ variant.main_image.image.url }}" alt="Current main">
                                 </div>
                             </div>
                         </div>
@@ -897,11 +897,11 @@
                             Total images (main + gallery): Min 3, Max 7
                         </span>
                         
-                        {% if variant and variant.images.all %}
+                        {% if variant and variant.gallery_images %}
                         <div class="current-image-preview" id="currentGalleryPreview">
                             <div class="current-image-header">
                                 <span class="current-image-label">
-                                    <i class="fas fa-images"></i> Current Gallery ({{ variant.images.count }} images):
+                                    <i class="fas fa-images"></i> Current Gallery ({{ variant.gallery_images|length }} images):
                                 </span>
                                 <button type="button" class="btn-remove-current" onclick="removeCurrentGallery()">
                                     <i class="fas fa-trash"></i>
@@ -909,7 +909,7 @@
                                 </button>
                             </div>
                             <div class="preview-grid" id="currentGalleryGrid">
-                                {% for img in variant.images.all %}
+                                {% for img in variant.gallery_images %}
                                 <div class="preview-item" data-image-id="{{ img.id }}">
                                     <img src="{{ img.image.url }}" alt="Gallery image">
                                     <button
@@ -1035,7 +1035,7 @@
         
         // Initialize counters for current images if editing
         let currentMainCount = {{ variant.main_image|yesno:"1,0" }};
-        let currentGalleryCount = {{ variant.images.count|default:0 }};
+        let currentGalleryCount = {{ variant.gallery_images|length|default:0 }};
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -1086,9 +1086,9 @@
             const newMain = croppedMainBlob ? 1 : 0;
             const newGallery = croppedGalleryBlobs.length;
             
-            // Total will be either current (if no new images) or new images (which replace current)
-            const totalImages = (newMain > 0 ? newMain : currentMain) + 
-                              (newGallery > 0 ? newGallery : currentGallery);
+            // Total will be either current main (if no new main) or new main
+            // For gallery, new images are appended to current ones
+            const totalImages = (newMain > 0 ? newMain : currentMain) + currentGallery + newGallery;
             
             const counter = document.getElementById('imageCounter');
             const countSpan = document.getElementById('imageCount');
@@ -1191,6 +1191,7 @@
         function removeMainImage() {
             mainImageFile = null;
             croppedMainBlob = null;
+            mainImageInput.value = ''; // clear native input
             document.getElementById('mainImagePreview').innerHTML = '';
             updateImageCounter();
             showToast('New main image removed', 'success');
@@ -1270,6 +1271,14 @@
         function removeGalleryImage(index) {
             galleryFiles.splice(index, 1);
             croppedGalleryBlobs.splice(index, 1);
+            
+            // Re-assign native file input
+            const dt = new DataTransfer();
+            croppedGalleryBlobs.forEach((b, idx) => {
+                dt.items.add(new File([b], `gallery_${idx}.jpg`, { type: "image/jpeg" }));
+            });
+            galleryInput.files = dt.files;
+            
             updateGalleryPreview();
             updateImageCounter();
             showToast('New gallery image removed', 'success');
@@ -1365,6 +1374,12 @@
             canvas.toBlob((blob) => {
                 if (currentCropTarget === 'main') {
                     croppedMainBlob = blob;
+                    
+                    // Assign to native file input
+                    const dt = new DataTransfer();
+                    dt.items.add(new File([blob], "main_image.jpg", { type: "image/jpeg" }));
+                    mainImageInput.files = dt.files;
+                    
                     showMainImagePreview(blob);
                     showToast('Main image cropped successfully', 'success');
                 } else {
@@ -1377,6 +1392,13 @@
                         updateImageCounter();
                         return;
                     }
+                    
+                    // Set all cropped blobs into native galleryInput
+                    const dt = new DataTransfer();
+                    croppedGalleryBlobs.forEach((b, idx) => {
+                        dt.items.add(new File([b], `gallery_${idx}.jpg`, { type: "image/jpeg" }));
+                    });
+                    galleryInput.files = dt.files;
                     
                     updateGalleryPreview();
                     showToast(`Gallery image ${croppedGalleryBlobs.length} added`, 'success');
@@ -1440,71 +1462,34 @@
             closeCropModal();
         });
 
-        document.getElementById('submitBtn').addEventListener('click', async () => {
+        document.getElementById('submitBtn').addEventListener('click', (e) => {
             // Calculate final image count
             const finalMainCount = croppedMainBlob ? 1 : (currentMainRemoved ? 0 : currentMainCount);
-            const finalGalleryCount = croppedGalleryBlobs.length > 0 ? croppedGalleryBlobs.length : 
-                                     (currentGalleryRemoved ? 0 : currentGalleryCount);
+            const finalGalleryCount = (currentGalleryRemoved ? 0 : currentGalleryCount) + croppedGalleryBlobs.length;
             const totalImages = finalMainCount + finalGalleryCount;
+            const currentTotal = currentMainCount + currentGalleryCount;
             
-            if (totalImages < 3) {
+            if (totalImages < 3 && totalImages < currentTotal) {
                 const needed = 3 - totalImages;
+                e.preventDefault();
                 showToast(`Please provide at least 3 images in total. You need ${needed} more image(s).`, 'error');
                 return;
             }
             
             if (totalImages > 7) {
                 const excess = totalImages - 7;
+                e.preventDefault();
                 showToast(`Maximum 7 images allowed. Please remove ${excess} image(s).`, 'error');
                 return;
             }
 
-            const formData = new FormData(document.getElementById('variantForm'));
-            
-            // Remove default file inputs
-            formData.delete('main_image');
-            formData.delete('images');
-            
-            // Add new images if uploaded
-            if (croppedMainBlob) {
-                formData.append('main_image', croppedMainBlob, 'main_image.jpg');
-            }
-            
-            croppedGalleryBlobs.forEach((blob, index) => {
-                formData.append('images', blob, `gallery_${index}.jpg`);
-            });
-
             const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Variant...';
+            setTimeout(() => {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Variant...';
+            }, 50);
 
-            try {
-                const response = await fetch(document.getElementById('variantForm').action || window.location.href, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                });
-
-                if (response.redirected) {
-                    showToast('Variant saved successfully!', 'success');
-                    setTimeout(() => {
-                        window.location.href = response.url;
-                    }, 500);
-                } else {
-                    showToast('Please correct the errors and try again.', 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
-                
-            } catch (error) {
-                showToast('Error submitting form. Please try again.', 'error');
-                console.error('Form submission error:', error);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
+            document.getElementById('variantForm').submit();
         });
 
         // Initialize counter on page load

@@ -104,33 +104,15 @@ class Order(models.Model):
         ]
 
     def recalculate_totals(self):
-        active_items = self.items.exclude(
-            item_status__in=['CANCELLED', 'RETURNED']
-        )
-
-        new_subtotal = sum((item.item_total for item in active_items), Decimal("0.00"))
-
-        discount = Decimal("0.00")
-        if self.coupon and new_subtotal > 0:
-            if new_subtotal >= self.coupon.min_order_amount:
-                discount = (
-                    Decimal(self.coupon.discount_percentage) / Decimal("100")
-                ) * new_subtotal
-            else:
-                self.coupon = None
-                discount = Decimal("0.00")
-
-        if new_subtotal >= Decimal("1000"):
-            shipping = Decimal("0.00")
-        elif new_subtotal > 0:
-            shipping = Decimal("50.00")
-        else:
-            shipping = Decimal("0.00")
-
-        self.subtotal = new_subtotal
-        self.discount_amount = discount
-        self.shipping_charge = shipping
-        self.total_amount = new_subtotal + shipping - discount
+        from .services.pricing_service import PricingService
+        
+        totals = PricingService.calculate_order_totals(self)
+        
+        self.subtotal = totals['subtotal']
+        self.discount_amount = totals['discount_amount']
+        self.shipping_charge = totals['shipping_charge']
+        self.tax_amount = totals['tax_amount']
+        self.total_amount = totals['total_amount']
 
         self.save()
 
@@ -169,7 +151,9 @@ class OrderItem(models.Model):
 
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=1)
-    item_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    item_total = models.DecimalField(max_digits=12, decimal_places=2, default=0) # unit_price * quantity
+    coupon_discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0) # proportional share of coupon
+    final_total = models.DecimalField(max_digits=12, decimal_places=2, default=0) # item_total - coupon_discount_amount
 
     item_status = models.CharField(max_length=30, choices=ITEM_STATUS_CHOICES, default='PENDING')
 

@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -33,13 +34,16 @@ def _get_user_cart(user):
 
 @login_required
 def add_to_cart(request):
+    referer = request.META.get('HTTP_REFERER', reverse('cart:cart_page'))
     if request.method != 'POST':
-        return HttpResponseBadRequest("Invalid request method.")
+        messages.error(request, "Invalid request method.")
+        return redirect(referer)
 
     try:
         variant_id = int(request.POST.get('variant_id'))
     except (TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid variant id.")
+        messages.error(request, "Invalid variant id.")
+        return redirect(referer)
 
     try:
         qty_requested = int(request.POST.get('qty', 1))
@@ -52,21 +56,25 @@ def add_to_cart(request):
     variant = get_object_or_404(Variant, pk=variant_id)
 
     if variant.is_deleted or not variant.is_listed:
-        return HttpResponseBadRequest("This variant is not available.")
+        messages.error(request, "This variant is not available.")
+        return redirect(referer)
 
     product = variant.product
     if product.is_deleted or not product.is_listed:
-        return HttpResponseBadRequest("This product is not available.")
+        messages.error(request, "This product is not available.")
+        return redirect(referer)
 
     category = getattr(product, 'category', None)
     if category and getattr(category, 'is_blocked', False):
-        return HttpResponseBadRequest("This category is blocked.")
+        messages.error(request, "This category is blocked.")
+        return redirect(referer)
 
     site_max = _max_qty_limit()
     allowed_max = min(site_max, variant.stock or 0)
 
     if allowed_max <= 0:
-        return HttpResponseBadRequest("This variant is out of stock.")
+        messages.error(request, "This variant is out of stock.")
+        return redirect(referer)
 
     qty_to_add = min(qty_requested, allowed_max)
 
@@ -79,8 +87,18 @@ def add_to_cart(request):
 
     if created:
         cart_item.quantity = qty_to_add
+        messages.success(request, f"Added {product.name} to your cart.")
     else:
-        cart_item.quantity = min(cart_item.quantity + qty_to_add, allowed_max)
+        old_qty = cart_item.quantity
+        new_qty = min(old_qty + qty_to_add, allowed_max)
+        cart_item.quantity = new_qty
+        
+        if old_qty >= allowed_max:
+            messages.warning(request, f"You already have the maximum allowed quantity ({allowed_max}) of {product.name} in your cart.")
+        elif new_qty == allowed_max:
+            messages.success(request, f"Added {product.name} to cart. You've reached the maximum limit of {allowed_max}.")
+        else:
+            messages.success(request, f"Updated {product.name} quantity in your cart.")
 
     cart_item.save()
     if Wishlist:
@@ -96,13 +114,43 @@ def add_to_cart(request):
 @login_required
 def cart_page(request):
     cart = _get_user_cart(request.user)
-    items = cart.items.select_related('variant__product')
+    items = list(cart.items.select_related('variant__product'))
+    
+    has_unavailable_items = False
+    modified_items = False
+    
+    for item in items:
+        variant = item.variant
+        product = variant.product
+        category = getattr(product, 'category', None)
+        
+        item.is_available = True
+        
+        if (variant.is_deleted or not variant.is_listed or 
+            product.is_deleted or not product.is_listed or
+            (category and getattr(category, 'is_blocked', False))):
+            item.is_available = False
+            has_unavailable_items = True
+        else:
+            site_max = _max_qty_limit()
+            allowed_max = min(site_max, variant.stock or 0)
+            item.allowed_max = allowed_max
+            if item.quantity > allowed_max:
+                item.quantity = allowed_max
+                item.save()
+                modified_items = True
+            
+
+    if modified_items:
+        messages.info(request, "Quantities for some items were updated due to limited stock.")
+
     subtotal = Decimal('0')
 
     for item in items:
-        discounted_price = item.variant.product.get_discounted_price()
-        item.item_total = discounted_price * item.quantity
-        subtotal += item.item_total
+        if item.is_available:
+            discounted_price = item.variant.product.get_discounted_price()
+            item.item_total = discounted_price * item.quantity
+            subtotal += item.item_total
 
     coupon_id = request.session.get('coupon_id')
     coupon = None
@@ -135,6 +183,7 @@ def cart_page(request):
         'discount': discount,
         'total_price': total,
         'coupon': coupon,
+        'has_unavailable_items': has_unavailable_items,
         "cod_limit": settings.COD_LIMIT,
     }
 
@@ -149,6 +198,7 @@ def remove_cart_item(request, item_id):
     cart = _get_user_cart(request.user)
     item = get_object_or_404(CartItem, pk=item_id, cart=cart)
     item.delete()
+    messages.success(request, "Removed item from cart.")
 
     return redirect(reverse('cart:cart_page'))
 
@@ -181,6 +231,12 @@ def update_quantity(request, item_id):
         return JsonResponse({'error': 'No action provided'}, status=400)
 
     new_qty = max(1, min(new_qty, allowed_max))
+    message = None
+    if action == 'increment' and new_qty >= allowed_max:
+        message = f"You can only order maximum {allowed_max}."
+    elif action == 'decrement' and new_qty <= 1:
+        message = "Minimum one item is required."
+
     item.quantity = new_qty
     item.save()
 
@@ -196,7 +252,7 @@ def update_quantity(request, item_id):
     if coupon_id and Coupon:
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
         if coupon and coupon.is_valid():
-            if subtotal >= coupon.minimum_amount:
+            if subtotal >= coupon.min_order_amount:
                 discount = (coupon.discount_percentage / Decimal('100')) * subtotal
                 request.session['discount_amount'] = float(discount)
             else:
@@ -204,9 +260,10 @@ def update_quantity(request, item_id):
                 request.session.pop('coupon_id', None)
                 request.session.pop('discount_amount', None)
                 return JsonResponse({
-                    'error': f'Coupon removed! Minimum order amount should be ₹{coupon.minimum_amount}',
+                    'error': f'Coupon removed! Minimum order amount should be ₹{coupon.min_order_amount}',
                     'coupon_removed': True,
                     'quantity': item.quantity,
+                    'allowed_max': allowed_max,
                     'item_total': float(item.variant.product.get_discounted_price() * item.quantity),
                     'cart_subtotal': float(subtotal),
                     'discount': 0,
@@ -219,6 +276,8 @@ def update_quantity(request, item_id):
     return JsonResponse({
         'item_id': item.id,
         'quantity': item.quantity,
+        'allowed_max': allowed_max,
+        'message': message,
         'item_total': float(item.variant.product.get_discounted_price() * item.quantity),
         'cart_subtotal': float(subtotal),
         'discount': float(discount),

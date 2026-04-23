@@ -143,6 +143,15 @@ class Variant(models.Model):
     def __str__(self):
         return f"{self.product.name} — {self.color}"
 
+    @property
+    def main_image(self):
+        first_img = self.images.order_by('order').first()
+        return first_img if first_img else None
+
+    @property
+    def gallery_images(self):
+        return list(self.images.order_by('order')[1:])
+
     def save(self, *args, **kwargs):
         if self.stock == 0:
             self.is_listed = False

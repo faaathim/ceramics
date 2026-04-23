@@ -581,12 +581,24 @@
     document.getElementById('flipH').addEventListener('click', () => { scaleX = -scaleX; cropper?.scaleX(scaleX); });
     document.getElementById('flipV').addEventListener('click', () => { scaleY = -scaleY; cropper?.scaleY(scaleY); });
 
-    // Apply crop → store blob + show preview
     document.getElementById('applyCrop').addEventListener('click', () => {
         if (!cropper) return;
         cropper.getCroppedCanvas({ width: 800, height: 800, imageSmoothingQuality: 'high' })
             .toBlob(blob => {
                 croppedBlob = blob;
+                
+                // Assign to native file input so the form can submit naturally
+                const dt = new DataTransfer();
+                dt.items.add(new File([blob], "main_image.jpg", { type: "image/jpeg" }));
+                mainImageInput.files = dt.files;
+                
+                // Preserve the image across validation reloads
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    sessionStorage.setItem('product_form_main_image', reader.result);
+                };
+                
                 showPreview(blob);
                 closeCropModal();
                 toast('Image ready — click "Create Product" to save.', 'success');
@@ -597,11 +609,18 @@
         cropModal.classList.remove('active');
         if (cropper) { cropper.destroy(); cropper = null; }
         scaleX = 1; scaleY = 1;
-        mainImageInput.value = '';  // allow re-selecting the same file
+        // Do NOT clear mainImageInput.value here anymore, because it might hold our cropped image!
+        // We only want to clear if we cancel.
     }
 
-    document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
-    document.getElementById('closeCropModal').addEventListener('click', closeCropModal);
+    document.getElementById('cancelCrop').addEventListener('click', () => {
+        mainImageInput.value = ''; // clear only on cancel
+        closeCropModal();
+    });
+    document.getElementById('closeCropModal').addEventListener('click', () => {
+        mainImageInput.value = ''; // clear only on cancel
+        closeCropModal();
+    });
 
     function showPreview(blob) {
         const url = URL.createObjectURL(blob);
@@ -623,54 +642,54 @@
 
     function removePreview() {
         croppedBlob = null;
+        mainImageInput.value = ''; // Clear native input
         document.getElementById('mainImagePreview').innerHTML = '';
+        sessionStorage.removeItem('product_form_main_image');
         toast('Image removed.', 'info');
     }
+
+    // Recover image on page reload if validation failed
+    document.addEventListener('DOMContentLoaded', () => {
+        const hasErrors = {% if form.errors %}true{% else %}false{% endif %};
+        
+        if (!hasErrors) {
+            sessionStorage.removeItem('product_form_main_image');
+        } else {
+            const savedImage = sessionStorage.getItem('product_form_main_image');
+            if (savedImage) {
+                fetch(savedImage)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        croppedBlob = blob;
+                        const dt = new DataTransfer();
+                        dt.items.add(new File([blob], "main_image.jpg", { type: "image/jpeg" }));
+                        mainImageInput.files = dt.files;
+                        showPreview(blob);
+                    });
+            }
+        }
+    });
 
     // ═══════════════════════════════════════════════════════════════
     // FORM SUBMISSION
     // ═══════════════════════════════════════════════════════════════
 
-    document.getElementById('submitBtn').addEventListener('click', async () => {
+    document.getElementById('submitBtn').addEventListener('click', (e) => {
         // Client-side guard: view also checks server-side
-        if (!croppedBlob) {
+        if (!mainImageInput.files || mainImageInput.files.length === 0) {
+            e.preventDefault();
             toast('A main product image is required — please upload one.', 'error');
             return;
         }
 
-        const formEl   = document.getElementById('productForm');
-        const formData = new FormData(formEl);
-
-        // Replace the empty file input with the cropped blob
-        formData.delete('main_image');
-        formData.append('main_image', croppedBlob, 'main_image.jpg');
-
-        const btn      = document.getElementById('submitBtn');
-        const origHTML = btn.innerHTML;
-        btn.disabled   = true;
-        btn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i> Creating…';
-
-        try {
-            const response = await fetch(formEl.action || window.location.href, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
-            });
-
-            if (response.redirected) {
-                // Server redirected → success path
-                window.location.href = response.url;
-            } else {
-                // Server re-rendered form with validation errors
-                const html = await response.text();
-                document.open(); document.write(html); document.close();
-            }
-        } catch (err) {
-            console.error(err);
-            toast('Network error — please try again.', 'error');
-            btn.disabled  = false;
-            btn.innerHTML = origHTML;
-        }
+        const btn = document.getElementById('submitBtn');
+        // Let the form submit naturally. Disable button slightly later so it doesn't block submit event.
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
+            btn.disabled = true;
+        }, 50);
+        
+        document.getElementById('productForm').submit();
     });
     </script>
   </section>
