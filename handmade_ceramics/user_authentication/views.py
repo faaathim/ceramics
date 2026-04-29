@@ -265,17 +265,29 @@ def login_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
+            user_obj = User.objects.filter(email=email).first()
+
+            if not user_obj:
+                messages.error(request, "No account found with this email.")
+                return redirect('user_authentication:login')
+            
+            if not user_obj.is_active:
+                messages.error(request, "This account has been blocked. Please contact support.")
+                return redirect('user_authentication:login')
+            
             user = authenticate(request, username=email, password=password)
 
-            if user:
+            if user: 
                 login(request, user)
                 return redirect('user_side:home')
-
-            messages.error(request, "Invalid email or password.")
+            else:
+                messages.error(request, "Incorrect password.")
         else:
             messages.error(request, "Invalid input.")
-
+    
     return render(request, 'user_authentication/login.html', {'form': form})
+
+
 
 def logout_view(request):
     logout(request)
