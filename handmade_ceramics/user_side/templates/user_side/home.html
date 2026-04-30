@@ -261,8 +261,9 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: grayscale(100%) brightness(0.75) contrast(1.1);
-      transition: transform 0.6s ease, filter 0.4s ease;
+      /* Temporarily remove these to see if images appear */
+      filter: none !important; 
+      transition: transform 0.6s ease;
     }
     .product-card:hover .product-image {
       transform: scale(1.08);
@@ -762,96 +763,78 @@
     <div class="marquee-inner" id="marqueeInner"></div>
   </div>
 
-  <!-- ══════════ LATEST ARRIVALS ══════════ -->
-  <section id="latest-arrivals" class="arrivals-section">
-    <div class="container-xl px-4 px-lg-5">
-      <div class="row mb-5 align-items-end">
-        <div class="col-lg-6">
-          <span class="section-eyebrow">Fresh from the Kiln</span>
-          <h2 class="section-heading">Latest <em>Arrivals</em></h2>
-        </div>
-        <div class="col-lg-5 offset-lg-1 d-flex align-items-end justify-content-lg-end mt-3 mt-lg-0">
-          <a href="{% url 'user_side:shop' %}" class="btn-outline-ceramic">View All Pieces</a>
-        </div>
+<!-- ══════════ LATEST ARRIVALS ══════════ -->
+<section id="latest-arrivals" class="arrivals-section">
+  <div class="container-xl px-4 px-lg-5">
+    <div class="row mb-5 align-items-end">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">Fresh from the Kiln</span>
+        <h2 class="section-heading">Latest <em>Arrivals</em></h2>
       </div>
+      <div class="col-lg-5 offset-lg-1 d-flex align-items-end justify-content-lg-end mt-3 mt-lg-0">
+        <a href="{% url 'user_side:shop' %}" class="btn-outline-ceramic">View All Pieces</a>
+      </div>
+    </div>
 
-      {% if products_page %}
-        <div class="row g-4">
-          {% for product in products_page %}
-          {% with v=product.listed_variants.0 %}
+    {% if products_page %}
+      <div class="row g-4">
+        {% for product in products_page %}
+          {% with v=product.listed_variants|first %} 
           <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="product-card reveal-card">
-              <a href="{% url 'custom_admin:product_management:product_detail' product.id %}{% if v %}?variant={{ v.id }}{% endif %}">
+            <div class="product-card">
+              {# Note: Update this URL to your actual product detail page later #}
+              <a href="{% url 'user_side:shop' %}?q={{ product.name }}">
                 <div class="product-image-wrapper">
-                  {% if v and v.main_image %}
-                    <img src="{{ v.main_image.url }}" alt="{{ product.name }}" class="product-image">
-                  {% elif v and v.images.first %}
-                    <img src="{{ v.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                  {# 1. Check if the variant has a main_image (which returns a VariantImage object) #}
+                  {% if v.main_image %}
+                    {# Access the 'image' field inside that object #}
+                    <img src="{{ v.main_image.image.url }}" alt="{{ product.name }}" class="product-image" style="filter: none !important;">
+                  
+                  {# 2. Fallback to product images if you have a separate ProductImage model (optional) #}
                   {% elif product.images.first %}
-                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image" style="filter: none !important;">
+                
+                  {# 3. Placeholder if no images exist #}
                   {% else %}
-                    <img src="https://via.placeholder.com/400x480/111111/333333?text=No+Image" alt="{{ product.name }}" class="product-image">
+                    <img src="https://placehold.co/400x480/333333/FFFFFF?text=No+Image+Found" alt="Placeholder" class="product-image" style="filter: none !important;">
                   {% endif %}
+                  
                   <div class="product-overlay">
                     <button class="quick-view-btn">Quick View</button>
                   </div>
-                  {% if product.get_best_discount_percentage > 0 %}
-                    <div class="image-discount-badge">-{{ product.get_best_discount_percentage }}%</div>
-                  {% endif %}
                 </div>
+                
                 <div class="product-info">
-                  <div class="product-category">{{ product.category.name|default:"Ceramics" }}</div>
+                  <div class="product-category">{{ product.category.name }}</div>
                   <h3 class="product-name">{{ product.name }}</h3>
                   <div class="product-price">
-                    {% with best_discount=product.get_best_discount_percentage %}
-                      {% if best_discount > 0 %}
-                        ₹{{ product.get_discounted_price }}
-                        <span class="product-price-original">₹{{ product.price }}</span>
-                        <span class="price-discount-badge">-{{ best_discount }}%</span>
+                    {% if v %}
+                      {% if v.sale_price %}
+                        ₹{{ v.sale_price }}
+                      {% elif v.price %}
+                        ₹{{ v.price }}
                       {% else %}
                         ₹{{ product.price }}
                       {% endif %}
-                    {% endwith %}
+                    {% else %}
+                      Contact for Price
+                    {% endif %}
                   </div>
                 </div>
               </a>
             </div>
           </div>
           {% endwith %}
-          {% endfor %}
-        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-products-msg text-center">
+        <p>Our kiln is empty at the moment. Check back soon for new arrivals!</p>
+      </div>
+    {% endif %}
 
-        {% if products_page.has_other_pages %}
-        <div class="pagination-wrapper">
-          <nav aria-label="Product pagination">
-            <ul class="pagination">
-              {% if products_page.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ products_page.previous_page_number }}">&laquo;</a></li>
-              {% else %}
-                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-              {% endif %}
-              {% for num in products_page.paginator.page_range %}
-                {% if products_page.number == num %}
-                  <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                {% elif num > products_page.number|add:'-3' and num < products_page.number|add:'3' %}
-                  <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                {% endif %}
-              {% endfor %}
-              {% if products_page.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ products_page.next_page_number }}">&raquo;</a></li>
-              {% else %}
-                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-              {% endif %}
-            </ul>
-          </nav>
-        </div>
-        {% endif %}
-      {% else %}
-        <div class="no-products-msg">No pieces available at the moment.</div>
-      {% endif %}
-    </div>
-  </section>
-
+  </div>
+</section>
   <!-- ══════════ CRAFTSMANSHIP FEATURE ══════════ -->
   <section class="feature-section">
     <div class="row g-0">
