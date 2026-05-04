@@ -160,6 +160,7 @@ def cart_page(request):
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
         if coupon and coupon.is_valid():
             discount = (coupon.discount_percentage / Decimal('100')) * subtotal
+            discount = min(discount, subtotal)
             request.session['discount_amount'] = float(discount)
         else:
             request.session.pop('coupon_id', None)
@@ -167,12 +168,13 @@ def cart_page(request):
             coupon = None
 
     tax_amount = Decimal('0')
-    shipping_amount = Decimal('0')
+
+    if subtotal < Decimal('1000'):
+        shipping_amount = Decimal('50') 
+    else:
+        shipping_amount = Decimal('0')
 
     total = subtotal + tax_amount + shipping_amount - discount
-
-    if total < 1:
-        total = Decimal('1')
 
     context = {
         'cart': cart,
@@ -202,9 +204,9 @@ def remove_cart_item(request, item_id):
 
     return redirect(reverse('cart:cart_page'))
 
-
 @login_required
 def update_quantity(request, item_id):
+    # 1. Validate request
     if request.method != 'POST' or request.headers.get('x-requested-with') != 'XMLHttpRequest':
         return HttpResponseBadRequest("Invalid request.")
 
@@ -215,9 +217,11 @@ def update_quantity(request, item_id):
     action = request.POST.get('action')
     qty_val = request.POST.get('qty')
 
+    # 2. Max allowed quantity
     site_max = _max_qty_limit()
     allowed_max = min(site_max, variant.stock or 0)
 
+    # 3. Decide new quantity
     if action == 'increment':
         new_qty = item.quantity + 1
     elif action == 'decrement':
@@ -225,40 +229,60 @@ def update_quantity(request, item_id):
     elif qty_val is not None:
         try:
             new_qty = int(qty_val)
-        except (TypeError, ValueError):
+        except:
             return JsonResponse({'error': 'Invalid quantity'}, status=400)
     else:
         return JsonResponse({'error': 'No action provided'}, status=400)
 
+    # 4. Apply limits (min = 1, max = allowed_max)
     new_qty = max(1, min(new_qty, allowed_max))
+
+    # 5. Optional messages
     message = None
     if action == 'increment' and new_qty >= allowed_max:
         message = f"You can only order maximum {allowed_max}."
     elif action == 'decrement' and new_qty <= 1:
         message = "Minimum one item is required."
 
+    # 6. Save updated quantity
     item.quantity = new_qty
     item.save()
 
+    # 7. Recalculate subtotal (ONLY available items)
     items = cart.items.select_related('variant__product')
-    subtotal = sum(
-        i.variant.product.get_discounted_price() * i.quantity
-        for i in items
-    )
 
+    subtotal = Decimal('0')
+
+    for i in items:
+        variant = i.variant
+        product = variant.product
+
+        # Skip unavailable items
+        if (
+            variant.is_deleted or not variant.is_listed or
+            product.is_deleted or not product.is_listed
+        ):
+            continue
+
+        subtotal += product.get_discounted_price() * i.quantity
+
+    # 8. Apply coupon
     discount = Decimal('0')
     coupon_id = request.session.get('coupon_id')
 
     if coupon_id and Coupon:
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
+
         if coupon and coupon.is_valid():
             if subtotal >= coupon.min_order_amount:
                 discount = (coupon.discount_percentage / Decimal('100')) * subtotal
+                discount = min(discount, subtotal)
                 request.session['discount_amount'] = float(discount)
             else:
-                # Remove coupon — minimum amount no longer met
+                # ❌ Remove coupon if condition fails
                 request.session.pop('coupon_id', None)
                 request.session.pop('discount_amount', None)
+
                 return JsonResponse({
                     'error': f'Coupon removed! Minimum order amount should be ₹{coupon.min_order_amount}',
                     'coupon_removed': True,
@@ -267,11 +291,23 @@ def update_quantity(request, item_id):
                     'item_total': float(item.variant.product.get_discounted_price() * item.quantity),
                     'cart_subtotal': float(subtotal),
                     'discount': 0,
-                    'cart_total': float(max(subtotal, Decimal('1'))),
+                    'cart_total': float(subtotal),
                     'cart_items': cart.total_items(),
-                }, status=200)
+                })
 
-    total = max(subtotal - discount, Decimal('1'))
+    # 9. Calculate shipping (based on DISCOUNTED subtotal)
+    discounted_subtotal = subtotal - discount
+
+    if discounted_subtotal >= Decimal('1000'):
+        shipping_amount = Decimal('0')   # Free shipping
+        print("discounted subtotal gr than 1000, 0 shipping amount")
+    else:
+        shipping_amount = Decimal('50')
+
+    # 10. Tax (currently 0)
+    tax_amount = Decimal('0')
+
+    total = discounted_subtotal + shipping_amount + tax_amount
 
     return JsonResponse({
         'item_id': item.id,
@@ -280,6 +316,7 @@ def update_quantity(request, item_id):
         'message': message,
         'item_total': float(item.variant.product.get_discounted_price() * item.quantity),
         'cart_subtotal': float(subtotal),
+        'shipping_amount': float(shipping_amount),
         'discount': float(discount),
         'cart_total': float(total),
         'cart_items': cart.total_items(),

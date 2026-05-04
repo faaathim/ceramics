@@ -76,6 +76,8 @@ def cancel_order(request, order_id):
     messages.success(request, "Order cancelled successfully.")
     return redirect(order.get_absolute_url())
 
+
+
 @login_required
 @require_POST
 def cancel_order_item(request, order_id, item_id):

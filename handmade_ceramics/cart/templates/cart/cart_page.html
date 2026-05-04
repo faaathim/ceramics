@@ -77,27 +77,11 @@
     }
 
     @keyframes qtyShake {
-
-        0%,
-        100% {
-            transform: translateX(0);
-        }
-
-        20% {
-            transform: translateX(-5px);
-        }
-
-        40% {
-            transform: translateX(5px);
-        }
-
-        60% {
-            transform: translateX(-4px);
-        }
-
-        80% {
-            transform: translateX(4px);
-        }
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-5px); }
+        40% { transform: translateX(5px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
     }
 
     .qty-limit-flash {
@@ -138,27 +122,13 @@
     }
 
     @keyframes toastIn {
-        from {
-            opacity: 0;
-            transform: translateX(100%) scale(.9)
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0) scale(1)
-        }
+        from { opacity: 0; transform: translateX(100%) scale(.9); }
+        to   { opacity: 1; transform: translateX(0) scale(1); }
     }
 
     @keyframes toastOut {
-        from {
-            opacity: 1;
-            transform: translateX(0) scale(1)
-        }
-
-        to {
-            opacity: 0;
-            transform: translateX(100%) scale(.9)
-        }
+        from { opacity: 1; transform: translateX(0) scale(1); }
+        to   { opacity: 0; transform: translateX(100%) scale(.9); }
     }
 
     .cart-main-container {
@@ -352,20 +322,9 @@
     }
 
     @keyframes flashLimit {
-        0% {
-            border-color: #7b1fa2;
-            box-shadow: 0 0 0 0 rgba(123, 31, 162, 0.6);
-        }
-
-        40% {
-            border-color: #ab47bc;
-            box-shadow: 0 0 0 6px rgba(123, 31, 162, 0.2);
-        }
-
-        100% {
-            border-color: #404040;
-            box-shadow: none;
-        }
+        0%   { border-color: #7b1fa2; box-shadow: 0 0 0 0 rgba(123, 31, 162, 0.6); }
+        40%  { border-color: #ab47bc; box-shadow: 0 0 0 6px rgba(123, 31, 162, 0.2); }
+        100% { border-color: #404040; box-shadow: none; }
     }
 
     .qty-limit-flash {
@@ -483,46 +442,97 @@
         color: #fff;
     }
 
+    /* ── Order summary / totals box ─────────────────────────── */
     .cart-totals-box {
         background: #0d0d0d;
         padding: 30px;
-        border-radius: 8px;
-        border: 1px solid #404040;
+        border-radius: 12px;
+        border: 1px solid #2e2e2e;
     }
 
     .totals-title {
-        font-size: 1.3rem;
+        font-size: 1.15rem;
         font-weight: 600;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #404040;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #2e2e2e;
         color: #fff;
+        letter-spacing: .5px;
     }
 
-    .totals-line {
+    /* Price rows — matching checkout style */
+    .price-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .price-row {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 15px;
-        font-size: 1rem;
-        color: #fff;
+        align-items: center;
+        padding: 9px 0;
+        color: #ccc;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255,255,255,.04);
     }
 
-    .totals-line.coupon-discount {
+    .price-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .discount-row {
         color: #4caf50;
     }
 
-    .totals-line.coupon-discount.hidden {
+    .discount-row.hidden {
         display: none;
     }
 
-    .totals-line.final-total {
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 1px solid #404040;
+    .discount-amount {
+        color: #4caf50;
+        font-weight: 600;
     }
 
+    .coupon-pill {
+        display: inline-block;
+        background: rgba(76,175,80,.15);
+        color: #4caf50;
+        border: 1px solid rgba(76,175,80,.3);
+        padding: 1px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        margin-left: 6px;
+    }
+
+    .free-badge {
+        background: rgba(76,175,80,.18);
+        color: #4caf50;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .total-row {
+        margin-top: 8px;
+        padding-top: 14px !important;
+        border-top: 2px solid #2e2e2e !important;
+        border-bottom: none !important;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .min-note {
+        color: #888;
+        font-size: 11px;
+        margin: 8px 0 0;
+    }
+
+    /* COD notice */
     .cod-limit-notice {
         display: flex;
         align-items: flex-start;
@@ -535,13 +545,13 @@
     }
 
     .cod-limit-notice .notice-icon {
-        font-size: 16px;
+        font-size: 14px;
         flex-shrink: 0;
         margin-top: 1px;
     }
 
     .cod-limit-notice .notice-text {
-        font-size: 13px;
+        font-size: 12px;
         color: #ffb74d;
         line-height: 1.5;
     }
@@ -654,7 +664,7 @@
 
     @keyframes alertSlideIn {
         from { opacity: 0; transform: translateY(-10px) scale(.97); }
-        to   { opacity: 1; transform: translateY(0)     scale(1);   }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .alert::before {
@@ -662,40 +672,19 @@
         flex-shrink: 0;
     }
 
-    .alert-success {
-        background: #1b2e1f;
-        border-color: #2e7d32;
-        color: #a5d6a7;
-    }
+    .alert-success { background: #1b2e1f; border-color: #2e7d32; color: #a5d6a7; }
     .alert-success::before { content: '✅'; }
 
-    .alert-error {
-        background: #2e1b1b;
-        border-color: #c62828;
-        color: #ef9a9a;
-    }
+    .alert-error { background: #2e1b1b; border-color: #c62828; color: #ef9a9a; }
     .alert-error::before { content: '⚠️'; }
 
-    .alert-warning {
-        background: #2e2618;
-        border-color: #e65100;
-        color: #ffcc80;
-    }
+    .alert-warning { background: #2e2618; border-color: #e65100; color: #ffcc80; }
     .alert-warning::before { content: '⚠️'; }
 
-    .alert-info {
-        background: #1b2535;
-        border-color: #1565c0;
-        color: #90caf9;
-    }
+    .alert-info { background: #1b2535; border-color: #1565c0; color: #90caf9; }
     .alert-info::before { content: 'ℹ️'; }
 
-    /* fallback for untagged messages */
-    .alert:not([class*="alert-"]) {
-        background: #1b2535;
-        border-color: #1565c0;
-        color: #90caf9;
-    }
+    .alert:not([class*="alert-"]) { background: #1b2535; border-color: #1565c0; color: #90caf9; }
     .alert:not([class*="alert-"])::before { content: 'ℹ️'; }
 
     @media (max-width: 968px) {
@@ -837,30 +826,56 @@
             {% endif %}
         </div>
 
+        <!-- ── Order Summary (checkout-style billing) ── -->
         <div class="cart-totals-box">
-            <h3 class="totals-title">Cart Totals</h3>
+            <h3 class="totals-title">🛒 Order Summary</h3>
 
-            <div class="totals-line">
-                <span>Subtotal</span>
-                <span id="cart-subtotal">₹{{ subtotal|floatformat:0 }}</span>
+            <div class="price-breakdown">
+
+                <div class="price-row">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+
+                <div class="price-row">
+                    <span>Tax</span>
+                    <span id="cart-tax">
+                        {% if tax_amount > 0 %}
+                            ₹{{ tax_amount|floatformat:2 }}
+                        {% else %}
+                            <span class="free-badge">Included</span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="price-row">
+                    <span>Shipping</span>
+                    <span id="cart-shipping">
+                        {% if shipping_amount > 0 %}
+                  ₹{{ shipping_amount|floatformat:2 }}
+                {% else %}
+                  <span class="free-badge">Free</span>
+                {% endif %}
+                    </span>
+                </div>
+
+                <div class="price-row discount-row {% if not discount or discount == 0 %}hidden{% endif %}"
+                    id="coupon-discount-row">
+                    <span>
+                        Discount
+                        {% if coupon %}
+                        <span class="coupon-pill">{{ coupon.code }}</span>
+                        {% endif %}
+                    </span>
+                    <span class="discount-amount" id="cart-discount">− ₹{{ discount|floatformat:2 }}</span>
+                </div>
+
+                <div class="price-row total-row">
+                    <span>Total</span>
+                    <span id="cart-total">₹{{ total_price|floatformat:2 }}</span>
+                </div>
+
             </div>
-
-            <div class="totals-line coupon-discount {% if not discount or discount == 0 %}hidden{% endif %}"
-                id="coupon-discount-row">
-                <span>Coupon Discount</span>
-                <span id="cart-discount">− ₹{{ discount|floatformat:0 }}</span>
-            </div>
-
-            <div class="totals-line">
-                <span>Shipping</span>
-                <span>₹0</span>
-            </div>
-
-            <div class="totals-line final-total">
-                <span>Total</span>
-                <span id="cart-total">₹{{ total_price|floatformat:0 }}</span>
-            </div>
-
             <div class="cod-limit-notice" id="cod-limit-notice"
                 style="{% if total_price <= cod_limit %}display:none;{% endif %}">
                 <span class="notice-icon">⚠️</span>
@@ -902,6 +917,7 @@
 
 <script>
     const COD_LIMIT = {{ cod_limit }};
+
 
     const TOAST_ICONS = { success: '✅', error: '⚠️', warning: '⚠️', info: 'ℹ️', limit: '🔒' };
 
@@ -967,7 +983,7 @@
     function updateQuantity(itemId, action) {
         const decBtn = document.querySelector(`.qty-decrement[data-item-id="${itemId}"]`);
         const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
-        const qtyEl = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
+        const qtyEl  = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
 
         const currentQty = qtyEl ? parseInt(qtyEl.textContent, 10) : null;
         const maxAllowed = incBtn ? parseInt(incBtn.dataset.allowedMax, 10) : null;
@@ -997,61 +1013,72 @@
             },
             body,
         })
-            .then(r => r.json())
-            .then(data => {
+        .then(r => r.json())
+        .then(data => {
 
-                if (data.coupon_removed) {
-                    showToast(data.error, 'warning', 7000);
-                    window.location.reload();
-                    return;
-                }
+            if (data.coupon_removed) {
+                showToast(data.error, 'warning', 7000);
+                window.location.reload();
+                return;
+            }
 
-                if (data.error) {
-                    showToast(data.error, 'error');
-                    reEnable(itemId, currentQty, maxAllowed);
-                    return;
-                }
-
-                if (data.message) {
-                    flashQtyRow(itemId);
-                    showToast(data.message, 'limit', 4000);
-                }
-
-                refreshRow(itemId, data);
-
-                const elSub = document.getElementById('cart-subtotal');
-                const elTot = document.getElementById('cart-total');
-                const elDisc = document.getElementById('cart-discount');
-                const discRow = document.getElementById('coupon-discount-row');
-
-                if (elSub) elSub.textContent = `₹${Math.round(data.cart_subtotal)}`;
-
-                if (data.discount > 0) {
-                    if (discRow) discRow.classList.remove('hidden');
-                    if (elDisc) elDisc.textContent = `− ₹${Math.round(data.discount)}`;
-                } else {
-                    if (discRow) discRow.classList.add('hidden');
-                }
-
-                const newTotal = Math.round(data.cart_total);
-                if (elTot) elTot.textContent = `₹${newTotal}`;
-                updateCodNotice(newTotal);
-                refreshCount(data.cart_items);
-                reEnable(itemId, data.quantity, data.allowed_max);
-            })
-            .catch(err => {
-                console.error('Cart update error:', err);
-                showToast('Failed to update quantity. Please try again.', 'error');
+            if (data.error) {
+                showToast(data.error, 'error');
                 reEnable(itemId, currentQty, maxAllowed);
-            });
+                return;
+            }
+
+            if (data.message) {
+                flashQtyRow(itemId);
+                showToast(data.message, 'limit', 4000);
+            }
+
+            refreshRow(itemId, data);
+
+            const elSub      = document.getElementById('cart-subtotal');
+            const elTot      = document.getElementById('cart-total');
+            const elDisc     = document.getElementById('cart-discount');
+            const elShipping = document.getElementById('cart-shipping');
+            const discRow    = document.getElementById('coupon-discount-row');
+
+            if (elSub) elSub.textContent = `₹${parseFloat(data.cart_subtotal).toFixed(2)}`;
+
+            // Update shipping display based on new subtotal
+            if (elShipping) {
+                if (parseFloat(data.shipping_amount) === 0) {
+                    elShipping.innerHTML = `<span class="free-badge">Free</span>`;
+                } else {
+                    elShipping.textContent = `₹${parseFloat(data.shipping_amount).toFixed(2)}`;
+                }
+            }
+            
+
+            if (data.discount > 0) {
+                if (discRow) discRow.classList.remove('hidden');
+                if (elDisc) elDisc.textContent = `− ₹${parseFloat(data.discount).toFixed(2)}`;
+            } else {
+                if (discRow) discRow.classList.add('hidden');
+            }
+
+            const newTotal = parseFloat(data.cart_total);
+            if (elTot) elTot.textContent = `₹${newTotal.toFixed(2)}`;
+            updateCodNotice(newTotal);
+            refreshCount(data.cart_items);
+            reEnable(itemId, data.quantity, data.allowed_max);
+        })
+        .catch(err => {
+            console.error('Cart update error:', err);
+            showToast('Failed to update quantity. Please try again.', 'error');
+            reEnable(itemId, currentQty, maxAllowed);
+        });
     }
 
     function refreshRow(itemId, data) {
-        const qtyEl = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
-        const subEl = document.querySelector(`.subtotal-column[data-item-id="${itemId}"]`);
+        const qtyEl  = document.querySelector(`.qty-display[data-item-id="${itemId}"]`);
+        const subEl  = document.querySelector(`.subtotal-column[data-item-id="${itemId}"]`);
         const incBtn = document.querySelector(`.qty-increment[data-item-id="${itemId}"]`);
-        if (qtyEl && data.quantity != null) qtyEl.textContent = data.quantity;
-        if (subEl && data.item_total != null) subEl.textContent = `₹${Math.round(data.item_total)}`;
+        if (qtyEl && data.quantity != null)    qtyEl.textContent = data.quantity;
+        if (subEl && data.item_total != null)  subEl.textContent = `₹${Math.round(data.item_total)}`;
         if (incBtn && data.allowed_max != null) incBtn.dataset.allowedMax = data.allowed_max;
     }
 

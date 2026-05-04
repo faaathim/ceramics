@@ -52,7 +52,7 @@ def checkout_page(request):
     )
 
     tax_amount = 0
-    shipping_amount = Decimal(str(settings.DELIVERY_CHARGE))
+    shipping_amount = Decimal('0') if subtotal >= Decimal('1000') else Decimal('50')
 
     discount = Decimal(str(request.session.get("discount_amount", 0)))
     coupon_id = request.session.get("coupon_id")
@@ -62,9 +62,6 @@ def checkout_page(request):
         coupon = Coupon.objects.filter(id=coupon_id).first()
 
     total = subtotal + tax_amount + shipping_amount - discount
-
-    if total < 1:
-        total = 1
 
     addresses = Address.objects.filter(user=user, is_deleted=False)
 
@@ -135,7 +132,7 @@ def place_order(request):
         for item in cart_items
     )
     tax_amount = 0
-    shipping_amount = Decimal(str(settings.DELIVERY_CHARGE))
+    shipping_amount = Decimal('0') if subtotal >= Decimal('1000') else Decimal('50')
 
     discount = Decimal(str(request.session.get("discount_amount", 0)))
     coupon_id = request.session.get("coupon_id")
@@ -143,9 +140,7 @@ def place_order(request):
     if coupon_id:
         coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
     total = subtotal + tax_amount + shipping_amount - discount
-    if total < 1:
-        total = 1
-    
+
     if payment_method == "COD" and total > settings.COD_LIMIT:
         messages.error(
             request,
@@ -188,14 +183,9 @@ def place_order(request):
         item_unit_price = item.variant.product.get_discounted_price()
         item_subtotal = item_unit_price * item.quantity
         
-        # Calculate proportional discount
         item_discount = Decimal("0.00")
         if coupon and subtotal > 0:
-            # We use the same percentage that was applied to the whole order
-            # item_discount = (item_subtotal / subtotal) * discount
-            # Since our coupons are percentage-based, this is equivalent to:
             item_discount = (item_subtotal * Decimal(coupon.discount_percentage)) / Decimal("100")
-            # Rounding to 2 decimal places to avoid precision issues
             item_discount = item_discount.quantize(Decimal("0.01"))
 
         OrderItem.objects.create(
