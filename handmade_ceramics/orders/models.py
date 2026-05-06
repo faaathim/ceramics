@@ -1,5 +1,3 @@
-# orders/models.py
-
 from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -11,6 +9,7 @@ from decimal import Decimal
 
 User = get_user_model()
 
+
 ORDER_STATUS_CHOICES = [
     ('PENDING', 'Pending'),
     ('CONFIRMED', 'Confirmed'),
@@ -19,9 +18,8 @@ ORDER_STATUS_CHOICES = [
     ('DELIVERED', 'Delivered'),
     ('CANCELLED', 'Cancelled'),
     ('RETURN_REQUESTED', 'Return requested'),
-    ('PARTIAL_RETURN_REQUESTED', 'Partial return requested')
+    ('PARTIAL_RETURN_REQUESTED', 'Partial return requested'),
 ]
-
 
 ITEM_STATUS_CHOICES = [
     ('PENDING', 'Pending'),
@@ -42,9 +40,7 @@ def generate_order_id():
 
 
 class Order(models.Model):
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-
     order_id = models.CharField(max_length=40, unique=True, editable=False)
 
     shipping_full_name = models.CharField(max_length=200)
@@ -74,50 +70,13 @@ class Order(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    ORDER_STATUS_FLOW = {
-        'PENDING': ['CONFIRMED', 'CANCELLED'],
-        'CONFIRMED': ['SHIPPED', 'CANCELLED'],
-        'SHIPPED': ['OUT_FOR_DELIVERY'],
-        'OUT_FOR_DELIVERY': ['DELIVERED'],
-        'DELIVERED': ['RETURN_REQUESTED', 'PARTIAL_RETURN_REQUESTED'],
-        'RETURN_REQUESTED': ['RETURN_PROCESSING'],
-        'PARTIAL_RETURN_REQUESTED': ['PARTIAL_RETURN_PROCESSING'],
-        'RETURN_PROCESSING': ['RETURNED'],
-        'PARTIAL_RETURN_PROCESSING': ['PARTIALLY_RETURNED'],
-        'RETURNED': [],
-        'PARTIALLY_RETURNED': [],
-        'CANCELLED': [],
-    }
-
-    coupon = models.ForeignKey(
-        Coupon,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['status']),
-            models.Index(fields=['created_at']),
-        ]
 
-    def recalculate_totals(self):
-        from .services.pricing_service import PricingService
-        
-        totals = PricingService.calculate_order_totals(self)
-        
-        self.subtotal = totals['subtotal']
-        self.discount_amount = totals['discount_amount']
-        self.shipping_charge = totals['shipping_charge']
-        self.tax_amount = totals['tax_amount']
-        self.total_amount = totals['total_amount']
-
-        self.save()
-
-    def __str__(self):
-        return f"{self.order_id} - {self.user}"
+    def get_absolute_url(self):
+        return reverse('orders:order_detail', args=[self.order_id])
 
     def save(self, *args, **kwargs):
         if not self.order_id:
@@ -129,19 +88,47 @@ class Order(models.Model):
             else:
                 self.order_id = generate_order_id()
         super().save(*args, **kwargs)
-
-    def get_absolute_url(self):
-        return reverse('orders:order_detail', args=[self.order_id])
-
+        
     def can_change_status(self, new_status):
-        return new_status in self.ORDER_STATUS_FLOW.get(self.status, [])
+        allowed_transitions = {
+            'PENDING': ['CONFIRMED', 'CANCELLED'],
+            'CONFIRMED': ['SHIPPED', 'CANCELLED'],
+            'SHIPPED': ['OUT_FOR_DELIVERY', 'CANCELLED'],
+            'OUT_FOR_DELIVERY': ['DELIVERED'],
+            'DELIVERED': ['RETURN_REQUESTED', 'PARTIAL_RETURN_REQUESTED'],
+            'RETURN_REQUESTED': ['RETURN_PROCESSING'],
+            'PARTIAL_RETURN_REQUESTED': ['RETURN_PROCESSING'],
+            'RETURN_PROCESSING': ['RETURNED'],
+        }
+
+        return new_status in allowed_transitions.get(self.status, [])
+
     
-    def calculate_refund(self, old_total):
-        return old_total - self.total_amount
+    def recalculate_totals(self):
+        items = self.items.exclude(
+            item_status__in=['CANCELLED', 'RETURNED']
+        )
+
+        subtotal = sum(
+            (item.item_total for item in items),
+            Decimal("0.00")
+        )
+
+        discount = sum(
+            (item.coupon_discount_amount for item in items),
+            Decimal("0.00")
+        )
+
+        self.subtotal = subtotal
+        self.discount_amount = discount
+        self.total_amount = (
+            subtotal + self.tax_amount + self.shipping_charge - discount
+        )
+
+        self.save()
 
 
 class OrderItem(models.Model):
-
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     variant = models.ForeignKey(Variant, on_delete=models.SET_NULL, null=True, blank=True)
@@ -151,51 +138,22 @@ class OrderItem(models.Model):
 
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=1)
-    item_total = models.DecimalField(max_digits=12, decimal_places=2, default=0) # unit_price * quantity
-    coupon_discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0) # proportional share of coupon
-    final_total = models.DecimalField(max_digits=12, decimal_places=2, default=0) # item_total - coupon_discount_amount
+    item_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    final_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     item_status = models.CharField(max_length=30, choices=ITEM_STATUS_CHOICES, default='PENDING')
 
-    cancellation_reason = models.TextField(blank=True, null=True)
-    return_reason = models.TextField(blank=True, null=True)
-
     created_at = models.DateTimeField(default=timezone.now)
+
+    coupon_discount_amount = models.DecimalField(max_digits=10,decimal_places=2,default=0)
 
     class Meta:
         ordering = ['-created_at']
 
-    def __str__(self):
-        return f"{self.product_name} x {self.quantity} ({self.order.order_id})"
-
-    @transaction.atomic
-    def cancel_item(self):
-        if self.item_status in ['CANCELLED', 'RETURNED']:
-            return
-        
-        if self.variant:
-            self.variant.stock += self.quantity
-            self.variant.save()
-
-        self.item_status = 'CANCELLED'  
-        self.save()
-
-        self.order.recalculate_totals()
-
-    @transaction.atomic
-    def process_return(self):
-        if self.item_status != 'RETURN_REQUESTED':
-            return
-
-        if self.variant:
-            self.variant.stock += self.quantity
-            self.variant.save()
-
-        self.item_status = 'RETURNED'
-        self.save()
-
-        self.order.recalculate_totals()
-
     def save(self, *args, **kwargs):
         self.item_total = self.unit_price * self.quantity
         super().save(*args, **kwargs)
+
+    def process_return(self):
+        from orders.services.item_service import OrderItemService
+        OrderItemService.process_return(self)

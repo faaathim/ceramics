@@ -1,3 +1,5 @@
+# orders/services/pricing_service
+
 from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 
@@ -7,34 +9,28 @@ class PricingService:
     def quantify(amount):
         return Decimal(amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-    @classmethod
     def calculate_order_totals(cls, order):
 
         active_items = order.items.exclude(
             item_status__in=['CANCELLED', 'RETURNED']
         )
 
-        # ✅ USE STORED VALUES (DO NOT RECALCULATE)
         subtotal = sum((item.item_total for item in active_items), Decimal("0.00"))
-        subtotal = cls.quantify(subtotal)
 
         discount = sum((item.coupon_discount_amount for item in active_items), Decimal("0.00"))
-        discount = cls.quantify(discount)
 
         final_items_total = sum((item.final_total for item in active_items), Decimal("0.00"))
-        final_items_total = cls.quantify(final_items_total)
 
         shipping = cls.calculate_shipping(subtotal)
-        shipping = cls.quantify(shipping)
 
-        tax = cls.quantify(Decimal("0.00"))
+        tax = Decimal("0.00")
 
         return {
             'subtotal': subtotal,
             'discount_amount': discount,
             'shipping_charge': shipping,
             'tax_amount': tax,
-            'total_amount': cls.quantify(final_items_total + shipping + tax)
+            'total_amount': final_items_total + shipping + tax
         }
 
     @classmethod

@@ -111,7 +111,6 @@ def place_order(request):
     if not cart_items.exists():
         return redirect("checkout:checkout")
 
-    # ✅ VALIDATIONS
     for item in cart_items:
         variant = item.variant
         product = variant.product
@@ -120,7 +119,6 @@ def place_order(request):
             messages.error(request, f"Only {variant.stock} items available for {product.name}.")
             return redirect("checkout:checkout")
 
-    # ✅ CALCULATIONS
     subtotal = sum(
         item.variant.product.get_discounted_price() * item.quantity
         for item in cart_items

@@ -10,12 +10,13 @@ from django.template.loader import render_to_string
 from django.db.models import F
 from django.views.decorators.http import require_POST
 import weasyprint
-
+from decimal import Decimal
 from .models import Order, OrderItem
 from profiles.models import Profile
 from coupons.models import CouponUsage
 from wallet.models import Wallet, WalletTransaction
 from orders.services.order_service import OrderService
+from django.db.models import Sum
 
 @login_required
 def order_list(request):
@@ -54,11 +55,13 @@ def order_detail(request, order_id):
 
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
     items = order.items.all()
+    refunded_amount = order.items.filter(item_status='RETURNED').aggregate(total=Sum('final_total'))['total'] or Decimal('0.00')
 
     return render(request, "orders/order_detail.html", {
         "order": order,
         "items": items,
         "profile": profile,
+        "refunded_amount": refunded_amount,
     })
 
 @login_required

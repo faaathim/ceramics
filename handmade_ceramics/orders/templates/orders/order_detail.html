@@ -81,7 +81,7 @@
         {% elif order.status == 'DELIVERED' %}<p>Your order has been delivered. You can return items within the eligible window.</p>
         {% elif order.status == 'CANCELLED' %}
           <p>This order has been cancelled.</p>
-          {% if order.is_refunded %}<p class="note-refund">✓ ₹{{ order.total_amount }} has been refunded to your wallet.</p>{% endif %}
+          {% if order.is_refunded %}<p class="note-refund">✓ ₹{{ refunded_amount }} has been refunded to your wallet.</p>{% endif %}
         {% elif order.status == 'RETURN_REQUESTED' %}
           <p>Your return request has been submitted and is awaiting admin review.</p>
           {% if order.return_reason %}<p class="note-sub">Reason: {{ order.return_reason }}</p>{% endif %}
@@ -91,7 +91,7 @@
           <p>Your return is being processed. Please ensure items are ready to ship back.</p>
         {% elif order.status == 'RETURNED' %}
           <p>Your return has been completed.</p>
-          {% if order.is_refunded %}<p class="note-refund">✓ ₹{{ order.total_amount }} has been refunded to your wallet.</p>{% endif %}
+          {% if order.is_refunded %}<p class="note-refund">✓ ₹{{ refunded_amount }} has been refunded to your wallet.</p>{% endif %}
         {% endif %}
         {% if order.return_rejection_reason %}
           <p class="note-reject">⚠ Return rejected — {{ order.return_rejection_reason }}</p>
@@ -146,7 +146,7 @@
           {% if order.is_refunded %}
           <div class="info-row">
             <span class="ir-label">Refund</span>
-            <span class="ir-val refund-val">₹{{ order.total_amount }} → Wallet</span>
+            <span class="ir-val refund-val">₹{{ refunded_amount }} → Wallet</span>
           </div>
           {% endif %}
         </div>

@@ -3,10 +3,10 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from orders.models import Order
 import uuid
 
 User = get_user_model()
+
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -34,31 +34,23 @@ class WalletTransaction(models.Model):
         ('MANUAL', 'Manual Adjustment'),
     ]
 
-    transaction_id = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        unique=True
+    transaction_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+    wallet = models.ForeignKey(
+        Wallet,
+        on_delete=models.CASCADE,
+        related_name='transactions'
     )
 
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions')
-
-    transaction_type = models.CharField(
-        max_length=10,
-        choices=TRANSACTION_TYPE_CHOICES
-    )
-
-    source = models.CharField(
-        max_length=20,
-        choices=SOURCE_CHOICES,
-        default='MANUAL'
-    )
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='MANUAL')
 
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-
     description = models.TextField()
 
+    # ✅ FIX: correct safe FK (NO IMPORT)
     order = models.ForeignKey(
-        Order,
+        'orders.Order',
         on_delete=models.SET_NULL,
         null=True,
         blank=True

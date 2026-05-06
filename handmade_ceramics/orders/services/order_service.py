@@ -1,3 +1,5 @@
+# orders/services/order_service.py
+
 from django.db import transaction
 from decimal import Decimal
 
@@ -85,23 +87,6 @@ class OrderService:
     @transaction.atomic
     def process_item_return(item):
 
-        # ✅ Only valid state
         if item.item_status != 'RETURN_REQUESTED':
             return
-
-        order = item.order
-
-        # ✅ Capture refund BEFORE mutation
-        refund_amount = item.final_total
-
-        # ✅ Process return (updates stock + status)
         item.process_return()
-
-        if order.is_paid and refund_amount > 0:
-
-            RefundService.refund_to_wallet(
-                user=order.user,
-                amount=refund_amount,
-                order=order,
-                source="ITEM_RETURN_REFUND"
-            )

@@ -1,8 +1,8 @@
-from django.db import transaction
-from django.db.models import F
+# orders/services/return_service.py
 
-from wallet.models import Wallet, WalletTransaction
-from orders.models import OrderItem
+from django.db import transaction
+from decimal import Decimal
+from orders.services.refund_service import RefundService
 
 
 class ReturnService:
@@ -10,12 +10,8 @@ class ReturnService:
     @staticmethod
     @transaction.atomic
     def approve_order_return(order):
-        """
-        Admin approves a full order return
-        """
 
-        if order.status != "RETURN_REQUESTED" and order.status != "PARTIAL_RETURN_REQUESTED":
-            print(f"status:{order.status}")
+        if order.status not in ["RETURN_REQUESTED", "PARTIAL_RETURN_REQUESTED"]:
             return False
 
         order.status = "RETURN_PROCESSING"
@@ -25,49 +21,60 @@ class ReturnService:
         ).update(item_status="RETURN_PROCESSING")
 
         order.save()
-
         return True
 
 
     @staticmethod
     @transaction.atomic
     def reject_order_return(order, reason=""):
-        """
-        Admin rejects a return request
-        """
 
         if order.status not in ["RETURN_REQUESTED", "PARTIAL_RETURN_REQUESTED"]:
             return False
 
         order.status = "DELIVERED"
         order.return_rejection_reason = reason
-        order.save()
 
         order.items.filter(
             item_status="RETURN_REQUESTED"
         ).update(item_status="DELIVERED")
 
+        order.save()
         return True
 
 
     @staticmethod
     @transaction.atomic
     def complete_order_return(order):
-        """
-        Admin completes the return
-        """
-        if order.status != "RETURN_PROCESSING" and order.status != "PARTIAL_RETURN_REQUESTED":
+
+        items = order.items.filter(item_status='RETURN_PROCESSING')
+
+        if not items.exists():
             return False
 
-        # We use a loop to process each item that is being returned
-        # This allows us to handle partial returns correctly
-        items_to_process = order.items.filter(item_status__in=["RETURN_REQUESTED", "RETURN_PROCESSING"])
-        
-        from .order_service import OrderService
-        for item in items_to_process:
-            OrderService.process_item_return(item)
+        # ✅ SINGLE SOURCE OF TRUTH FOR REFUND
+        total_refund = sum(
+            (item.final_total for item in items),
+            Decimal("0.00")
+        )
 
-        order.status = "RETURNED"
+        # ✅ Refund ONLY ONCE
+        if total_refund > 0:
+            RefundService.refund_to_wallet(
+                user=order.user,
+                amount=total_refund,
+                order=order,
+                source='RETURN_REFUND'
+            )
+
+        # ✅ Mark returned
+        items.update(item_status='RETURNED')
+
+        order.status = 'RETURNED'
+        order.is_refunded = True
+
+        # ❌ REMOVE THIS (VERY IMPORTANT)
+        # order.recalculate_totals()
+
         order.save()
 
         return True
