@@ -15,416 +15,577 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-      body {
-        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Segoe+UI:wght@400;500;600;700&display=swap');
+
+      *, *::before, *::after { box-sizing: border-box; }
+
+      :root {
+        --bg-deep:    #0a0a0a;
+        --bg-card:    #1a1a1a;
+        --bg-hover:   #252525;
+        --border:     #333;
+        --border-hi:  #404040;
+        --accent:     #9b8bdb;
+        --accent-dim: rgba(155,139,219,.12);
+        --accent2:    #70c090;
+        --accent3:    #d0c070;
+        --red:        #e07070;
+        --text-hi:    #e8e8e8;
+        --text-mid:   #909090;
+        --text-low:   #606060;
+        --mono:       'JetBrains Mono', monospace;
+        --sans:       'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --radius:     15px;
+        --shadow:     0 5px 20px rgba(0,0,0,.5);
+        --shadow-hi:  0 8px 30px rgba(0,0,0,.7);
       }
 
+      body { font-family: var(--sans); background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); }
+
+      /* ── Layout ── */
       .sales-report-content {
         margin-left: 250px;
         margin-top: 70px;
-        padding: 40px;
+        padding: 36px 40px;
         min-height: calc(100vh - 70px);
       }
 
-      /* ── Header ── */
-      .header-section {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: 15px;
-        padding: 25px 30px;
-        box-shadow: 0 5px 20px rgba(0,0,0,.5);
-        margin-bottom: 30px;
-        border: 1px solid #333;
+      /* ── Page Header ── */
+      .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
         transition: all .3s ease;
       }
-      .header-section:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,.7);
-        border-color: #404040;
-      }
-      .header-title {
+      .page-header:hover { box-shadow: var(--shadow-hi); border-color: var(--border-hi); }
+      .page-header-left {
         display: flex;
         align-items: center;
-        gap: 15px;
-        color: #e8e8e8;
+        gap: 14px;
       }
-      .header-title i {
-        font-size: 2rem;
-        color: #9b8bdb;
+      .header-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        background: var(--accent-dim);
+        border: 1px solid rgba(91,141,238,.25);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--accent);
+        font-size: 1.1rem;
       }
-      .header-title h2 {
+      .page-header h2 {
         margin: 0;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-hi);
+        letter-spacing: -.3px;
+      }
+      .page-header .sub {
+        font-size: .8rem;
+        color: var(--text-mid);
+        margin-top: 2px;
+        font-family: var(--mono);
+      }
+
+      /* ── Active Filter Badges ── */
+      .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .active-filters-label {
+        font-size: .75rem;
+        color: var(--text-mid);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+      }
+      .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: var(--accent-dim);
+        border: 1px solid rgba(91,141,238,.25);
+        color: var(--accent);
+        font-size: .78rem;
+        font-family: var(--mono);
         font-weight: 600;
       }
+      .filter-badge i { font-size: .7rem; opacity: .7; }
 
       /* ── Filter Card ── */
       .filter-card {
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: 15px;
-        padding: 25px 30px;
-        box-shadow: 0 5px 20px rgba(0,0,0,.5);
-        margin-bottom: 30px;
-        border: 1px solid #333;
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
         transition: all .3s ease;
       }
-      .filter-card:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,.7);
-        border-color: #404040;
-      }
+      .filter-card:hover { border-color: var(--border-hi); box-shadow: var(--shadow-hi); }
+
       .filter-card .form-label {
-        color: #b0b0b0;
+        color: var(--text-mid);
         font-weight: 600;
-        font-size: .85rem;
+        font-size: .78rem;
         text-transform: uppercase;
-        letter-spacing: .5px;
+        letter-spacing: .6px;
         margin-bottom: 8px;
+        display: flex; align-items: center; gap: 6px;
       }
+      .filter-card .form-label i { color: var(--accent); opacity: .7; }
+
       .filter-card .form-select,
       .filter-card .form-control {
-        background: #0f0f0f;
-        border: 2px solid #404040;
-        color: #e8e8e8;
+        background: var(--bg-deep);
+        border: 1.5px solid var(--border);
+        color: var(--text-hi);
         border-radius: 10px;
-        padding: 12px 16px;
-        font-size: .95rem;
-        transition: all .3s ease;
+        padding: 11px 14px;
+        font-size: .9rem;
+        font-family: var(--sans);
+        transition: border-color .2s, box-shadow .2s;
+        appearance: none;
+        -webkit-appearance: none;
       }
       .filter-card .form-select:focus,
       .filter-card .form-control:focus {
         outline: none;
-        border-color: #9b8bdb;
-        background: #1a1a1a;
-        box-shadow: 0 0 0 4px rgba(155,139,219,.1);
-        color: #e8e8e8;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(91,141,238,.12);
+        color: var(--text-hi);
+        background: var(--bg-card);
       }
-      .filter-card .form-select option {
-        background: #1a1a1a;
-        color: #e8e8e8;
-      }
+      .filter-card .form-select option { background: #0d1117; }
 
-      /* ── Buttons ── */
-      .btn-filter {
-        padding: 12px 28px;
-        border: none;
-        border-radius: 12px;
+      /* ── Filter Buttons Row ── */
+      .filter-actions { display: flex; gap: 10px; }
+
+      .btn-apply {
+        flex: 1;
+        padding: 11px 20px;
+        border-radius: 10px;
         font-weight: 600;
-        font-size: .9rem;
+        font-size: .88rem;
         cursor: pointer;
-        transition: all .3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+        transition: all .2s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
         background: linear-gradient(135deg, #9b8bdb, #8b7bcb);
         color: #fff;
         border: 2px solid transparent;
-        text-decoration: none;
-        white-space: nowrap;
-        width: 100%;
-        justify-content: center;
+        font-family: var(--sans);
+        letter-spacing: .2px;
       }
-      .btn-filter:hover {
+      .btn-apply:hover {
         background: linear-gradient(135deg, #ab9beb, #9b8bdb);
         transform: translateY(-2px);
         box-shadow: 0 5px 20px rgba(155,139,219,.5);
         color: #fff;
+        text-decoration: none;
+      }
+
+      .btn-clear {
+        padding: 11px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: .88rem;
+        cursor: pointer;
+        transition: all .2s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        background: transparent;
+        color: var(--text-mid);
+        border: 1.5px solid var(--border);
+        font-family: var(--sans);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .btn-clear:hover {
+        border-color: var(--red);
+        color: var(--red);
+        background: rgba(224,96,96,.06);
+        transform: translateY(-1px);
+        text-decoration: none;
+      }
+
+      /* ── Export Divider ── */
+      .export-divider {
+        margin: 18px 0 0;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .export-label {
+        font-size: .75rem;
+        color: var(--text-low);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        white-space: nowrap;
       }
 
       .btn-excel {
-        padding: 12px 28px;
-        border-radius: 12px;
+        padding: 9px 18px;
+        border-radius: 9px;
         font-weight: 600;
-        font-size: .9rem;
+        font-size: .83rem;
         cursor: pointer;
-        transition: all .3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, #2a4a3a, #3a5a4a);
-        color: #70c090;
-        border: 2px solid #4a6a5a;
+        transition: all .2s;
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(62,207,142,.08);
+        color: var(--accent2);
+        border: 1.5px solid rgba(62,207,142,.2);
         text-decoration: none;
-        white-space: nowrap;
-        justify-content: center;
+        font-family: var(--sans);
       }
       .btn-excel:hover {
-        background: linear-gradient(135deg, #3a5a4a, #4a6a5a);
-        color: #80d0a0;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(112,192,144,.5);
+        background: rgba(62,207,142,.15);
+        color: var(--accent2);
+        border-color: rgba(62,207,142,.4);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(62,207,142,.2);
+        text-decoration: none;
       }
 
       .btn-pdf {
-        padding: 12px 28px;
-        border-radius: 12px;
+        padding: 9px 18px;
+        border-radius: 9px;
         font-weight: 600;
-        font-size: .9rem;
+        font-size: .83rem;
         cursor: pointer;
-        transition: all .3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, #4a2a2a, #5a3a3a);
-        color: #e07070;
-        border: 2px solid #6a4a4a;
+        transition: all .2s;
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(224,96,96,.08);
+        color: var(--red);
+        border: 1.5px solid rgba(224,96,96,.2);
         text-decoration: none;
-        white-space: nowrap;
-        justify-content: center;
+        font-family: var(--sans);
       }
       .btn-pdf:hover {
-        background: linear-gradient(135deg, #5a3a3a, #6a4a4a);
-        color: #f08080;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(224,112,112,.5);
+        background: rgba(224,96,96,.14);
+        color: var(--red);
+        border-color: rgba(224,96,96,.4);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(224,96,96,.2);
+        text-decoration: none;
       }
-
-      .export-row {
-        display: flex;
-        gap: 12px;
-        margin-top: 18px;
-      }
-      .export-row a { flex: 1; }
 
       /* ── Summary Cards ── */
       .summary-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
+        gap: 16px;
+        margin-bottom: 24px;
       }
       @media (max-width: 1100px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
       @media (max-width: 600px)  { .summary-grid { grid-template-columns: 1fr; } }
 
       .summary-card {
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: 15px;
-        padding: 25px;
-        box-shadow: 0 5px 20px rgba(0,0,0,.5);
-        border: 1px solid #333;
+        border-radius: var(--radius);
+        padding: 22px 24px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
         transition: all .3s ease;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+        position: relative;
+        overflow: hidden;
       }
-      .summary-card:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,.7);
-        border-color: #404040;
-        transform: translateY(-3px);
+      .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: var(--card-accent, var(--accent));
+        opacity: 0;
+        transition: opacity .2s;
       }
-      .summary-card .card-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        margin-bottom: 5px;
-      }
-      .icon-purple  { background: rgba(155,139,219,.15); color: #9b8bdb; }
-      .icon-green   { background: rgba(112,192,144,.15); color: #70c090; }
-      .icon-yellow  { background: rgba(208,192,112,.15); color: #d0c070; }
-      .icon-blue    { background: rgba(112,160,192,.15); color: #70a0c0; }
+      .summary-card:hover { border-color: var(--border-hi); transform: translateY(-3px); box-shadow: var(--shadow-hi); }
+      .summary-card:hover::before { opacity: 1; }
 
-      .summary-card .card-label {
-        color: #909090;
-        font-size: .85rem;
+      .summary-card.c-purple { --card-accent: var(--accent); }
+      .summary-card.c-blue   { --card-accent: #70b0e0; }
+      .summary-card.c-yellow { --card-accent: var(--accent3); }
+      .summary-card.c-green  { --card-accent: var(--accent2); }
+
+      .sc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+      .sc-icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+      }
+      .ic-purple { background: var(--accent-dim); color: var(--accent); }
+      .ic-blue   { background: rgba(112,176,224,.1); color: #70b0e0; }
+      .ic-yellow { background: rgba(245,166,35,.1);  color: var(--accent3); }
+      .ic-green  { background: rgba(62,207,142,.1);  color: var(--accent2); }
+
+      .sc-label {
+        font-size: .75rem;
+        color: var(--text-mid);
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: .5px;
+        letter-spacing: .6px;
+        margin-bottom: 6px;
       }
-      .summary-card .card-value {
-        color: #e8e8e8;
-        font-size: 1.8rem;
+      .sc-value {
+        font-size: 1.65rem;
         font-weight: 700;
+        color: var(--text-hi);
+        font-family: var(--mono);
+        letter-spacing: -1px;
         line-height: 1;
       }
 
       /* ── Chart Card ── */
       .chart-card {
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 5px 20px rgba(0,0,0,.5);
-        margin-bottom: 30px;
-        border: 1px solid #333;
+        border-radius: var(--radius);
+        padding: 26px 28px;
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
         transition: all .3s ease;
       }
-      .chart-card:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,.7);
-        border-color: #404040;
-      }
-      .chart-card h5 {
-        color: #e8e8e8;
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .chart-card h5 i { color: #9b8bdb; }
-      .chart-card canvas { max-height: 320px; }
+      .chart-card:hover { border-color: var(--border-hi); box-shadow: var(--shadow-hi); }
 
-      /* ── Table Card ── */
+      .section-title {
+        display: flex; align-items: center; gap: 10px;
+        color: var(--text-hi);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 20px;
+      }
+      .section-title i { color: var(--accent); font-size: .9rem; }
+      .section-title .pill {
+        margin-left: auto;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: var(--accent-dim);
+        color: var(--accent);
+        font-size: .72rem;
+        font-family: var(--mono);
+        font-weight: 600;
+        border: 1px solid rgba(91,141,238,.2);
+      }
+
+      /* ── Table ── */
       .table-container {
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: 15px;
-        padding: 0;
-        box-shadow: 0 5px 20px rgba(0,0,0,.5);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
         overflow: hidden;
-        border: 1px solid #333;
+        border: 1px solid var(--border);
+        margin-bottom: 24px;
         transition: all .3s ease;
-        margin-bottom: 30px;
       }
-      .table-container:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,.7);
-      }
-      .table-header {
-        padding: 20px 25px;
-        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-        border-bottom: 2px solid #404040;
+      .table-container:hover { box-shadow: var(--shadow-hi); }
+
+      .table-header-bar {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
-        gap: 10px;
-        color: #e8e8e8;
-        font-weight: 600;
-        font-size: 1.1rem;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
       }
-      .table-header i { color: #9b8bdb; }
+      .table-header-bar .section-title { margin-bottom: 0; }
+
+      .orders-count {
+        font-size: .78rem;
+        color: var(--text-mid);
+        font-family: var(--mono);
+        padding: 4px 10px;
+        background: rgba(255,255,255,.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
 
       .sales-table {
         width: 100%;
-        margin: 0;
         border-collapse: collapse;
+        font-size: .88rem;
       }
       .sales-table thead {
         background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        border-bottom: 1px solid var(--border);
       }
       .sales-table th {
-        padding: 18px 25px;
+        padding: 14px 20px;
         text-align: left;
         font-weight: 600;
-        color: #b0b0b0;
+        color: var(--text-mid);
         text-transform: uppercase;
-        font-size: .85rem;
-        letter-spacing: .5px;
-        border-bottom: 2px solid #404040;
+        font-size: .72rem;
+        letter-spacing: .7px;
+        white-space: nowrap;
       }
+      .sales-table th:first-child { padding-left: 24px; }
+      .sales-table td:first-child { padding-left: 24px; }
+      .sales-table td:last-child  { padding-right: 24px; }
+      .sales-table th:last-child  { padding-right: 24px; }
+
       .sales-table tbody tr {
-        border-bottom: 1px solid #2a2a2a;
-        transition: all .3s ease;
+        border-bottom: 1px solid rgba(255,255,255,.03);
+        transition: background .15s;
       }
-      .sales-table tbody tr:hover {
-        background: linear-gradient(135deg, #252525, #303030);
-      }
+      .sales-table tbody tr:hover { background: linear-gradient(135deg, #252525, #303030); }
       .sales-table tbody tr:last-child { border-bottom: none; }
+
       .sales-table td {
-        padding: 18px 25px;
-        color: #e8e8e8;
-        font-size: .95rem;
+        padding: 15px 20px;
+        color: var(--text-hi);
+        vertical-align: middle;
       }
 
+      .row-num {
+        color: var(--text-low);
+        font-family: var(--mono);
+        font-size: .78rem;
+        width: 40px;
+      }
       .order-id-cell {
-        font-family: 'Courier New', monospace;
+        font-family: var(--mono);
         font-weight: 700;
-        color: #9b8bdb;
+        color: var(--accent);
+        font-size: .85rem;
+        letter-spacing: -.3px;
       }
-      .amount-cell { font-weight: 600; color: #e8e8e8; }
-      .discount-cell { color: #e07070; font-weight: 600; }
-      .total-cell { color: #70c090; font-weight: 700; }
+      .user-cell { color: var(--text-hi); font-weight: 500; }
+      .date-cell {
+        color: var(--text-mid);
+        font-family: var(--mono);
+        font-size: .82rem;
+      }
+      .amount-cell { font-weight: 600; font-family: var(--mono); color: var(--text-hi); }
+      .discount-cell {
+        font-weight: 600;
+        font-family: var(--mono);
+        color: var(--red);
+      }
+      .discount-cell::before { content: '−'; margin-right: 1px; }
+      .total-cell {
+        font-weight: 700;
+        font-family: var(--mono);
+        color: var(--accent2);
+      }
 
+      /* ── Empty State ── */
       .empty-state {
         text-align: center;
-        padding: 60px 20px;
-        color: #606060;
+        padding: 64px 20px;
+        color: var(--text-low);
       }
-      .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 20px;
-        opacity: .3;
+      .empty-icon {
+        width: 72px; height: 72px;
+        margin: 0 auto 20px;
+        border-radius: 20px;
+        background: rgba(255,255,255,.03);
+        border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem;
+        color: var(--text-low);
       }
-      .empty-state p { font-size: 1.2rem; font-weight: 600; }
+      .empty-state p { font-size: 1rem; font-weight: 600; color: var(--text-mid); margin: 0 0 6px; }
+      .empty-state span { font-size: .83rem; color: var(--text-low); }
 
-      /* ── Messages ── */
+      /* ── Pagination ── */
+      .pagination-wrap {
+        padding: 18px 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+      }
+      .pagination-info {
+        font-size: .8rem;
+        color: var(--text-mid);
+        font-family: var(--mono);
+      }
+      .pagination-controls {
+        display: flex; gap: 4px; align-items: center;
+      }
+      .pg-btn {
+        min-width: 34px; height: 34px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-mid);
+        font-size: .83rem;
+        font-family: var(--mono);
+        cursor: pointer;
+        transition: all .15s;
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none;
+        padding: 0 8px;
+      }
+      .pg-btn:hover { background: var(--bg-hover); border-color: var(--border-hi); color: var(--text-hi); text-decoration: none; }
+      .pg-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+      .pg-btn.disabled { opacity: .3; pointer-events: none; }
+
+      /* ── Alerts ── */
       .messages-container {
         position: fixed;
-        top: 90px;
-        right: 30px;
+        top: 86px; right: 24px;
         z-index: 9999;
-        max-width: 450px;
+        max-width: 400px;
         pointer-events: none;
       }
       .alert {
         pointer-events: all;
-        padding: 16px 20px;
-        margin-bottom: 12px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
         border-radius: 12px;
         border: 1px solid;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        animation: slideInRight .4s cubic-bezier(.68,-.55,.265,1.55);
-        box-shadow: 0 8px 25px rgba(0,0,0,.6);
-        backdrop-filter: blur(10px);
-        position: relative;
-        overflow: hidden;
+        display: flex; align-items: flex-start; gap: 10px;
+        animation: slideIn .35s cubic-bezier(.34,1.56,.64,1);
+        box-shadow: var(--shadow-hi);
+        position: relative; overflow: hidden;
+        font-size: .88rem;
       }
-      .alert::before {
-        content: '';
-        position: absolute;
-        left: 0; top: 0; bottom: 0;
-        width: 4px;
-        background: currentColor;
-      }
-      .alert.hiding { animation: slideOutRight .4s cubic-bezier(.68,-.55,.265,1.55) forwards; }
-      .alert-success  { background: linear-gradient(135deg,rgba(42,74,58,.95),rgba(58,90,74,.95)); border-color:#4a6a5a; color:#70c090; }
-      .alert-error,
-      .alert-danger   { background: linear-gradient(135deg,rgba(74,42,42,.95),rgba(90,58,58,.95)); border-color:#6a4a4a; color:#e07070; }
-      .alert-warning  { background: linear-gradient(135deg,rgba(74,74,42,.95),rgba(90,90,58,.95)); border-color:#6a6a4a; color:#d0c070; }
-      .alert-info     { background: linear-gradient(135deg,rgba(42,58,74,.95),rgba(58,74,90,.95)); border-color:#4a5a6a; color:#70a0c0; }
-
-      .alert-icon  { font-size:1.3rem; flex-shrink:0; margin-top:2px; }
-      .alert-content { flex:1; min-width:0; }
-      .alert-message-text { display:block; color:inherit; font-weight:500; font-size:.95rem; line-height:1.5; word-wrap:break-word; }
+      .alert.hiding { animation: slideOut .3s ease forwards; }
+      .alert-success { background: linear-gradient(135deg,rgba(42,74,58,.95),rgba(58,90,74,.95)); border-color:#4a6a5a; color:#70c090; }
+      .alert-error, .alert-danger { background: linear-gradient(135deg,rgba(74,42,42,.95),rgba(90,58,58,.95)); border-color:#6a4a4a; color:#e07070; }
+      .alert-warning { background: linear-gradient(135deg,rgba(74,74,42,.95),rgba(90,90,58,.95)); border-color:#6a6a4a; color:#d0c070; }
+      .alert-info    { background: linear-gradient(135deg,rgba(42,58,74,.95),rgba(58,74,90,.95)); border-color:#4a5a6a; color:#70a0c0; }
+      .alert-progress { position: absolute; bottom: 0; left: 0; height: 2px; background: currentColor; opacity: .3; animation: shrink 5s linear forwards; }
       .alert-close {
-        flex-shrink:0; background:none; border:none; color:inherit; cursor:pointer;
-        font-size:1.1rem; padding:0; width:24px; height:24px;
-        display:flex; align-items:center; justify-content:center;
-        border-radius:4px; opacity:.7; transition:all .2s ease; margin-top:2px;
+        background: none; border: none; color: inherit; cursor: pointer;
+        opacity: .5; transition: opacity .15s; padding: 0; margin-left: auto; flex-shrink: 0; font-size: 1rem;
       }
-      .alert-close:hover { opacity:1; background:rgba(255,255,255,.1); }
-      .alert-progress {
-        position:absolute; bottom:0; left:0; height:3px;
-        background:currentColor; opacity:.4;
-        animation: progressShrink 5s linear forwards;
-      }
+      .alert-close:hover { opacity: 1; }
 
-      @keyframes slideInRight  { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
-      @keyframes slideOutRight { from{transform:translateX(0);opacity:1}    to{transform:translateX(120%);opacity:0} }
-      @keyframes progressShrink{ from{width:100%} to{width:0} }
+      @keyframes slideIn  { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(110%); opacity: 0; } }
+      @keyframes shrink   { from { width: 100%; } to { width: 0; } }
     </style>
 
     <div class="sales-report-content">
 
-      <!-- Messages -->
+      <!-- Alerts -->
       {% if messages %}
-      <div class="messages-container" id="messagesContainer">
+      <div class="messages-container">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" data-alert-id="{{ forloop.counter }}">
-          <i class="alert-icon fas
-            {% if message.tags == 'success' %}fa-check-circle
-            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-            {% elif message.tags == 'warning' %}fa-exclamation-triangle
-            {% else %}fa-info-circle{% endif %}"></i>
-          <div class="alert-content">
-            <span class="alert-message-text">{{ message }}</span>
-          </div>
-          <button class="alert-close" onclick="dismissAlert(this)" aria-label="Close">
-            <i class="fas fa-times"></i>
-          </button>
+        <div class="alert alert-{{ message.tags }}">
+          <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+          <span style="flex:1">{{ message }}</span>
+          <button class="alert-close" onclick="dismissAlert(this)"><i class="fas fa-times"></i></button>
           <div class="alert-progress"></div>
         </div>
         {% endfor %}
@@ -432,21 +593,48 @@
       {% endif %}
 
       <!-- Page Header -->
-      <div class="header-section">
-        <div class="header-title">
-          <i class="fas fa-chart-line"></i>
-          <h2>Sales Report</h2>
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="header-icon"><i class="fas fa-chart-line"></i></div>
+          <div>
+            <h2>Sales Report</h2>
+            <div class="sub">
+              {% if start_date and end_date %}
+                {{ start_date }} → {{ end_date }}
+              {% elif report_type %}
+                {{ report_type|capfirst }} view
+              {% else %}
+                All time
+              {% endif %}
+            </div>
+          </div>
         </div>
+
+        <!-- Active filter badges -->
+        {% if report_type or start_date or end_date %}
+        <div class="active-filters">
+          <span class="active-filters-label">Active filters:</span>
+          {% if report_type %}
+            <span class="filter-badge"><i class="fas fa-calendar-alt"></i> {{ report_type }}</span>
+          {% endif %}
+          {% if start_date %}
+            <span class="filter-badge"><i class="fas fa-calendar-day"></i> from {{ start_date }}</span>
+          {% endif %}
+          {% if end_date %}
+            <span class="filter-badge"><i class="fas fa-calendar-check"></i> to {{ end_date }}</span>
+          {% endif %}
+        </div>
+        {% endif %}
       </div>
 
-      <!-- Filter Section -->
+      <!-- Filter Card -->
       <div class="filter-card">
-        <form method="GET" class="row g-3 align-items-end">
+        <form method="GET" id="filterForm" class="row g-3 align-items-end">
 
           <div class="col-md-3">
-            <label class="form-label"><i class="fas fa-calendar-alt me-1"></i> Report Type</label>
+            <label class="form-label"><i class="fas fa-calendar-alt"></i> Report Type</label>
             <select name="report_type" class="form-select">
-              <option value="">-- Select --</option>
+              <option value="">— All time —</option>
               <option value="daily"   {% if report_type == 'daily'   %}selected{% endif %}>Daily</option>
               <option value="weekly"  {% if report_type == 'weekly'  %}selected{% endif %}>Weekly</option>
               <option value="monthly" {% if report_type == 'monthly' %}selected{% endif %}>Monthly</option>
@@ -455,136 +643,209 @@
           </div>
 
           <div class="col-md-3">
-            <label class="form-label"><i class="fas fa-calendar-day me-1"></i> Start Date</label>
+            <label class="form-label"><i class="fas fa-calendar-day"></i> Start Date</label>
             <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
           </div>
 
           <div class="col-md-3">
-            <label class="form-label"><i class="fas fa-calendar-check me-1"></i> End Date</label>
+            <label class="form-label"><i class="fas fa-calendar-check"></i> End Date</label>
             <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
           </div>
 
           <div class="col-md-3">
-            <button type="submit" class="btn-filter">
-              <i class="fas fa-filter"></i>
-              Apply Filter
-            </button>
+            <label class="form-label" style="visibility:hidden">Action</label>
+            <div class="filter-actions">
+              <button type="submit" class="btn-apply">
+                <i class="fas fa-filter"></i> Apply
+              </button>
+              {% if report_type or start_date or end_date %}
+              <a href="?" class="btn-clear" title="Clear all filters">
+                <i class="fas fa-times"></i> Clear
+              </a>
+              {% else %}
+              <button type="button" class="btn-clear" disabled style="opacity:.3; cursor:default;">
+                <i class="fas fa-times"></i> Clear
+              </button>
+              {% endif %}
+            </div>
           </div>
 
         </form>
 
-        <div class="export-row">
+        <!-- Export row -->
+        <div class="export-divider">
+          <span class="export-label"><i class="fas fa-download" style="margin-right:5px"></i> Export</span>
           <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&export=excel"
              class="btn-excel">
-            <i class="fas fa-file-excel"></i>
-            Download Excel
+            <i class="fas fa-file-excel"></i> Excel
           </a>
           <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&export=pdf"
              class="btn-pdf">
-            <i class="fas fa-file-pdf"></i>
-            Download PDF
+            <i class="fas fa-file-pdf"></i> PDF
           </a>
         </div>
       </div>
 
       <!-- Summary Cards -->
       <div class="summary-grid">
-
-        <div class="summary-card">
-          <div class="card-icon icon-purple"><i class="fas fa-shopping-bag"></i></div>
-          <div class="card-label">Total Orders</div>
-          <div class="card-value">{{ summary.total_orders }}</div>
+        <div class="summary-card c-purple">
+          <div class="sc-top">
+            <div class="sc-icon ic-purple"><i class="fas fa-shopping-bag"></i></div>
+          </div>
+          <div class="sc-label">Total Orders</div>
+          <div class="sc-value">{{ summary.total_orders }}</div>
         </div>
 
-        <div class="summary-card">
-          <div class="card-icon icon-blue"><i class="fas fa-receipt"></i></div>
-          <div class="card-label">Subtotal</div>
-          <div class="card-value">₹{{ summary.total_subtotal }}</div>
+        <div class="summary-card c-blue">
+          <div class="sc-top">
+            <div class="sc-icon ic-blue"><i class="fas fa-receipt"></i></div>
+          </div>
+          <div class="sc-label">Subtotal</div>
+          <div class="sc-value">₹{{ summary.total_subtotal }}</div>
         </div>
 
-        <div class="summary-card">
-          <div class="card-icon icon-yellow"><i class="fas fa-tag"></i></div>
-          <div class="card-label">Total Discount</div>
-          <div class="card-value">₹{{ summary.total_discount }}</div>
+        <div class="summary-card c-yellow">
+          <div class="sc-top">
+            <div class="sc-icon ic-yellow"><i class="fas fa-tag"></i></div>
+          </div>
+          <div class="sc-label">Total Discount</div>
+          <div class="sc-value">₹{{ summary.total_discount }}</div>
         </div>
 
-        <div class="summary-card">
-          <div class="card-icon icon-green"><i class="fas fa-rupee-sign"></i></div>
-          <div class="card-label">Net Revenue</div>
-          <div class="card-value">₹{{ summary.total_revenue }}</div>
+        <div class="summary-card c-green">
+          <div class="sc-top">
+            <div class="sc-icon ic-green"><i class="fas fa-rupee-sign"></i></div>
+          </div>
+          <div class="sc-label">Net Revenue</div>
+          <div class="sc-value">₹{{ summary.total_revenue }}</div>
         </div>
-
       </div>
 
       <!-- Chart -->
       <div class="chart-card">
-        <h5><i class="fas fa-chart-area"></i> Sales Overview</h5>
-        <canvas id="salesChart"></canvas>
+        <div class="section-title">
+          <i class="fas fa-chart-area"></i>
+          Sales Overview
+          <span class="pill">Revenue ₹</span>
+        </div>
+        <canvas id="salesChart" style="max-height:300px"></canvas>
       </div>
 
       <!-- Orders Table -->
       <div class="table-container">
-        <div class="table-header">
-          <i class="fas fa-list-alt"></i>
-          Orders
+        <div class="table-header-bar">
+          <div class="section-title">
+            <i class="fas fa-list-alt"></i>
+            Orders
+          </div>
+          <span class="orders-count">{{ orders.paginator.count }} total</span>
         </div>
-        <table class="sales-table">
-          <thead>
-            <tr>
-              <th><i class="fas fa-hashtag"></i> Order ID</th>
-              <th><i class="fas fa-user"></i> User</th>
-              <th><i class="fas fa-calendar"></i> Date</th>
-              <th><i class="fas fa-receipt"></i> Subtotal</th>
-              <th><i class="fas fa-tag"></i> Discount</th>
-              <th><i class="fas fa-rupee-sign"></i> Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for order in orders %}
-            <tr>
-              <td class="order-id-cell">{{ order.order_id }}</td>
-              <td>{{ order.user }}</td>
-              <td>{{ order.created_at|date:"M d, Y" }}</td>
-              <td class="amount-cell">₹{{ order.subtotal }}</td>
-              <td class="discount-cell">₹{{ order.discount_amount }}</td>
-              <td class="total-cell">₹{{ order.total_amount }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="6">
-                <div class="empty-state">
-                  <i class="fas fa-chart-bar"></i>
-                  <p>No orders found for the selected period.</p>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
 
+        <div class="table-wrap">
+          <table class="sales-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th><i class="fas fa-hashtag" style="opacity:.5; margin-right:5px"></i>Order ID</th>
+                <th><i class="fas fa-user" style="opacity:.5; margin-right:5px"></i>User</th>
+                <th><i class="fas fa-calendar" style="opacity:.5; margin-right:5px"></i>Date</th>
+                <th><i class="fas fa-receipt" style="opacity:.5; margin-right:5px"></i>Subtotal</th>
+                <th><i class="fas fa-tag" style="opacity:.5; margin-right:5px"></i>Discount</th>
+                <th><i class="fas fa-rupee-sign" style="opacity:.5; margin-right:5px"></i>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr>
+                <td class="row-num">{{ forloop.counter|add:orders.start_index|add:"-1" }}</td>
+                <td class="order-id-cell">{{ order.order_id }}</td>
+                <td class="user-cell">{{ order.user }}</td>
+                <td class="date-cell">{{ order.created_at|date:"d M Y" }}</td>
+                <td class="amount-cell">₹{{ order.subtotal }}</td>
+                <td class="discount-cell">₹{{ order.discount_amount }}</td>
+                <td class="total-cell">₹{{ order.total_amount }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                    <p>No orders found</p>
+                    <span>Try adjusting your filters or selecting a wider date range</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <div class="pagination-wrap">
+          <span class="pagination-info">
+            Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+            &nbsp;·&nbsp;
+            Showing {{ orders.start_index }}–{{ orders.end_index }} of {{ orders.paginator.count }}
+          </span>
+          <div class="pagination-controls">
+            {% if orders.has_previous %}
+              <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&page=1" class="pg-btn" title="First">
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&page={{ orders.previous_page_number }}" class="pg-btn">
+                <i class="fas fa-angle-left"></i>
+              </a>
+            {% else %}
+              <span class="pg-btn disabled"><i class="fas fa-angle-double-left"></i></span>
+              <span class="pg-btn disabled"><i class="fas fa-angle-left"></i></span>
+            {% endif %}
+
+            {% for num in orders.paginator.page_range %}
+              {% if orders.number == num %}
+                <span class="pg-btn active">{{ num }}</span>
+              {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&page={{ num }}" class="pg-btn">{{ num }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if orders.has_next %}
+              <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&page={{ orders.next_page_number }}" class="pg-btn">
+                <i class="fas fa-angle-right"></i>
+              </a>
+              <a href="?report_type={{ report_type }}&start_date={{ start_date }}&end_date={{ end_date }}&page={{ orders.paginator.num_pages }}" class="pg-btn" title="Last">
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            {% else %}
+              <span class="pg-btn disabled"><i class="fas fa-angle-right"></i></span>
+              <span class="pg-btn disabled"><i class="fas fa-angle-double-right"></i></span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
     </div><!-- /.sales-report-content -->
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       /* ── Chart ── */
       const ctx = document.getElementById('salesChart');
       new Chart(ctx, {
         type: 'line',
         data: {
-          labels: [{% for item in chart_data %}"{{ item.period|date:'Y-m-d' }}",{% endfor %}],
+          labels: [{% for item in chart_data %}"{{ item.period|date:'d M Y' }}",{% endfor %}],
           datasets: [{
             label: 'Revenue (₹)',
             data: [{% for item in chart_data %}{{ item.total }},{% endfor %}],
             borderColor: '#9b8bdb',
             backgroundColor: 'rgba(155,139,219,.12)',
-            borderWidth: 2.5,
+            borderWidth: 2,
             pointBackgroundColor: '#9b8bdb',
             pointBorderColor: '#1a1a1a',
             pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.45,
             fill: true,
           }]
         },
@@ -592,46 +853,50 @@
           responsive: true,
           interaction: { intersect: false, mode: 'index' },
           plugins: {
-            legend: { labels: { color: '#b0b0b0', font: { size: 13 } } },
+            legend: { display: false },
             tooltip: {
-              backgroundColor: '#1a1a1a',
-              borderColor: '#404040',
+              backgroundColor: '#0d1117',
+              borderColor: '#1e2a38',
               borderWidth: 1,
-              titleColor: '#e8e8e8',
-              bodyColor: '#b0b0b0',
-              padding: 12,
+              titleColor: '#e8edf5',
+              bodyColor: '#7a8a9a',
+              padding: 14,
+              cornerRadius: 10,
               callbacks: {
-                label: ctx => ' ₹' + ctx.parsed.y.toLocaleString()
+                label: ctx => '  ₹' + ctx.parsed.y.toLocaleString()
               }
             }
           },
           scales: {
             x: {
-              ticks: { color: '#909090' },
-              grid:  { color: 'rgba(255,255,255,.05)' }
+              ticks: { color: '#909090', font: { size: 11, family: "'JetBrains Mono', monospace" } },
+              grid:  { color: 'rgba(255,255,255,.05)' },
+              border: { color: 'rgba(255,255,255,.06)' }
             },
             y: {
               ticks: {
                 color: '#909090',
+                font: { size: 11, family: "'JetBrains Mono', monospace" },
                 callback: v => '₹' + v.toLocaleString()
               },
-              grid: { color: 'rgba(255,255,255,.05)' }
+              grid:  { color: 'rgba(255,255,255,.05)' },
+              border: { color: 'rgba(255,255,255,.06)' }
             }
           }
         }
       });
 
-      /* ── Alert auto-dismiss ── */
+      /* ── Alerts ── */
       function dismissAlert(btn) {
-        const alert = btn.closest('.alert');
-        alert.classList.add('hiding');
-        setTimeout(() => alert.remove(), 400);
+        const el = btn.closest('.alert');
+        el.classList.add('hiding');
+        setTimeout(() => el.remove(), 300);
       }
       document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.alert').forEach((el, i) => {
+        document.querySelectorAll('.alert').forEach(el => {
           setTimeout(() => {
             el.classList.add('hiding');
-            setTimeout(() => el.remove(), 400);
+            setTimeout(() => el.remove(), 300);
           }, 5000);
         });
       });
