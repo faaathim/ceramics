@@ -5,12 +5,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.utils import timezone
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import IntegrityError
 from .models import Category
 from .forms import CategoryForm, CategorySearchForm
 
-import base64
 
 
 def superuser_check(user):
@@ -57,36 +54,29 @@ def category_list(request):
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def category_create(request):
+
     if request.method == 'POST':
-        post_data = request.POST.copy()
-        files_data = request.FILES.copy()
 
-        cropped_data = post_data.get('image_cropped')
-
-        if cropped_data and cropped_data.startswith('data:image'):
-            try:
-                format, imgstr = cropped_data.split(';base64,')
-                ext = format.split('/')[-1]
-                filename = f"category_{int(timezone.now().timestamp())}.{ext}"
-
-                files_data['image'] = SimpleUploadedFile(
-                    name=filename,
-                    content=base64.b64decode(imgstr),
-                    content_type=f'image/{ext}'
-                )
-            except Exception:
-                messages.error(request, "Invalid image data. Please try again.")
-
-        post_data.pop('image_cropped', None)
-
-        form = CategoryForm(post_data, files_data)
+        form = CategoryForm(request.POST)
 
         if form.is_valid():
+
             category = form.save()
-            messages.success(request, f'Category "{category.name}" created successfully.')
-            return redirect('custom_admin:category_management:category_list')
-        else:
-            messages.error(request, "Please fix the errors below.")
+
+            messages.success(
+                request,
+                f'Category "{category.name}" created successfully.'
+            )
+
+            return redirect(
+                'custom_admin:category_management:category_list'
+            )
+
+        messages.error(
+            request,
+            "Please correct the errors below."
+        )
+
     else:
         form = CategoryForm()
 
@@ -99,40 +89,37 @@ def category_create(request):
 @login_required(login_url='custom_admin:login')
 @user_passes_test(superuser_check, login_url='custom_admin:login')
 def category_edit(request, pk):
-    category = get_object_or_404(Category.all_objects, pk=pk)
+
+    category = get_object_or_404(
+        Category.all_objects,
+        pk=pk
+    )
 
     if request.method == 'POST':
-        post_data = request.POST.copy()
-        files_data = request.FILES.copy()
 
-        cropped_data = post_data.get('image_cropped')
-
-        if cropped_data and cropped_data.startswith('data:image'):
-            try:
-                format, imgstr = cropped_data.split(';base64,')
-                ext = format.split('/')[-1]
-                filename = f"category_{int(timezone.now().timestamp())}.{ext}"
-
-                files_data['image'] = SimpleUploadedFile(
-                    name=filename,
-                    content=base64.b64decode(imgstr),
-                    content_type=f'image/{ext}'
-                )
-            except Exception:
-                messages.error(request, "Invalid image data. Please try again.")
-        else:
-            files_data.pop('image', None)
-
-        post_data.pop('image_cropped', None)
-
-        form = CategoryForm(post_data, files_data, instance=category)
+        form = CategoryForm(
+            request.POST,
+            instance=category
+        )
 
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Category "{category.name}" updated successfully.')
-            return redirect('custom_admin:category_management:category_list')
-        else:
-            messages.error(request, "Please fix the errors below.")
+
+            updated_category = form.save()
+
+            messages.success(
+                request,
+                f'Category "{updated_category.name}" updated successfully.'
+            )
+
+            return redirect(
+                'custom_admin:category_management:category_list'
+            )
+
+        messages.error(
+            request,
+            "Please correct the errors below."
+        )
+
     else:
         form = CategoryForm(instance=category)
 

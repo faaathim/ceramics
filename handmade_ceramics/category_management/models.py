@@ -4,7 +4,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from product_management.models import Product
-from cloudinary.models import CloudinaryField
 
 
 class CategoryQuerySet(models.QuerySet):
@@ -20,7 +19,6 @@ class CategoryManager(models.Manager):
 class Category(models.Model):
     name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
-    image = CloudinaryField('category_image', blank=True, null=True)
 
     is_listed = models.BooleanField(default=True)
 
@@ -39,19 +37,31 @@ class Category(models.Model):
         return self.name
 
     def clean(self):
+        errors = {}
+
         name = self.name.strip()
 
         if not name:
-            raise ValidationError({'name': "Category name cannot be empty."})
+            errors['name'] = "Category name cannot be empty."
 
-        if len(name) < 3:
-            raise ValidationError({'name': "Category name must be at least 3 characters long."})
+        elif len(name) < 3:
+            errors['name'] = "Category name must be at least 3 characters long."
 
-        if len(name) > 150:
-            raise ValidationError({'name': "Category name cannot exceed 150 characters."})
+        elif len(name) > 150:
+            errors['name'] = "Category name cannot exceed 150 characters."
+
+        if self.description and len(self.description.strip()) > 500:
+            errors['description'] = "Description cannot exceed 500 characters."
+
+        if errors:
+            raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
         self.name = self.name.strip()
+
+        if self.description:
+            self.description = self.description.strip()
+
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -60,11 +70,18 @@ class Category(models.Model):
         self.is_listed = False
         self.save(update_fields=["is_deleted", "is_listed"])
 
-        products = Product.all_objects.filter(category=self, is_deleted=False)
+        products = Product.all_objects.filter(
+            category=self,
+            is_deleted=False
+        )
 
-        products.update(is_deleted=True, is_listed=False)
+        products.update(
+            is_deleted=True,
+            is_listed=False
+        )
 
         from product_management.models import Variant
+
         Variant.objects.filter(product__in=products).update(
             is_deleted=True,
             is_listed=False
