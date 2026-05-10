@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404, JsonResponse
 from django.db.models import Q, Max
 
+from django.core.exceptions import ValidationError
+from .utils import validate_variant_images
 from reviews.utils import can_user_review
 from reviews.models import Review
 from .models import Product, Variant, VariantImage
@@ -53,7 +55,6 @@ def product_list(request):
 @transaction.atomic
 def product_create(request):
     if request.method == 'POST':
-        print("request is submitting")
         form = ProductForm(request.POST, request.FILES)
 
         if form.is_valid():
@@ -82,18 +83,25 @@ def product_edit(request, pk):
     product = get_object_or_404(Product.all_objects, pk=pk)
 
     if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        remove_main = "remove_main_image" in request.POST
+        remove_main = request.POST.get("remove_main_image") == "1"
+
+        form = ProductForm(
+            request.POST,
+            request.FILES,
+            instance=product,
+            remove_main=remove_main,
+        )
 
         if form.is_valid():
-            product = form.save(commit=False)
+            new_image = request.FILES.get("main_image")
 
-            if remove_main and not request.FILES.get("main_image"):
-                if product.main_image:
-                    product.main_image.delete(save=False)
-                product.main_image = None
-
-            product.save()
+            if remove_main and not new_image:
+                form.cleaned_data.pop('main_image', None)
+                updated_product = form.save(commit=False)
+                updated_product.save()
+                Product.all_objects.filter(pk=pk).update(main_image="")
+            else:
+                form.save()
 
             messages.success(request, "Product updated successfully!")
             return redirect("custom_admin:product_management:product_list")
@@ -101,11 +109,11 @@ def product_edit(request, pk):
     else:
         form = ProductForm(instance=product)
 
-    return render(request, "product_management/product_edit.html", {
-        "form": form,
-        "product": product,
-    })
-
+    return render(
+        request,
+        "product_management/product_edit.html",
+        {"form": form, "product": product},
+    )
 
 @admin_required
 def product_delete(request, pk):
@@ -114,7 +122,7 @@ def product_delete(request, pk):
     if request.method == 'POST':
         product.is_deleted = True
         product.save()
-        messages.success(request, f'Product "{product.name}" deleted.')
+        messages.success(request, f'Product "{product.name}" moved to trash successfully.')
 
     return redirect(reverse('custom_admin:product_management:product_list'))
 
@@ -131,7 +139,7 @@ def product_toggle_listing(request, pk):
             status = "listed" if product.is_listed else "unlisted"
             messages.success(request, f'Product "{product.name}" {status}.')
         else:
-            messages.error(request, "Add listed variants first.")
+            messages.error(request, "Product cannot be listed because no active listed variants are available.")
 
     return redirect(reverse('custom_admin:product_management:product_list'))
 
@@ -147,7 +155,7 @@ def variant_list(request, product_pk):
 
     try:
         variants = paginator.page(page)
-    except:
+    except Exception:
         variants = paginator.page(1)
 
     return render(request, 'product_management/variant_list.html', {
@@ -159,46 +167,83 @@ def variant_list(request, product_pk):
 @admin_required
 @transaction.atomic
 def variant_create(request, product_pk):
-    product = get_object_or_404(Product.all_objects, pk=product_pk)
+
+    product = get_object_or_404(
+        Product.all_objects,
+        pk=product_pk
+    )
 
     if request.method == 'POST':
-        form = VariantForm(request.POST, request.FILES)
-        
+
+        form = VariantForm(
+            request.POST,
+            request.FILES,
+            initial={'product': product}
+        )
+
         main_image = request.FILES.get('main_image')
         gallery_images = request.FILES.getlist('images')
-        
+
         all_images = []
+
         if main_image:
             all_images.append(main_image)
+
         all_images.extend(gallery_images)
 
         if form.is_valid():
-            if len(all_images) < 3:
-                form.add_error(None, "Minimum 3 images required.")
-            elif len(all_images) > 7:
-                form.add_error(None, "Max 7 images allowed.")
-            else:
+
+            try:
+                # FIX: was validate_images() — correct name is validate_variant_images()
+                validate_variant_images(all_images)
+
                 variant = form.save(commit=False)
                 variant.product = product
                 variant.save()
 
-                for i, img in enumerate(all_images):
-                    VariantImage.objects.create(variant=variant, image=img, order=i)
+                for index, image in enumerate(all_images):
+                    VariantImage.objects.create(
+                        variant=variant,
+                        image=image,
+                        order=index
+                    )
 
                 product.update_stock()
 
-                messages.success(request, "Variant created.")
+                messages.success(
+                    request,
+                    f'Variant "{variant.color}" created successfully.'
+                )
+
                 return redirect(
-                    reverse('custom_admin:product_management:variant_list', args=[product.id])
+                    reverse(
+                        'custom_admin:product_management:variant_list',
+                        args=[product.id]
+                    )
+                )
+
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+            except Exception:
+                form.add_error(
+                    None,
+                    "Something went wrong while creating variant."
                 )
 
     else:
-        form = VariantForm(initial={'product': product})
+        form = VariantForm(
+            initial={'product': product}
+        )
 
-    return render(request, 'product_management/variant_form.html', {
-        'form': form,
-        'product': product
-    })
+    return render(
+        request,
+        'product_management/variant_form.html',
+        {
+            'form': form,
+            'product': product
+        }
+    )
 
 
 @admin_required
@@ -224,18 +269,41 @@ def variant_delete_confirm(request, product_pk, pk):
 
 @admin_required
 def variant_toggle_listing(request, product_pk, pk):
-    variant = get_object_or_404(Variant, pk=pk, product_id=product_pk)
+
+    variant = get_object_or_404(
+        Variant,
+        pk=pk,
+        product_id=product_pk
+    )
 
     if request.method == 'POST':
-        if variant.stock > 0:
+
+        if variant.stock <= 0:
+            messages.error(
+                request,
+                "Variant cannot be listed because stock is zero."
+            )
+
+        else:
             variant.is_listed = not variant.is_listed
             variant.save()
-            messages.success(request, "Variant updated.")
-        else:
-            messages.error(request, "Stock is zero.")
+
+            status = (
+                "listed"
+                if variant.is_listed
+                else "unlisted"
+            )
+
+            messages.success(
+                request,
+                f'Variant "{variant.color}" {status} successfully.'
+            )
 
     return redirect(
-        reverse('custom_admin:product_management:variant_list', args=[product_pk])
+        reverse(
+            'custom_admin:product_management:variant_list',
+            args=[product_pk]
+        )
     )
 
 
@@ -248,8 +316,7 @@ def product_detail(request, pk):
         raise Http404
 
     selected_variant = variants.first()
-    
-    # Check for requested variant
+
     variant_id = request.GET.get('variant')
     if variant_id:
         v_obj = variants.filter(id=variant_id).first()
@@ -257,10 +324,12 @@ def product_detail(request, pk):
             selected_variant = v_obj
 
     reviews = Review.objects.filter(product=product).select_related('user').order_by('-created_at')
-    
+
     can_review = False
+    # FIX: already_reviewed must always be defined before the template context
+    already_reviewed = False
+
     if request.user.is_authenticated:
-        # User can review if they purchased it AND haven't reviewed it yet
         already_reviewed = reviews.filter(user=request.user).exists()
         if can_user_review(request.user, product) and not already_reviewed:
             can_review = True
@@ -271,7 +340,7 @@ def product_detail(request, pk):
         "variants": variants,
         "reviews": reviews,
         "can_review": can_review,
-        "already_reviewed": already_reviewed if request.user.is_authenticated else False,
+        "already_reviewed": already_reviewed,
     })
 
 
@@ -298,28 +367,27 @@ def variant_edit(request, product_pk, pk):
         form = VariantForm(request.POST, request.FILES, instance=variant)
         new_main_image = request.FILES.get('main_image')
         new_gallery_images = request.FILES.getlist("images")
-        
+
         remove_main = request.POST.get("remove_main_image") == "1"
         remove_gallery = request.POST.get("remove_gallery_images") == "1"
         remove_gallery_ids_str = request.POST.get("remove_gallery_ids", "")
 
         if form.is_valid():
-            # Calculate final image count
             current_main_count = 1 if variant.images.filter(order=0).exists() else 0
             current_gallery_count = variant.images.filter(order__gt=0).count()
-            
+
             final_main_count = 1 if new_main_image else (0 if remove_main else current_main_count)
-            
+
             remove_ids = [int(i.strip()) for i in remove_gallery_ids_str.split(',') if i.strip().isdigit()]
             deleted_gallery_count = 0
             if remove_gallery:
                 deleted_gallery_count = current_gallery_count
             elif remove_ids:
                 deleted_gallery_count = variant.images.filter(order__gt=0, id__in=remove_ids).count()
-                
+
             final_gallery_count = current_gallery_count - deleted_gallery_count + len(new_gallery_images)
             total_final_images = final_main_count + final_gallery_count
-            
+
             if total_final_images < 3 and total_final_images < (current_main_count + current_gallery_count):
                 form.add_error(None, "Minimum 3 images required.")
             elif total_final_images > 7:
@@ -335,7 +403,6 @@ def variant_edit(request, product_pk, pk):
                 if remove_main:
                     variant.images.filter(order=0).delete()
 
-                # Handle new main image
                 if new_main_image:
                     first_img = variant.images.filter(order=0).first()
                     if first_img:
@@ -344,7 +411,6 @@ def variant_edit(request, product_pk, pk):
                     else:
                         VariantImage.objects.create(variant=variant, image=new_main_image, order=0)
 
-                # Append new gallery images
                 if new_gallery_images:
                     current_max_order = variant.images.aggregate(Max('order'))['order__max']
                     start_order = 1 if current_max_order is None else current_max_order + 1

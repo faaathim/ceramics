@@ -82,8 +82,6 @@
         }
         .form-input::placeholder, .form-textarea::placeholder { color: #606060; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-        /* Upload area */
         .file-upload-area {
             position: relative; border: 2px dashed #404040; border-radius: 12px;
             padding: 40px 30px; text-align: center;
@@ -100,8 +98,6 @@
             position: absolute; opacity: 0;
             width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;
         }
-
-        /* Preview */
         .preview-wrap {
             margin-top: 20px; padding: 20px;
             background: #0f0f0f; border-radius: 12px; border: 1px solid #2a2a2a;
@@ -131,8 +127,6 @@
             padding: 4px 8px; background: rgba(155,139,219,0.9);
             color: white; border-radius: 6px; font-size: 0.7rem; font-weight: 700;
         }
-
-        /* Crop modal */
         .crop-modal {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.95); z-index: 9999;
@@ -190,8 +184,6 @@
             font-weight: 600; cursor: pointer; transition: all 0.3s ease;
         }
         .btn-crop-cancel:hover { background: #2a2a2a; color: #e8e8e8; }
-
-        /* Misc */
         .section-divider {
             margin: 40px 0; border: 0; height: 2px;
             background: linear-gradient(90deg, transparent, #404040, transparent);
@@ -199,6 +191,14 @@
         .section-title {
             color: #9b8bdb; font-size: 1.2rem; font-weight: 600;
             margin-bottom: 25px; display: flex; align-items: center; gap: 10px;
+        }
+        /* Stock info badge */
+        .info-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+            color: #7ab8e0; border-radius: 10px; font-size: 0.9rem;
+            border: 1px solid #3a4a5a; margin-top: 8px;
         }
         .warning-badge {
             display: flex; align-items: flex-start; gap: 10px;
@@ -247,8 +247,6 @@
         .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-cancel { background: transparent; color: #909090; border-color: #404040; }
         .btn-cancel:hover { background: #2a2a2a; color: #e8e8e8; border-color: #505050; transform: translateY(-3px); }
-
-        /* Messages portal */
         .messages-portal {
             position: fixed; top: 90px; right: 20px;
             z-index: 10000; max-width: 420px;
@@ -282,7 +280,6 @@
             transition: color 0.2s; align-self: flex-start;
         }
         .msg-close:hover { color: #e8e8e8; }
-
         @media (max-width: 768px) {
             .form-content { padding: 20px; margin-left: 0; }
             .form-body    { padding: 25px; }
@@ -294,7 +291,6 @@
         }
     </style>
 
-    {# ── Unified messages portal ── #}
     <div class="messages-portal" id="messagesPortal">
         {% for message in messages %}
         <div class="msg-item {{ message.tags }}" role="alert">
@@ -325,7 +321,6 @@
                 <form method="post" enctype="multipart/form-data" id="productForm">
                     {% csrf_token %}
 
-                    {# Server-side non-field errors (e.g. missing image on re-render) #}
                     {% if form.non_field_errors %}
                     <div class="form-errors-block">
                         <div class="form-errors-block-title">
@@ -343,12 +338,13 @@
                         <i class="fas fa-info-circle"></i> Basic Information
                     </div>
 
-                    <!-- Product Name -->
+                    {# name — CharField max_length=255, cleaned to title-case, min 3 chars #}
                     <div class="form-group">
                         <label class="form-label"><i class="fas fa-tag"></i> Product Name</label>
                         <input type="text" name="{{ form.name.name }}"
                                value="{{ form.name.value|default:'' }}"
-                               class="form-input" placeholder="Enter product name…" required>
+                               class="form-input" placeholder="Enter product name…"
+                               maxlength="255" required>
                         {% if form.name.errors %}
                         <div class="field-error">
                             <i class="fas fa-exclamation-triangle"></i> {{ form.name.errors.0 }}
@@ -356,11 +352,11 @@
                         {% endif %}
                     </div>
 
-                    <!-- Description -->
+                    {# description — TextField, min 20 chars #}
                     <div class="form-group">
                         <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
                         <textarea name="{{ form.description.name }}" class="form-textarea"
-                                  placeholder="Enter product description…">{{ form.description.value|default:'' }}</textarea>
+                                  placeholder="Enter product description (min. 20 characters)…">{{ form.description.value|default:'' }}</textarea>
                         {% if form.description.errors %}
                         <div class="field-error">
                             <i class="fas fa-exclamation-triangle"></i> {{ form.description.errors.0 }}
@@ -368,7 +364,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Category + Price -->
+                    {# category (FK → Category, only is_listed=True) + price (DecimalField, 0 < price ≤ 100000) #}
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-layer-group"></i> Category</label>
@@ -391,10 +387,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Price</label>
+                            {# price: DecimalField max_digits=10 decimal_places=2, must be > 0 and ≤ 100000 #}
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Price (₹)</label>
                             <input type="number" name="{{ form.price.name }}"
                                    value="{{ form.price.value|default:'' }}"
-                                   class="form-input" placeholder="0.00" step="0.01" min="0" required>
+                                   class="form-input" placeholder="0.00"
+                                   step="0.01" min="0.01" max="100000" required>
                             {% if form.price.errors %}
                             <div class="field-error">
                                 <i class="fas fa-exclamation-triangle"></i> {{ form.price.errors.0 }}
@@ -403,14 +401,19 @@
                         </div>
                     </div>
 
-                    <div class="warning-badge">
+                    {#
+                        stock: PositiveIntegerField, editable=False — auto-calculated from variants.
+                        is_listed: defaults False on create; forced False by model.save() if no valid variants.
+                        Both are intentionally omitted on the create form (product_create view hardcodes them).
+                    #}
+                    <div class="info-badge">
                         <i class="fas fa-info-circle"></i>
-                        <span>Stock is automatically calculated from variants. You will add variants after creating this product.</span>
+                        Stock is auto-calculated from variants. Listing is enabled after adding at least one active variant.
                     </div>
 
                     <hr class="section-divider">
 
-                    <!-- Main Image — the only image field on Product -->
+                    {# main_image — CloudinaryField, required on create, max 5 MB, jpg/jpeg/png/webp #}
                     <div class="section-title"><i class="fas fa-image"></i> Main Product Image</div>
 
                     <div class="form-group">
@@ -421,12 +424,19 @@
                         <div class="file-upload-area" id="uploadArea">
                             <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
                             <div class="file-upload-text"><strong>Click to upload</strong> or drag and drop</div>
-                            <div class="file-upload-hint">PNG or JPG — max 5 MB. Cropped to a 1:1 square.</div>
+                            <div class="file-upload-hint">JPG, JPEG, PNG or WEBP — max 5 MB. Cropped to 1:1 square.</div>
                             <input type="file" name="main_image" class="file-input"
-                                   id="mainImageInput" accept="image/*" style="display:none;">
+                                   id="mainImageInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                   style="display:none;">
                         </div>
+                        {% if form.main_image.errors %}
+                        <div class="field-error">
+                            <i class="fas fa-exclamation-triangle"></i> {{ form.main_image.errors.0 }}
+                        </div>
+                        {% endif %}
                         <div id="mainImagePreview"></div>
                     </div>
+
                 </form>
             </div>
 
@@ -476,10 +486,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-    // ═══════════════════════════════════════════════════════════════
-    // UNIFIED MESSAGE SYSTEM
-    // ═══════════════════════════════════════════════════════════════
-
     function dismissMsg(btn) {
         const item = btn.closest('.msg-item');
         if (!item) return;
@@ -510,7 +516,6 @@
         }
     }
 
-    // Auto-dismiss server messages after 6 s
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#messagesPortal .msg-item').forEach((el, i) => {
             setTimeout(() => {
@@ -519,15 +524,8 @@
         });
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    // SINGLE MAIN IMAGE — UPLOAD + CROP
-    //
-    // Product.main_image is the only image field on this model.
-    // No gallery images belong here; those live on VariantImage.
-    // ═══════════════════════════════════════════════════════════════
-
     let cropper     = null;
-    let croppedBlob = null;   // blob we'll POST as main_image
+    let croppedBlob = null;
     let scaleX = 1, scaleY = 1;
 
     const uploadArea     = document.getElementById('uploadArea');
@@ -535,26 +533,31 @@
     const cropModal      = document.getElementById('cropModal');
     const cropImage      = document.getElementById('cropImage');
 
-    // Trigger file input on area click (but not remove-button clicks)
     uploadArea.addEventListener('click', e => {
         if (!e.target.closest('.preview-remove')) mainImageInput.click();
     });
-
-    // Drag and drop
     uploadArea.addEventListener('dragover',  e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
     uploadArea.addEventListener('drop', e => {
         e.preventDefault(); uploadArea.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) openCropper(file);
-        else toast('Please drop a valid image file (PNG or JPG).', 'error');
+        if (file && file.type.startsWith('image/')) {
+            openCropper(file);
+        } else {
+            toast('Please drop a valid image file (JPG, PNG or WEBP).', 'error');
+        }
     });
-
     mainImageInput.addEventListener('change', e => {
         if (e.target.files[0]) openCropper(e.target.files[0]);
     });
 
     function openCropper(file) {
+        // Client-side size check matching server-side 5 MB limit
+        if (file.size > 5 * 1024 * 1024) {
+            toast('Image must be under 5 MB.', 'error');
+            mainImageInput.value = '';
+            return;
+        }
         const reader = new FileReader();
         reader.onload = e => {
             cropImage.src = e.target.result;
@@ -572,7 +575,6 @@
         reader.readAsDataURL(file);
     }
 
-    // Crop controls
     document.getElementById('zoomIn').addEventListener('click',    () => cropper?.zoom(0.1));
     document.getElementById('zoomOut').addEventListener('click',   () => cropper?.zoom(-0.1));
     document.getElementById('rotateLeft').addEventListener('click', () => cropper?.rotate(-45));
@@ -586,19 +588,12 @@
         cropper.getCroppedCanvas({ width: 800, height: 800, imageSmoothingQuality: 'high' })
             .toBlob(blob => {
                 croppedBlob = blob;
-                
-                // Assign to native file input so the form can submit naturally
                 const dt = new DataTransfer();
                 dt.items.add(new File([blob], "main_image.jpg", { type: "image/jpeg" }));
                 mainImageInput.files = dt.files;
-                
-                // Preserve the image across validation reloads
                 const reader = new FileReader();
                 reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                    sessionStorage.setItem('product_form_main_image', reader.result);
-                };
-                
+                reader.onloadend = () => sessionStorage.setItem('product_form_main_image', reader.result);
                 showPreview(blob);
                 closeCropModal();
                 toast('Image ready — click "Create Product" to save.', 'success');
@@ -609,16 +604,14 @@
         cropModal.classList.remove('active');
         if (cropper) { cropper.destroy(); cropper = null; }
         scaleX = 1; scaleY = 1;
-        // Do NOT clear mainImageInput.value here anymore, because it might hold our cropped image!
-        // We only want to clear if we cancel.
     }
 
     document.getElementById('cancelCrop').addEventListener('click', () => {
-        mainImageInput.value = ''; // clear only on cancel
+        mainImageInput.value = '';
         closeCropModal();
     });
     document.getElementById('closeCropModal').addEventListener('click', () => {
-        mainImageInput.value = ''; // clear only on cancel
+        mainImageInput.value = '';
         closeCropModal();
     });
 
@@ -642,16 +635,15 @@
 
     function removePreview() {
         croppedBlob = null;
-        mainImageInput.value = ''; // Clear native input
+        mainImageInput.value = '';
         document.getElementById('mainImagePreview').innerHTML = '';
         sessionStorage.removeItem('product_form_main_image');
         toast('Image removed.', 'info');
     }
 
-    // Recover image on page reload if validation failed
+    // Restore image across failed validation reloads
     document.addEventListener('DOMContentLoaded', () => {
         const hasErrors = {% if form.errors %}true{% else %}false{% endif %};
-        
         if (!hasErrors) {
             sessionStorage.removeItem('product_form_main_image');
         } else {
@@ -670,25 +662,16 @@
         }
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    // FORM SUBMISSION
-    // ═══════════════════════════════════════════════════════════════
-
-    document.getElementById('submitBtn').addEventListener('click', (e) => {
-        // Client-side guard: view also checks server-side
+    document.getElementById('submitBtn').addEventListener('click', () => {
         if (!mainImageInput.files || mainImageInput.files.length === 0) {
-            e.preventDefault();
             toast('A main product image is required — please upload one.', 'error');
             return;
         }
-
         const btn = document.getElementById('submitBtn');
-        // Let the form submit naturally. Disable button slightly later so it doesn't block submit event.
         setTimeout(() => {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
             btn.disabled = true;
         }, 50);
-        
         document.getElementById('productForm').submit();
     });
     </script>
