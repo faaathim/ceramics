@@ -29,6 +29,10 @@ class ProductForm(forms.ModelForm):
 
         self.fields['category'].queryset = active_qs
 
+    def clean_is_listed(self):
+        # Unchecked checkboxes send nothing, so default to False
+        return self.cleaned_data.get('is_listed', False)
+
     def clean_name(self):
         name = self.cleaned_data.get('name', '').strip()
         if len(name) < 3:

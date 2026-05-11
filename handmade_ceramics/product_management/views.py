@@ -144,6 +144,46 @@ def product_toggle_listing(request, pk):
     return redirect(reverse('custom_admin:product_management:product_list'))
 
 
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk, is_deleted=False)
+
+    variants = product.variants.filter(is_deleted=False, is_listed=True)
+
+    if not variants.exists():
+        raise Http404
+
+    selected_variant = variants.first()
+
+    variant_id = request.GET.get('variant')
+    if variant_id:
+        v_obj = variants.filter(id=variant_id).first()
+        if v_obj:
+            selected_variant = v_obj
+
+    reviews = Review.objects.filter(product=product).select_related('user').order_by('-created_at')
+
+    can_review = False
+    # FIX: already_reviewed must always be defined before the template context
+    already_reviewed = False
+
+    if request.user.is_authenticated:
+        already_reviewed = reviews.filter(user=request.user).exists()
+        if can_user_review(request.user, product) and not already_reviewed:
+            can_review = True
+
+    return render(request, "product_management/product_variant_detail.html", {
+        "product": product,
+        "variant": selected_variant,
+        "variants": variants,
+        "reviews": reviews,
+        "can_review": can_review,
+        "already_reviewed": already_reviewed,
+    })
+
+
+
+
 @admin_required
 def variant_list(request, product_pk):
     product = get_object_or_404(Product.all_objects, pk=product_pk)
@@ -307,41 +347,6 @@ def variant_toggle_listing(request, product_pk, pk):
     )
 
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk, is_deleted=False)
-
-    variants = product.variants.filter(is_deleted=False, is_listed=True)
-
-    if not variants.exists():
-        raise Http404
-
-    selected_variant = variants.first()
-
-    variant_id = request.GET.get('variant')
-    if variant_id:
-        v_obj = variants.filter(id=variant_id).first()
-        if v_obj:
-            selected_variant = v_obj
-
-    reviews = Review.objects.filter(product=product).select_related('user').order_by('-created_at')
-
-    can_review = False
-    # FIX: already_reviewed must always be defined before the template context
-    already_reviewed = False
-
-    if request.user.is_authenticated:
-        already_reviewed = reviews.filter(user=request.user).exists()
-        if can_user_review(request.user, product) and not already_reviewed:
-            can_review = True
-
-    return render(request, "product_management/product_variant_detail.html", {
-        "product": product,
-        "variant": selected_variant,
-        "variants": variants,
-        "reviews": reviews,
-        "can_review": can_review,
-        "already_reviewed": already_reviewed,
-    })
 
 
 def variant_json(request, variant_id):
@@ -424,6 +429,8 @@ def variant_edit(request, product_pk, pk):
                     reverse("custom_admin:product_management:variant_list", args=[product.id])
                 )
 
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = VariantForm(instance=variant)
 
