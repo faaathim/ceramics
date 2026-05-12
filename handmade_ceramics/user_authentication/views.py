@@ -184,47 +184,74 @@ def forgot_password_view(request):
         if user:
             request.session['reset_email'] = email
             request.session['otp_verified_for_reset'] = False
-            create_and_send_otp(
-                email=email, 
-                purpose='reset', 
-                user=user, 
-                first_name=user.first_name
-            )
+            request.session.modified = True  # ← force Django to save the session
+            try:
+                create_and_send_otp(
+                    email=email,
+                    purpose='reset',
+                    user=user,
+                    first_name=user.first_name
+                )
+            except Exception as e:
+                messages.error(request, str(e))
+                return redirect('user_authentication:forgot_password')
             return redirect('user_authentication:verify_reset_otp')
         messages.error(request, "No account found with that email.")
     return render(request, 'user_authentication/forgot_password.html')
 
 
 def verify_reset_otp(request):
-    if not request.session.get('reset_email'):
+    email = request.session.get('reset_email')
+
+    if not email:
         return redirect('user_authentication:forgot_password')
-    return render(request, 'user_authentication/verify_reset_otp.html')
+
+    otp = OTP.objects.filter(
+        email=email,
+        purpose='reset',
+        is_used=False
+    ).last()
+
+    remaining = 0
+
+    if otp and not otp.is_expired():
+        elapsed = (timezone.now() - otp.created_at).total_seconds()
+        remaining = max(0, int(OTP_EXPIRY_SECONDS - elapsed))
+
+    return render(request, 'user_authentication/verify_reset_otp.html', {
+        'remaining_time': remaining
+    })
 
 @require_POST
 def ajax_verify_reset_otp(request):
     email = request.session.get('reset_email')
+
+    if not email:  # ← separate check with clear error
+        return JsonResponse({'error': 'Session expired. Please start again.'}, status=400)
+
     code = request.POST.get('code', '').strip()
 
     otp = OTP.objects.filter(email=email, purpose='reset', is_used=False).last()
 
     if not otp:
-        return JsonResponse({'error': 'Invalid request.'}, status=400)
+        return JsonResponse({'error': 'No active OTP found. Please request a new one.'}, status=400)
 
     if otp.is_expired():
-        return JsonResponse({'error': 'OTP expired.'}, status=400)
+        return JsonResponse({'error': 'OTP expired. Please request a new one.'}, status=400)
 
     if otp.attempts >= OTP.MAX_ATTEMPTS:
-        return JsonResponse({'error': 'Too many attempts.'}, status=400)
+        return JsonResponse({'error': 'Too many attempts. Request a new OTP.'}, status=400)
 
     if not otp.verify(code):
         otp.attempts += 1
         otp.save()
-        return JsonResponse({'error': 'Invalid code.'}, status=400)
+        return JsonResponse({'error': 'Incorrect OTP. Please try again.'}, status=400)
 
     otp.is_used = True
     otp.save()
 
     request.session['otp_verified_for_reset'] = True
+    request.session.modified = True  
 
     return JsonResponse({'success': True})
 
