@@ -157,3 +157,14 @@ class OrderItem(models.Model):
     def process_return(self):
         from orders.services.item_service import OrderItemService
         OrderItemService.process_return(self)
+
+    def cancel_item(self):
+
+        if self.variant:
+            self.variant.stock += self.quantity
+            self.variant.save()
+
+        self.item_status = "CANCELLED"
+        self.save()
+
+        self.order.recalculate_totals()
