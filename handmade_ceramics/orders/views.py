@@ -55,7 +55,11 @@ def order_detail(request, order_id):
 
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
     items = order.items.all()
-    refunded_amount = order.items.filter(item_status='RETURNED').aggregate(total=Sum('final_total'))['total'] or Decimal('0.00')
+    refunded_amount = order.items.filter(
+        item_status__in=['CANCELLED', 'RETURNED']
+    ).aggregate(
+        total=Sum('final_total')
+    )['total'] or 0
 
     return render(request, "orders/order_detail.html", {
         "order": order,

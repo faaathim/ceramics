@@ -91,32 +91,49 @@ def address_list(request):
 
 @login_required
 def address_add(request):
+    next_url = request.GET.get('next') or request.POST.get('next') 
+
     if request.method == "POST":
         form = AddressForm(request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
+
+            if next_url == 'checkout':
+                return redirect('checkout:checkout')
             return redirect('profiles:address_list')
     else:
         form = AddressForm()
 
-    return render(request, "profiles/address/address_form.html", {"form": form})
+    return render(request, "profiles/address/address_form.html", {
+        "form": form,
+        "next": next_url,     
+        "title": "Add Address"
+    })
 
 
 @login_required
 def address_edit(request, pk):
     address = get_object_or_404(Address, pk=pk, user=request.user)
+    next_url = request.GET.get('next') or request.POST.get('next')  
 
     if request.method == "POST":
         form = AddressForm(request.POST, instance=address)
         if form.is_valid():
             form.save()
+
+            if next_url == 'checkout':
+                return redirect('checkout:checkout')
             return redirect('profiles:address_list')
     else:
         form = AddressForm(instance=address)
 
-    return render(request, "profiles/address/address_form.html", {"form": form})
+    return render(request, "profiles/address/address_form.html", {
+        "form": form,
+        "next": next_url,      
+        "title": "Edit Address"
+    })
 
 
 @login_required
