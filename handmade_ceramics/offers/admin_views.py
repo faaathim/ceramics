@@ -1,8 +1,7 @@
-# offers/admin_views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import ValidationError
 
 from .models import ProductOffer, CategoryOffer
 from .forms import ProductOfferForm, CategoryOfferForm
@@ -11,6 +10,10 @@ from .forms import ProductOfferForm, CategoryOfferForm
 def superuser_check(user):
     return user.is_active and user.is_superuser
 
+
+# =========================
+# PRODUCT OFFERS
+# =========================
 
 @login_required
 @user_passes_test(superuser_check)
@@ -22,14 +25,42 @@ def product_offer_list(request):
 @login_required
 @user_passes_test(superuser_check)
 def product_offer_create(request):
-    if request.method == 'POST':
-        form = ProductOfferForm(request.POST)
+    form = ProductOfferForm(request.POST or None)
+
+    if request.method == "POST":
         if form.is_valid():
-            form.save()
-            messages.success(request, "Product offer created successfully.")
-            return redirect('custom_admin:offers:product_offer_list')
-    else:
-        form = ProductOfferForm()
+            try:
+                form.save()
+                messages.success(request, "Product offer created successfully.")
+                return redirect('custom_admin:offers:product_offer_list')
+
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+        else:
+            messages.error(request, "Please correct the highlighted errors.")
+
+    return render(request, 'offers/product_offer_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(superuser_check)
+def product_offer_edit(request, offer_id):
+    offer = get_object_or_404(ProductOffer, id=offer_id)
+    form = ProductOfferForm(request.POST or None, instance=offer)
+
+    if request.method == "POST":
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "Product offer updated successfully.")
+                return redirect('custom_admin:offers:product_offer_list')
+
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+        else:
+            messages.error(request, "Please correct the highlighted errors.")
 
     return render(request, 'offers/product_offer_form.html', {'form': form})
 
@@ -38,28 +69,20 @@ def product_offer_create(request):
 @user_passes_test(superuser_check)
 def product_offer_toggle(request, offer_id):
     offer = get_object_or_404(ProductOffer, id=offer_id)
+
     offer.is_active = not offer.is_active
-    offer.save()
 
-    messages.success(request, "Offer status updated.")
+    try:
+        offer.save()
+        messages.success(
+            request,
+            f"Offer {'activated' if offer.is_active else 'deactivated'} successfully."
+        )
+
+    except ValidationError as e:
+        messages.error(request, e.message)
+
     return redirect('custom_admin:offers:product_offer_list')
-
-
-@login_required
-@user_passes_test(superuser_check)
-def product_offer_edit(request, offer_id):
-    offer = get_object_or_404(ProductOffer, id=offer_id)
-
-    if request.method == 'POST':
-        form = ProductOfferForm(request.POST, instance=offer)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Product offer updated successfully.")
-            return redirect('custom_admin:offers:product_offer_list')
-    else:
-        form = ProductOfferForm(instance=offer)
-
-    return render(request, 'offers/product_offer_form.html', {'form': form})
 
 
 @login_required
@@ -67,13 +90,17 @@ def product_offer_edit(request, offer_id):
 def product_offer_delete(request, offer_id):
     offer = get_object_or_404(ProductOffer, id=offer_id)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         offer.delete()
-        messages.success(request, "Product offer deleted.")
+        messages.success(request, "Product offer deleted successfully.")
         return redirect('custom_admin:offers:product_offer_list')
 
     return render(request, 'offers/offer_confirm_delete.html', {'offer': offer})
 
+
+# =========================
+# CATEGORY OFFERS
+# =========================
 
 @login_required
 @user_passes_test(superuser_check)
@@ -85,14 +112,20 @@ def category_offer_list(request):
 @login_required
 @user_passes_test(superuser_check)
 def category_offer_create(request):
-    if request.method == 'POST':
-        form = CategoryOfferForm(request.POST)
+    form = CategoryOfferForm(request.POST or None)
+
+    if request.method == "POST":
         if form.is_valid():
-            form.save()
-            messages.success(request, "Category offer created successfully.")
-            return redirect('custom_admin:offers:category_offer_list')
-    else:
-        form = CategoryOfferForm()
+            try:
+                form.save()
+                messages.success(request, "Category offer created successfully.")
+                return redirect('custom_admin:offers:category_offer_list')
+
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+        else:
+            messages.error(request, "Please correct the highlighted errors.")
 
     return render(request, 'offers/category_offer_form.html', {'form': form})
 
@@ -101,17 +134,42 @@ def category_offer_create(request):
 @user_passes_test(superuser_check)
 def category_offer_edit(request, offer_id):
     offer = get_object_or_404(CategoryOffer, id=offer_id)
+    form = CategoryOfferForm(request.POST or None, instance=offer)
 
-    if request.method == 'POST':
-        form = CategoryOfferForm(request.POST, instance=offer)
+    if request.method == "POST":
         if form.is_valid():
-            form.save()
-            messages.success(request, "Category offer updated successfully.")
-            return redirect('custom_admin:offers:category_offer_list')
-    else:
-        form = CategoryOfferForm(instance=offer)
+            try:
+                form.save()
+                messages.success(request, "Category offer updated successfully.")
+                return redirect('custom_admin:offers:category_offer_list')
+
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+        else:
+            messages.error(request, "Please correct the highlighted errors.")
 
     return render(request, 'offers/category_offer_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(superuser_check)
+def category_offer_toggle(request, offer_id):
+    offer = get_object_or_404(CategoryOffer, id=offer_id)
+
+    offer.is_active = not offer.is_active
+
+    try:
+        offer.save()
+        messages.success(
+            request,
+            f"Category offer {'activated' if offer.is_active else 'deactivated'} successfully."
+        )
+
+    except ValidationError as e:
+        messages.error(request, e.message)
+
+    return redirect('custom_admin:offers:category_offer_list')
 
 
 @login_required
@@ -119,20 +177,9 @@ def category_offer_edit(request, offer_id):
 def category_offer_delete(request, offer_id):
     offer = get_object_or_404(CategoryOffer, id=offer_id)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         offer.delete()
-        messages.success(request, "Category offer deleted.")
+        messages.success(request, "Category offer deleted successfully.")
         return redirect('custom_admin:offers:category_offer_list')
 
     return render(request, 'offers/offer_confirm_delete.html', {'offer': offer})
-
-
-@login_required
-@user_passes_test(superuser_check)
-def category_offer_toggle(request, offer_id):
-    offer = get_object_or_404(CategoryOffer, id=offer_id)
-    offer.is_active = not offer.is_active
-    offer.save()
-
-    messages.success(request, "Category offer status updated.")
-    return redirect('custom_admin:offers:category_offer_list')
