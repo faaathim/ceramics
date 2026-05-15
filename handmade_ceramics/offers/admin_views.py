@@ -80,7 +80,13 @@ def product_offer_toggle(request, offer_id):
         )
 
     except ValidationError as e:
-        messages.error(request, e.message)
+        if hasattr(e, "message_dict"):
+            for field, errors in e.message_dict.items():
+                for error in errors:
+                    messages.error(request, f"{error}")
+        else:
+            for error in e.messages:
+                messages.error(request, error)
 
     return redirect('custom_admin:offers:product_offer_list')
 
@@ -167,7 +173,13 @@ def category_offer_toggle(request, offer_id):
         )
 
     except ValidationError as e:
-        messages.error(request, e.message)
+        if hasattr(e, "message_dict"):
+            for field, errors in e.message_dict.items():
+                for error in errors:
+                    messages.error(request, f"{error}")
+        else:
+            for error in e.messages:
+                messages.error(request, error)
 
     return redirect('custom_admin:offers:category_offer_list')
 

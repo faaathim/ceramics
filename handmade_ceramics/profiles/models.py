@@ -11,6 +11,8 @@ from .validators import (
     validate_indian_pincode,
     validate_city,
     validate_state,
+    validate_country,
+    validate_street_address,
 )
 
 User = get_user_model()
@@ -71,8 +73,8 @@ class Address(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100, blank=True)
 
-    country = models.CharField(max_length=100)
-    street_address = models.CharField(max_length=255)
+    country = models.CharField(max_length=100, validators=[validate_country])
+    street_address = models.CharField(max_length=255, validators=[validate_street_address])
 
     city = models.CharField(max_length=100, validators=[validate_city])
     state = models.CharField(max_length=100, validators=[validate_state])

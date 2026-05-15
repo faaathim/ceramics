@@ -167,4 +167,18 @@ class OrderItem(models.Model):
         self.item_status = "CANCELLED"
         self.save()
 
-        self.order.recalculate_totals()
+        order = self.order
+
+        # Recalculate totals
+        order.recalculate_totals()
+
+        # Check if all items are cancelled/returned
+        remaining_items = order.items.exclude(
+            item_status__in=['CANCELLED', 'RETURNED']
+        )
+
+        # If all items inactive,
+        # mark order as cancelled
+        if not remaining_items.exists():
+            order.status = 'CANCELLED'
+            order.save(update_fields=['status'])

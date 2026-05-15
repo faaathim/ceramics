@@ -6,7 +6,7 @@ from .models import Profile, Address
 from .validators import (
     validate_profile_image,
     validate_indian_mobile,
-    validate_name
+    validate_name,
 )
 
 User = get_user_model()
@@ -84,6 +84,11 @@ class AddressForm(forms.ModelForm):
             'street_address': forms.Textarea(attrs={'rows': 2}),
         }
 
+    def clean_first_name(self):
+        return validate_name(self.cleaned_data.get('first_name'))
+
+    def clean_last_name(self):
+        return validate_name(self.cleaned_data.get('last_name')) 
 
 class ChangePasswordForm(forms.Form):
     current_password = forms.CharField(widget=forms.PasswordInput)

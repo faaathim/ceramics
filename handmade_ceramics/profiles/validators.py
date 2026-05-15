@@ -28,22 +28,62 @@ def validate_indian_pincode(value):
 # ✅ TEXT
 def validate_small_text(value, min_len=2, max_len=100):
     if not value:
-        return
+        raise ValidationError("This field is required.")
 
     cleaned = value.strip()
 
-    if len(cleaned) < min_len or len(cleaned) > max_len:
+    if not re.match(r'^[A-Za-z\s]+$', cleaned):
+        raise ValidationError("Only letters and spaces allowed.")
+
+    if not (min_len <= len(cleaned) <= max_len):
         raise ValidationError(
             f"Value must be between {min_len} and {max_len} characters."
         )
 
+    return cleaned
+
+def validate_country(value):
+    if not value:
+        raise ValidationError("Country is required.")
+
+    cleaned = value.strip()
+
+    if len(cleaned) < 2 or len(cleaned) > 100:
+        raise ValidationError("Invalid country name length.")
+
+    if not re.match(r"^[A-Za-zÀ-ÿ\s\-']+$", cleaned):
+        raise ValidationError(
+            "Country contains invalid characters."
+        )
+
+    return cleaned
+
+def validate_street_address(value):
+    if not value:
+        raise ValidationError("Street address is required.")
+
+    cleaned = value.strip()
+
+    # Allows:
+    # letters, numbers, spaces, commas, dots, hyphens, slashes, hash
+    if not re.match(r"^[A-Za-z0-9\s,.\-/#']+$", cleaned):
+        raise ValidationError(
+            "Street address contains invalid characters."
+        )
+
+    if not (5 <= len(cleaned) <= 255):
+        raise ValidationError(
+            "Street address must be between 5 and 255 characters."
+        )
+
+    return cleaned
 
 def validate_city(value):
-    validate_small_text(value, 2, 100)
+    return validate_small_text(value, 2, 100)
 
 
 def validate_state(value):
-    validate_small_text(value, 2, 100)
+    return validate_small_text(value, 2, 100)
 
 
 # ✅ NAME
