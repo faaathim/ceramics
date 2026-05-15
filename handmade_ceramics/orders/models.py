@@ -181,4 +181,5 @@ class OrderItem(models.Model):
         # mark order as cancelled
         if not remaining_items.exists():
             order.status = 'CANCELLED'
-            order.save(update_fields=['status'])
+            order.total_amount = Decimal("0.00")
+            order.save(update_fields=['status','total_amount'])

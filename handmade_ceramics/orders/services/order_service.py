@@ -56,7 +56,7 @@ class OrderService:
         refund_amount = sum(
             (item.final_total for item in refundable_items),
             Decimal("0.00")
-        )
+        ) if order.is_paid else Decimal("0.00")
 
         # ✅ Cancel all items
         for item in refundable_items:
@@ -69,8 +69,6 @@ class OrderService:
 
         # ✅ Update order
         order.status = "CANCELLED"
-        order.is_refunded = True
-        order.save()
 
         # ✅ Refund ONLY what user actually paid (NO shipping)
         if order.is_paid and refund_amount > 0:
@@ -81,6 +79,8 @@ class OrderService:
                 order=order,
                 source="ORDER_CANCEL_REFUND"
             )
+            order.is_refunded = True
+        order.save()
 
 
     @staticmethod
