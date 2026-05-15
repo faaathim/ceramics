@@ -401,11 +401,7 @@
                         </div>
                     </div>
 
-                    {#
-                        stock: PositiveIntegerField, editable=False — auto-calculated from variants.
-                        is_listed: defaults False on create; forced False by model.save() if no valid variants.
-                        Both are intentionally omitted on the create form (product_create view hardcodes them).
-                    #}
+            
                     <div class="info-badge">
                         <i class="fas fa-info-circle"></i>
                         Stock is auto-calculated from variants. Listing is enabled after adding at least one active variant.
