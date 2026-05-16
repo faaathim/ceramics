@@ -124,7 +124,7 @@ def shop(request):
         else:
             products_qs = products_qs.order_by('-created_at')
 
-    paginator = Paginator(products_qs, 12)
+    paginator = Paginator(products_qs, 6)
     page = request.GET.get('page', 1)
 
     try:
