@@ -206,7 +206,6 @@ def remove_cart_item(request, item_id):
 
 @login_required
 def update_quantity(request, item_id):
-    # 1. Validate request
     if request.method != 'POST' or request.headers.get('x-requested-with') != 'XMLHttpRequest':
         return HttpResponseBadRequest("Invalid request.")
 
@@ -217,11 +216,9 @@ def update_quantity(request, item_id):
     action = request.POST.get('action')
     qty_val = request.POST.get('qty')
 
-    # 2. Max allowed quantity
     site_max = _max_qty_limit()
     allowed_max = min(site_max, variant.stock or 0)
 
-    # 3. Decide new quantity
     if action == 'increment':
         new_qty = item.quantity + 1
     elif action == 'decrement':

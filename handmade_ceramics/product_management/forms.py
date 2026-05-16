@@ -16,6 +16,7 @@ class ProductForm(forms.ModelForm):
         fields = ['name', 'description', 'category', 'price', 'main_image', 'is_listed']
 
     def __init__(self, *args, **kwargs):
+        self.remove_main = kwargs.pop("remove_main", False)
         super().__init__(*args, **kwargs)
 
         self.fields['category'].queryset = Category.objects.filter(is_listed=True)
@@ -24,6 +25,17 @@ class ProductForm(forms.ModelForm):
             self.fields['category'].queryset = Category.objects.filter(
                 Q(is_listed=True) | Q(pk=self.instance.category.pk)
             )
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        if self.remove_main:
+            instance.main_image = None
+
+        if commit:
+            instance.save()
+
+        return instance
 
     def clean_name(self):
 
@@ -81,17 +93,17 @@ class ProductForm(forms.ModelForm):
         return name
     
     def clean_description(self):
+        description = self.cleaned_data.get('description', '')
 
-        description = self.cleaned_data.get(
-            'description',
-            ''
-        ).strip()
+        # Remove leading/trailing spaces
+        description = description.strip()
 
-        # Normalize spaces
+        # Normalize multiple spaces
         description = " ".join(description.split())
 
         if description:
 
+            # Length checks
             if len(description) < 5:
                 raise forms.ValidationError(
                     "Description must contain at least 5 characters."
@@ -100,6 +112,20 @@ class ProductForm(forms.ModelForm):
             if len(description) > 500:
                 raise forms.ValidationError(
                     "Description cannot exceed 500 characters."
+                )
+
+            # Allow letters, numbers, spaces, and basic punctuation only
+            # Blocks emojis, weird symbols, control characters, etc.
+            if not re.match(r'^[A-Za-z0-9 .,\'"-]+$', description):
+                raise forms.ValidationError(
+                    "Description contains invalid characters. Only letters, numbers, spaces, and basic punctuation (.,'\"-) are allowed."
+                )
+
+            # Prevent too many special characters (spam-like input)
+            special_count = len(re.findall(r'[^\w\s]', description))
+            if special_count > 10:
+                raise forms.ValidationError(
+                    "Description contains too many special characters."
                 )
 
         return description
